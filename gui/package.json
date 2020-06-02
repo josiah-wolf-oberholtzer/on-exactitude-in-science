@@ -1,0 +1,7 @@
+{
+  "name": "maps",
+  "version": "1.0.0",
+  "main": "maps/index.js",
+  "repository": "https://github.com/josiah-wolf-oberholtzer/on-exactitude-in-science",
+  "license": "MIT"
+}
