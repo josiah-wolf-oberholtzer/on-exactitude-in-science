@@ -47,7 +47,7 @@ pytest:
 		--cov-report=term \
 		--cov=${project}/ \
 		--durations=20 \
-		--timeout=60 \
+		-vv \
 		${testPaths}
 
 reformat: isort black-reformat

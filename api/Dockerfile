@@ -6,6 +6,8 @@ RUN apk update \
     && apk add --virtual .build-dependencies build-base python3-dev
 COPY requirements*.txt /app/
 RUN python3 -m ensurepip \
+    && pip3 install -U pip \
     && pip3 install -r requirements.txt -r requirements-test.txt \
     && apk del .build-dependencies
 COPY . /app/
+RUN pip3 install -e .

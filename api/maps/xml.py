@@ -4,18 +4,7 @@ import re
 import traceback
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import (
-    IO,
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Set,
-    Union,
-    cast,
-)
+from typing import IO, Any, Generator, List, Optional, Set, cast
 from xml.dom import minidom
 from xml.etree import cElementTree as ElementTree
 
@@ -25,21 +14,27 @@ year_regex = re.compile(r"^\d\d\d\d$")
 
 
 @dataclass
+class Role:
+    name: str
+    detail: Optional[str] = field(default=None)
+
+
+@dataclass(unsafe_hash=True)
 class Artist:
     id: int
     name: str
     aliases: List["Artist"] = field(default_factory=list, compare=False, hash=False)
     groups: List["Artist"] = field(default_factory=list, compare=False, hash=False)
     members: List["Artist"] = field(default_factory=list, compare=False, hash=False)
-    roles: List[str] = field(default_factory=list, compare=False, hash=False)
+    roles: List[Role] = field(default_factory=list, compare=False, hash=False)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Label:
     id: int
     name: str
     parent_label: Optional["Label"] = field(default=None, compare=False, hash=False)
-    roles: List[str] = field(default_factory=list, compare=False, hash=False)
+    roles: List[Role] = field(default_factory=list, compare=False, hash=False)
     sublabels: List["Label"] = field(default_factory=list, compare=False, hash=False)
 
 
@@ -118,12 +113,13 @@ def build_test_files(source_path: Path, target_path: Path, n=10):
         target_file_path = target_path / "discogs_test_{}s.xml.gz".format(tag)
         iterator = iterate_xml(source_file_path, tag)
         with gzip.GzipFile(target_file_path, "w") as gzip_file:
-            gzip_file.write(b'<?xml version="1.0" ?>')
-            gzip_file.write("<{}s>".format(tag).encode())
+            gzip_file.write(b'<?xml version="1.0" ?>\n')
+            gzip_file.write("<{}s>\n".format(tag).encode())
             for _ in range(n):
                 element = next(iterator)
-                gzip_file.write(prettify(element).encode())
-            gzip_file.write("</{}s>".format(tag).encode())
+                for line in prettify(element).splitlines()[1:]:  # strip <?xml>
+                    gzip_file.write((line + "\n").encode())
+            gzip_file.write("</{}s>\n".format(tag).encode())
 
 
 def get_artist_iterator(xml_path: Path) -> Generator[Artist, None, None]:
@@ -317,10 +313,7 @@ def parse_roles(text):
             name = current_buffer
         name = name.strip()
         detail = ", ".join(_.strip() for _ in details)
-        result = {"name": name}
-        if detail:
-            result["detail"] = detail
-        return result
+        return Role(name=name, detail=detail or None)
 
     roles = []
     if not text:
