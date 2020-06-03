@@ -33,6 +33,9 @@ services:
     ports:
     - 9200:9200
   janusgraph:
+    depends_on:
+    - cassandra
+    - elasticsearch
     image: janusgraph/janusgraph:0.5
     environment:
       JANUS_PROPS_TEMPLATE: cql-es
