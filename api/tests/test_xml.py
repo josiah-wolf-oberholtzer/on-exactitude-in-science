@@ -18,17 +18,17 @@ def test_get_artist_iterator():
     )
 
 
-def test_get_label_iterator():
+def test_get_company_iterator():
     path = Path(__file__).parent / "discogs_test_labels.xml.gz"
-    iterator = xml.get_label_iterator(path)
+    iterator = xml.get_company_iterator(path)
     label = next(iterator)
-    assert label == xml.Label(
+    assert label == xml.Company(
         id=1,
         name="Planet E",
-        parent_label=None,
-        sublabels=[
-            xml.Label(id=31405, name="I Ner Zon Sounds"),
-            xml.Label(id=1560615, name="Planet E Productions"),
+        parent_company=None,
+        subsidiaries=[
+            xml.Company(id=31405, name="I Ner Zon Sounds"),
+            xml.Company(id=1560615, name="Planet E Productions"),
         ],
     )
 
@@ -49,8 +49,8 @@ def test_get_release_iterator():
         name="Stockholm",
         artists=[xml.Artist(id=1, name="The Persuader")],
         companies=[
-            xml.Label(id=56025, name="MPO", roles=[xml.Role(name="Pressed By")]),
-            xml.Label(
+            xml.Company(id=56025, name="MPO", roles=[xml.Role(name="Pressed By")]),
+            xml.Company(
                 id=271046,
                 name="The Globe Studios",
                 roles=[xml.Role(name="Recorded At")],
@@ -67,7 +67,7 @@ def test_get_release_iterator():
         formats=['12"', "33 ⅓ RPM", "Vinyl"],
         genres=["Electronic"],
         is_main_release=True,
-        labels=[xml.Label(id=5, name="Svek")],
+        labels=[xml.Company(id=5, name="Svek")],
         master_id=1660109,
         styles=["Deep House"],
         tracks=[

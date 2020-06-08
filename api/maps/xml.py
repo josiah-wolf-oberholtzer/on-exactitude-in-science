@@ -30,12 +30,14 @@ class Artist:
 
 
 @dataclass(unsafe_hash=True)
-class Label:
+class Company:
     id: int
     name: str
-    parent_label: Optional["Label"] = field(default=None, compare=False, hash=False)
+    parent_company: Optional["Company"] = field(default=None, compare=False, hash=False)
     roles: List[Role] = field(default_factory=list, compare=False, hash=False)
-    sublabels: List["Label"] = field(default_factory=list, compare=False, hash=False)
+    subsidiaries: List["Company"] = field(
+        default_factory=list, compare=False, hash=False
+    )
 
 
 @dataclass
@@ -59,13 +61,13 @@ class Release:
     id: int
     name: str
     artists: List[Artist] = field(default_factory=list)
-    companies: List[Label] = field(default_factory=list)
+    companies: List[Company] = field(default_factory=list)
     country: Optional[str] = field(default=None)
     extra_artists: List[Artist] = field(default_factory=list)
     formats: List[str] = field(default_factory=list)
     genres: List[str] = field(default_factory=list)
     is_main_release: bool = field(default=False)
-    labels: List[Label] = field(default_factory=list)
+    labels: List[Company] = field(default_factory=list)
     master_id: Optional[int] = field(default=None)
     styles: List[str] = field(default_factory=list)
     tracks: List[Track] = field(default_factory=list)
@@ -81,8 +83,8 @@ def get_xml_path(directory_path: Path, tag: str):
     return file_paths[0]
 
 
-def iterate_xml(path: Path, tag: str):
-    with gzip.GzipFile(path, "r") as gzip_file:
+def iterate_xml(xml_path: Path, tag: str):
+    with gzip.GzipFile(xml_path, "r") as gzip_file:
         context = ElementTree.iterparse(
             cast(IO[Any], gzip_file), events=["start", "end"]
         )
@@ -142,18 +144,20 @@ def get_artist_iterator(xml_path: Path) -> Generator[Artist, None, None]:
         yield artist
 
 
-def get_label_iterator(xml_path: Path) -> Generator[Label, None, None]:
+def get_company_iterator(xml_path: Path) -> Generator[Company, None, None]:
     for element in iterate_xml(xml_path, "label"):
-        label = Label(id=int(element.find("id").text), name=element.find("name").text)
-        if (parent_label := element.find("parentLabel")) is not None:
-            label.parent_label = Label(
-                id=int(parent_label.get("id")), name=parent_label.text
+        company = Company(
+            id=int(element.find("id").text), name=element.find("name").text
+        )
+        if (parent_company := element.find("parentLabel")) is not None:
+            company.parent_company = Company(
+                id=int(parent_company.get("id")), name=parent_company.text
             )
         for subelement in element.find("sublabels") or []:
-            sublabel = Label(id=int(subelement.get("id")), name=subelement.text)
-            label.sublabels.append(sublabel)
-        label.sublabels.sort(key=lambda x: x.id)
-        yield label
+            subsidiary = Company(id=int(subelement.get("id")), name=subelement.text)
+            company.subsidiaries.append(subsidiary)
+        company.subsidiaries.sort(key=lambda x: x.id)
+        yield company
 
 
 def get_master_iterator(xml_path: Path) -> Generator[Master, None, None]:
@@ -175,11 +179,11 @@ def get_release_iterator(xml_path: Path):
             )
         return sorted(artists, key=lambda x: x.id)
 
-    def get_companies(element) -> List[Label]:
-        companies: List[Label] = []
+    def get_companies(element) -> List[Company]:
+        companies: List[Company] = []
         for company in element.find("companies") or []:
             companies.append(
-                Label(
+                Company(
                     id=int(company.find("id").text),
                     name=company.find("name").text,
                     roles=parse_roles(company.find("entity_type_name").text),
@@ -218,10 +222,10 @@ def get_release_iterator(xml_path: Path):
             result.append(genre.text)
         return sorted(set(result))
 
-    def get_labels(element) -> List[Label]:
-        labels: Set[Label] = set()
+    def get_labels(element) -> List[Company]:
+        labels: Set[Company] = set()
         for label in element.find("labels") or []:
-            label = Label(id=int(label.get("id")), name=label.get("name"))
+            label = Company(id=int(label.get("id")), name=label.get("name"))
             labels.add(label)
         return sorted(labels, key=lambda x: x.id)
 
