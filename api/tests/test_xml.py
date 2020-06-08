@@ -8,11 +8,11 @@ def test_get_artist_iterator():
     iterator = xml.get_artist_iterator(path)
     artist = next(iterator)
     assert artist == xml.Artist(
-        id=1,
+        entity_id=1,
         name="The Persuader",
         aliases=[
             xml.Artist(
-                id=239, name="Jesper Dahlbäck", aliases=[], groups=[], members=[]
+                entity_id=239, name="Jesper Dahlbäck", aliases=[], groups=[], members=[]
             ),
         ],
     )
@@ -23,12 +23,12 @@ def test_get_company_iterator():
     iterator = xml.get_company_iterator(path)
     label = next(iterator)
     assert label == xml.Company(
-        id=1,
+        entity_id=1,
         name="Planet E",
         parent_company=None,
         subsidiaries=[
-            xml.Company(id=31405, name="I Ner Zon Sounds"),
-            xml.Company(id=1560615, name="Planet E Productions"),
+            xml.Company(entity_id=31405, name="I Ner Zon Sounds"),
+            xml.Company(entity_id=1560615, name="Planet E Productions"),
         ],
     )
 
@@ -37,7 +37,9 @@ def test_get_master_iterator():
     path = Path(__file__).parent / "discogs_test_masters.xml.gz"
     iterator = xml.get_master_iterator(path)
     master = next(iterator)
-    assert master == xml.Master(id=18500, main_release_id=155102, name="New Soil")
+    assert master == xml.Master(
+        entity_id=18500, main_release_id=155102, name="New Soil"
+    )
 
 
 def test_get_release_iterator():
@@ -45,13 +47,15 @@ def test_get_release_iterator():
     iterator = xml.get_release_iterator(path)
     release = next(iterator)
     assert release == xml.Release(
-        id=1,
+        entity_id=1,
         name="Stockholm",
-        artists=[xml.Artist(id=1, name="The Persuader")],
+        artists=[xml.Artist(entity_id=1, name="The Persuader")],
         companies=[
-            xml.Company(id=56025, name="MPO", roles=[xml.Role(name="Pressed By")]),
             xml.Company(
-                id=271046,
+                entity_id=56025, name="MPO", roles=[xml.Role(name="Pressed By")]
+            ),
+            xml.Company(
+                entity_id=271046,
                 name="The Globe Studios",
                 roles=[xml.Role(name="Recorded At")],
             ),
@@ -59,7 +63,7 @@ def test_get_release_iterator():
         country="Sweden",
         extra_artists=[
             xml.Artist(
-                id=239,
+                entity_id=239,
                 name="Jesper Dahlbäck",
                 roles=[{"name": "Music By", "detail": "All Tracks By"}],
             ),
@@ -67,16 +71,16 @@ def test_get_release_iterator():
         formats=['12"', "33 ⅓ RPM", "Vinyl"],
         genres=["Electronic"],
         is_main_release=True,
-        labels=[xml.Company(id=5, name="Svek")],
+        labels=[xml.Company(entity_id=5, name="Svek")],
         master_id=1660109,
         styles=["Deep House"],
         tracks=[
-            xml.Track(id="1-A", name="Östermalm", position="A"),
-            xml.Track(id="1-B1", name="Vasastaden", position="B1"),
-            xml.Track(id="1-B2", name="Kungsholmen", position="B2"),
-            xml.Track(id="1-C1", name="Södermalm", position="C1"),
-            xml.Track(id="1-C2", name="Norrmalm", position="C2"),
-            xml.Track(id="1-D", name="Gamla Stan", position="D"),
+            xml.Track(entity_id="1-A", name="Östermalm", position="A"),
+            xml.Track(entity_id="1-B1", name="Vasastaden", position="B1"),
+            xml.Track(entity_id="1-B2", name="Kungsholmen", position="B2"),
+            xml.Track(entity_id="1-C1", name="Södermalm", position="C1"),
+            xml.Track(entity_id="1-C2", name="Norrmalm", position="C2"),
+            xml.Track(entity_id="1-D", name="Gamla Stan", position="D"),
         ],
         year=1999,
     )

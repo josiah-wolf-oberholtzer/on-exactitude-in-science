@@ -11,4 +11,4 @@ fetch-dataset:
 	curl http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_releases.xml.gz > data/discogs_${DATASET_TIMESTAMP}_releases.xml.gz
 
 test-api:
-	docker-compose run --rm -e GOBLIN_HOST=janusgraph-test api make test
+	docker-compose run --rm -e GOBLIN_HOST=janusgraph-test api make reformat test

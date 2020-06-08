@@ -21,7 +21,7 @@ class Role:
 
 @dataclass(unsafe_hash=True)
 class Artist:
-    id: int
+    entity_id: int
     name: str
     aliases: List["Artist"] = field(default_factory=list, compare=False, hash=False)
     groups: List["Artist"] = field(default_factory=list, compare=False, hash=False)
@@ -31,7 +31,7 @@ class Artist:
 
 @dataclass(unsafe_hash=True)
 class Company:
-    id: int
+    entity_id: int
     name: str
     parent_company: Optional["Company"] = field(default=None, compare=False, hash=False)
     roles: List[Role] = field(default_factory=list, compare=False, hash=False)
@@ -42,14 +42,14 @@ class Company:
 
 @dataclass
 class Master:
-    id: int
+    entity_id: int
     main_release_id: int
     name: str
 
 
 @dataclass
 class Track:
-    id: str
+    entity_id: str
     name: str
     position: str
     artists: List[Artist] = field(default_factory=list)
@@ -58,7 +58,7 @@ class Track:
 
 @dataclass
 class Release:
-    id: int
+    entity_id: int
     name: str
     artists: List[Artist] = field(default_factory=list)
     companies: List[Company] = field(default_factory=list)
@@ -126,44 +126,48 @@ def build_test_files(source_path: Path, target_path: Path, n=10):
 
 def get_artist_iterator(xml_path: Path) -> Generator[Artist, None, None]:
     for element in iterate_xml(xml_path, "artist"):
-        artist = Artist(id=int(element.find("id").text), name=element.find("name").text)
+        artist = Artist(
+            entity_id=int(element.find("id").text), name=element.find("name").text
+        )
         for subelement in element.find("aliases") or []:
-            alias = Artist(id=int(subelement.get("id")), name=subelement.text)
+            alias = Artist(entity_id=int(subelement.get("id")), name=subelement.text)
             artist.aliases.append(alias)
         for subelement in element.find("groups") or []:
-            group = Artist(id=int(subelement.get("id")), name=subelement.text)
+            group = Artist(entity_id=int(subelement.get("id")), name=subelement.text)
             artist.groups.append(group)
         for subelement in element.find("members") or []:
             if subelement.tag == "id":
                 continue
-            member = Artist(id=int(subelement.get("id")), name=subelement.text)
+            member = Artist(entity_id=int(subelement.get("id")), name=subelement.text)
             artist.members.append(member)
-        artist.aliases.sort(key=lambda x: x.id)
-        artist.groups.sort(key=lambda x: x.id)
-        artist.members.sort(key=lambda x: x.id)
+        artist.aliases.sort(key=lambda x: x.entity_id)
+        artist.groups.sort(key=lambda x: x.entity_id)
+        artist.members.sort(key=lambda x: x.entity_id)
         yield artist
 
 
 def get_company_iterator(xml_path: Path) -> Generator[Company, None, None]:
     for element in iterate_xml(xml_path, "label"):
         company = Company(
-            id=int(element.find("id").text), name=element.find("name").text
+            entity_id=int(element.find("id").text), name=element.find("name").text
         )
         if (parent_company := element.find("parentLabel")) is not None:
             company.parent_company = Company(
-                id=int(parent_company.get("id")), name=parent_company.text
+                entity_id=int(parent_company.get("id")), name=parent_company.text
             )
         for subelement in element.find("sublabels") or []:
-            subsidiary = Company(id=int(subelement.get("id")), name=subelement.text)
+            subsidiary = Company(
+                entity_id=int(subelement.get("id")), name=subelement.text
+            )
             company.subsidiaries.append(subsidiary)
-        company.subsidiaries.sort(key=lambda x: x.id)
+        company.subsidiaries.sort(key=lambda x: x.entity_id)
         yield company
 
 
 def get_master_iterator(xml_path: Path) -> Generator[Master, None, None]:
     for element in iterate_xml(xml_path, "master"):
         master = Master(
-            id=int(element.get("id")),
+            entity_id=int(element.get("id")),
             name=element.find("title").text,
             main_release_id=int(element.find("main_release").text),
         )
@@ -175,21 +179,23 @@ def get_release_iterator(xml_path: Path):
         artists: Set[Artist] = set()
         for artist in element.find("artists") or []:
             artists.add(
-                Artist(id=int(artist.find("id").text), name=artist.find("name").text)
+                Artist(
+                    entity_id=int(artist.find("id").text), name=artist.find("name").text
+                )
             )
-        return sorted(artists, key=lambda x: x.id)
+        return sorted(artists, key=lambda x: x.entity_id)
 
     def get_companies(element) -> List[Company]:
         companies: List[Company] = []
         for company in element.find("companies") or []:
             companies.append(
                 Company(
-                    id=int(company.find("id").text),
+                    entity_id=int(company.find("id").text),
                     name=company.find("name").text,
                     roles=parse_roles(company.find("entity_type_name").text),
                 )
             )
-        return sorted(companies, key=lambda x: x.id)
+        return sorted(companies, key=lambda x: x.entity_id)
 
     def get_country(element) -> Optional[str]:
         if (country := element.find("country")) is not None:
@@ -201,12 +207,12 @@ def get_release_iterator(xml_path: Path):
         for extra_artist in element.find("extraartists") or []:
             extra_artists.append(
                 Artist(
-                    id=int(extra_artist.find("id").text),
+                    entity_id=int(extra_artist.find("id").text),
                     name=extra_artist.find("name").text,
                     roles=parse_roles(extra_artist.find("role").text),
                 )
             )
-        return sorted(extra_artists, key=lambda x: x.id)
+        return sorted(extra_artists, key=lambda x: x.entity_id)
 
     def get_formats(element) -> List[str]:
         formats: Set[str] = set()
@@ -225,9 +231,9 @@ def get_release_iterator(xml_path: Path):
     def get_labels(element) -> List[Company]:
         labels: Set[Company] = set()
         for label in element.find("labels") or []:
-            label = Company(id=int(label.get("id")), name=label.get("name"))
+            label = Company(entity_id=int(label.get("id")), name=label.get("name"))
             labels.add(label)
-        return sorted(labels, key=lambda x: x.id)
+        return sorted(labels, key=lambda x: x.entity_id)
 
     def get_master_id(element) -> Optional[int]:
         if (master_id := element.find("master_id")) is not None:
@@ -251,7 +257,7 @@ def get_release_iterator(xml_path: Path):
             position = (track.find("position").text or "").strip() or str(i)
             tracks.append(
                 Track(
-                    id="{}-{}".format(release_id, position),
+                    entity_id="{}-{}".format(release_id, position),
                     name=track.find("title").text,
                     position=position,
                     artists=get_artists(track),
@@ -276,7 +282,7 @@ def get_release_iterator(xml_path: Path):
             extra_artists=get_extra_artists(element),
             formats=get_formats(element),
             genres=get_genres(element),
-            id=int(element.get("id")),
+            entity_id=int(element.get("id")),
             is_main_release=bool(get_is_main_release(element)),
             labels=get_labels(element),
             master_id=get_master_id(element),
