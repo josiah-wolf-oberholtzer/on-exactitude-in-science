@@ -1,5 +1,6 @@
 import asyncio
 import dataclasses
+import datetime
 import logging
 import random
 import time
@@ -14,14 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 async def load(path, consumer_count=1, limit=None):
-    start_time = time.time()
+    logger.info("Loading data ...")
+    start_time = datetime.datetime.now()
     cache = setup_cache()
     iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
     tasks = [consumer(iterator, cache, consumer_id=i) for i in range(consumer_count)]
     await asyncio.gather(*tasks)
     stop_time = time.time()
     logger.info(str({k: len(v) for k, v in cache.items()}))
-    logger.info(f"Elapsed Time: {stop_time - start_time}")
+    logger.info("Loaded data in {}".format(datetime.datetime.now() - start_time))
     return cache
 
 
@@ -36,8 +38,6 @@ def setup_cache():
     cache["Artist"] = {}
     cache["Company"] = {}
     cache["Master"] = {}
-    cache["Release"] = {}
-    cache["Track"] = {}
     return cache
 
 
@@ -179,6 +179,7 @@ async def save_vertex(xml_entity, session, cache):
                 if hasattr(goblin_entity, key):
                     setattr(goblin_entity, key, value)
             await session.save(goblin_entity)
+            session.current.clear()  # Don't cache vertices on the session
             if kind not in ("Release", "Track"):
                 cache[kind][xml_entity.entity_id] = goblin_entity.id
                 event.set()

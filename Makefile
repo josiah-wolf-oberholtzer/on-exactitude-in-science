@@ -12,3 +12,10 @@ fetch-dataset:
 
 test-api:
 	docker-compose run --rm -e GOBLIN_HOST=janusgraph-test api make reformat test
+
+load-from-scratch:
+	docker-compose stop
+	docker-compose rm -f
+	docker-compose up -d cassandra elasticsearch janusgraph
+	docker-compose run --rm janusgraph-healthcheck
+	docker-compose run --rm api python3 -m maps

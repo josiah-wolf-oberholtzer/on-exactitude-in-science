@@ -63,7 +63,7 @@ class GoblinManager:
 async def load_schema(goblin_app):
     schema_definition = format_schema(goblin_app)
     start_time = datetime.datetime.now()
-    logger.info("Processing schema....")
+    logger.info("Processing schema ...")
     client = await goblin_app.cluster.connect()
     response = await client.submit(schema_definition)
     await response.all()

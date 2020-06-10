@@ -3,6 +3,8 @@ services:
   api:
     build:
       context: api
+    depends_on:
+    - janusgraph-healthcheck
     ports:
     - 9090:9090
     volumes:
@@ -21,7 +23,6 @@ services:
     - 9042:9042
     - 9160:9160
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
     environment:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       http.host: 0.0.0.0
@@ -30,21 +31,30 @@ services:
       cluster.name: docker-cluster
       xpack.security.enabled: "false"
       discovery.zen.minimum_master_nodes: 1
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
     ports:
     - 9200:9200
   janusgraph:
     depends_on:
     - cassandra
     - elasticsearch
-    image: janusgraph/janusgraph:0.5
     environment:
       JANUS_PROPS_TEMPLATE: cql-es
+      gremlinserver.channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
       janusgraph.index.search.hostname: elasticsearch
       janusgraph.schema.default: "none"
       janusgraph.storage.batch-loading: "true"
       janusgraph.storage.hostname: cassandra
       janusgraph.storage.port: 9042
+    image: janusgraph/janusgraph:0.5
     ports:
     - 8182:8182
+  janusgraph-healthcheck:
+    command: "-sSf --retry 60 --retry-delay 5 --retry-connrefused 'http://janusgraph:8182?gremlin=100-1'"
+    depends_on:
+    - janusgraph
+    image: curlimages/curl:latest
   janusgraph-test:
     image: janusgraph/janusgraph:0.5
+    environment:
+      gremlinserver.channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
