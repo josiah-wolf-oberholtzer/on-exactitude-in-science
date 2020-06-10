@@ -46,7 +46,6 @@ pytest:
 		--cov-report=html \
 		--cov-report=term \
 		--cov=${project}/ \
-		--durations=20 \
 		-vv \
 		${testPaths}
 

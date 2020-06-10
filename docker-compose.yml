@@ -40,6 +40,8 @@ services:
     environment:
       JANUS_PROPS_TEMPLATE: cql-es
       janusgraph.index.search.hostname: elasticsearch
+      janusgraph.schema.default: "none"
+      janusgraph.storage.batch-loading: "true"
       janusgraph.storage.hostname: cassandra
       janusgraph.storage.port: 9042
     ports:

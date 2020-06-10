@@ -1,1 +1,4 @@
 goblin==2.2.3
+uvloop
+ujson
+uqbar
