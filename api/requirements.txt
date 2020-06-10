@@ -1,4 +1,6 @@
+aiodns
+cchardet
 goblin==2.2.3
-uvloop
-ujson
+gunicorn
 uqbar
+uvloop

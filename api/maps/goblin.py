@@ -60,22 +60,61 @@ class GoblinManager:
         return value["@value"]["relationId"]
 
 
-async def load_schema(goblin_app):
-    schema_definition = format_schema(goblin_app)
+async def get_session():
+    manager = GoblinManager()
+    goblin_app = await manager.setup_goblin()
+    session = await goblin_app.session()
+    return session
+
+
+async def install_indices(goblin_app):
+    definition = format_indices(goblin_app)
+    start_time = datetime.datetime.now()
+    logger.info("Processing indices ...")
+    client = await goblin_app.cluster.connect()
+    response = await client.submit(definition)
+    await response.all()
+    logger.info("Processed indices in {}".format(datetime.datetime.now() - start_time))
+
+
+async def install_schema(goblin_app):
+    definition = format_schema(goblin_app)
     start_time = datetime.datetime.now()
     logger.info("Processing schema ...")
     client = await goblin_app.cluster.connect()
-    response = await client.submit(schema_definition)
+    response = await client.submit(definition)
     await response.all()
     logger.info("Processed schema in {}".format(datetime.datetime.now() - start_time))
 
 
-async def load_indices(goblin_app):
-    pass
-
-
 def format_indices(goblin_app):
-    pass
+    lines = [
+        "graph.tx().rollback()",
+        "mgmt = graph.openManagement()",
+        "",
+        "// Composite indices",
+    ]
+    for label, _ in sorted(goblin_app.vertices.items()):
+        lines.append(f"{label} = mgmt.getVertexLabel('{label}')")
+    for label, _ in sorted(goblin_app.vertices.items()):
+        lines.append(f"{label}_id = mgmt.getPropertyKey('{label}_id')")
+    for label, _ in sorted(goblin_app.vertices.items()):
+        lines.append(
+            f"mgmt.buildIndex('by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
+        )
+    lines.extend(
+        [
+            "",
+            "// Mixed indices",
+            "name = mgmt.getPropertyKey('name')",
+            "random = mgmt.getPropertyKey('name')",
+            "mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXT.asParameter()).buildMixedIndex('search')",
+            "mgmt.buildIndex('by_random', Vertex.class).addKey(name).buildMixedIndex('search')",
+            "",
+            "mgmt.commit()",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def format_schema(goblin_app):
@@ -112,7 +151,7 @@ def format_schema(goblin_app):
         if label == "edge":
             continue
         lines.append(
-            f"{label} = mgmt.makeEdgeLabel('{label}').multiplicity(SIMPLE).make()"
+            f"{label} = mgmt.makeEdgeLabel('{label}').multiplicity(MULTI).make()"
         )
     lines.extend(["", "mgmt.commit()"])
     return "\n".join(lines)

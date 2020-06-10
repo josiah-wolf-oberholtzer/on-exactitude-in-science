@@ -3,7 +3,6 @@ import dataclasses
 import datetime
 import logging
 import random
-import time
 from pathlib import Path
 
 from aiogremlin.exception import GremlinServerError
@@ -21,7 +20,6 @@ async def load(path, consumer_count=1, limit=None):
     iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
     tasks = [consumer(iterator, cache, consumer_id=i) for i in range(consumer_count)]
     await asyncio.gather(*tasks)
-    stop_time = time.time()
     logger.info(str({k: len(v) for k, v in cache.items()}))
     logger.info("Loaded data in {}".format(datetime.datetime.now() - start_time))
     return cache
@@ -51,7 +49,7 @@ def producer(path: Path, consumer_count=1, limit=None):
         for i, entity in enumerate(iterator):
             if i == limit:
                 break
-            yield i, entities.Vertex, entity
+            yield i, entity
     for _ in range(consumer_count):
         yield None
 
@@ -66,12 +64,12 @@ async def consumer(iterator, cache, consumer_id=1):
     async with goblin.GoblinManager() as goblin_app:
         session = await goblin_app.session()
         while (iterator_output := next(iterator)) is not None:
-            i, _, xml_entity = iterator_output
+            i, xml_entity = iterator_output
             procedure = procedures[type(xml_entity)]
-            await procedure(xml_entity, session, cache)
+            vid = await procedure(xml_entity, session, cache)
             if not i % 100:
                 logger.info(
-                    f"[{consumer_id}] {type(xml_entity).__name__} {i} [{xml_entity.entity_id}] "
+                    f"[{consumer_id}] {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}, vid: {vid}] "
                     + str({k: len(v) for k, v in cache.items()})
                 )
 
@@ -87,6 +85,7 @@ async def load_artist(xml_artist, session, cache):
         await save_edge(session, entities.MemberOf, artist_vid, group_vid)
     for xml_member in xml_artist.members:
         await save_vertex(xml_member, session, cache)
+    return artist_vid
 
 
 async def load_company(xml_company, session, cache):
@@ -98,10 +97,11 @@ async def load_company(xml_company, session, cache):
         await save_edge(session, entities.SubsidiaryOf, company_vid, parent_company_vid)
     for xml_subsidiary in xml_company.subsidiaries:
         await save_vertex(xml_subsidiary, session, cache)
+    return company_vid
 
 
 async def load_master(xml_master, session, cache):
-    await save_vertex(xml_master, session, cache)
+    return await save_vertex(xml_master, session, cache)
 
 
 async def load_release(xml_release, session, cache):
@@ -150,6 +150,7 @@ async def load_release(xml_release, session, cache):
         )
         master_vid = await save_vertex(master, session, cache)
         await save_edge(session, entities.SubreleaseOf, release_vid, master_vid)
+    return release_vid
 
 
 async def save_vertex(xml_entity, session, cache):
@@ -172,9 +173,9 @@ async def save_vertex(xml_entity, session, cache):
             setattr(goblin_entity, f"{kind.lower()}_id", xml_entity.entity_id)
             goblin_entity.random = random.random()
             for key, value in dataclasses.asdict(xml_entity).items():
-                if isinstance(value, list):
-                    continue  # TODO: Implement goblin schema loading
-                elif value is None:
+                # if isinstance(value, list):
+                #    continue  # TODO: Implement goblin schema loading
+                if value is None:
                     continue
                 if hasattr(goblin_entity, key):
                     setattr(goblin_entity, key, value)

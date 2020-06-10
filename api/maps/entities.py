@@ -2,57 +2,54 @@ import goblin
 from gremlin_python.process.traversal import Cardinality
 
 
-class Vertex(goblin.Vertex):
-    random = goblin.Property(goblin.Float)
-
-
-class Edge(goblin.Edge):
-    pass
-
-
-class Artist(Vertex):
+class Artist(goblin.Vertex):
     __label__ = "artist"
     artist_id = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
+    random = goblin.Property(goblin.Float)
 
 
-class Company(Vertex):
+class Company(goblin.Vertex):
     __label__ = "company"
     company_id = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
+    random = goblin.Property(goblin.Float)
 
 
-class Master(Vertex):
+class Master(goblin.Vertex):
     __label__ = "master"
     master_id = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
+    random = goblin.Property(goblin.Float)
 
 
-class Release(Vertex):
+class Release(goblin.Vertex):
     __label__ = "release"
     country = goblin.Property(goblin.String)
     formats = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     genres = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     is_main_release = goblin.Property(goblin.Boolean)
     name = goblin.Property(goblin.String)
+    random = goblin.Property(goblin.Float)
     release_id = goblin.Property(goblin.Integer)
-    style = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
+    styles = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     year = goblin.Property(goblin.Integer)
 
 
-class Track(Vertex):
+class Track(goblin.Vertex):
     __label__ = "track"
     name = goblin.Property(goblin.String)
     position = goblin.Property(goblin.String)
+    random = goblin.Property(goblin.Float)
     track_id = goblin.Property(goblin.String)
 
 
-class AliasOf(Edge):
+class AliasOf(goblin.Edge):
     __label__ = "alias_of"
     __valid_relations__ = frozenset([(Artist, Artist)])
 
 
-class CreditedWith(Edge):
+class CreditedWith(goblin.Edge):
     __label__ = "credited_with"
     __valid_relations__ = frozenset(
         [(Artist, Release), (Artist, Track), (Company, Release)]
@@ -60,31 +57,31 @@ class CreditedWith(Edge):
     role = goblin.Property(goblin.String)
 
 
-class Includes(Edge):
+class Includes(goblin.Edge):
     __label__ = "includes"
     __valid_relations__ = frozenset([(Release, Track)])
 
 
-class MemberOf(Edge):
+class MemberOf(goblin.Edge):
     __label__ = "member_of"
     __valid_relations__ = frozenset([(Artist, Artist)])
 
 
-class Released(Edge):
+class Released(goblin.Edge):
     __label__ = "released"
     __valid_relations__ = frozenset([(Artist, Release), (Artist, Track)])
 
 
-class ReleasedOn(Edge):
+class ReleasedOn(goblin.Edge):
     __label__ = "released_on"
     __valid_relations__ = frozenset([(Release, Company)])
 
 
-class SubsidiaryOf(Edge):
+class SubsidiaryOf(goblin.Edge):
     __label__ = "subsidiary_of"
     __valid_relations__ = frozenset([(Company, Company)])
 
 
-class SubreleaseOf(Edge):
+class SubreleaseOf(goblin.Edge):
     __label__ = "subrelease_of"
     __valid_relations__ = frozenset([(Release, Master)])

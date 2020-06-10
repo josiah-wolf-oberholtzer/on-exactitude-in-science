@@ -3,6 +3,16 @@ services:
   api:
     build:
       context: api
+    command: gunicorn --conf gunicorn.conf.py maps.app:app
+    environment:
+      GUNICORN_ACCESSLOG: "-"
+      GUNICORN_BIND: 0.0.0.0:9090
+      GUNICORN_CAPTURE_OUTPUT: "true"
+      GUNICORN_ERRORLOG: "-"
+      GUNICORN_LOGLEVEL: debug
+      GUNICORN_RELOAD: "true"
+      GUNICORN_WORKERS: 4
+      GUNICORN_WORKER_CLASS: aiohttp.worker.GunicornUVLoopWebWorker
     depends_on:
     - janusgraph-healthcheck
     ports:

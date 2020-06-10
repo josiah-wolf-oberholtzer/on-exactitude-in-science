@@ -1,7 +1,37 @@
 import pytest
 from uqbar.strings import normalize
 
-from maps.goblin import format_schema, load_schema
+from maps.goblin import format_indices, format_schema, load_schema
+
+
+@pytest.mark.asyncio
+async def test_format_indices(goblin_app):
+    assert format_indices(goblin_app) == normalize(
+        """
+        graph.tx().rollback()
+        mgmt = graph.openManagement()
+
+        // Composite indices
+        artist_id = mgmt.getPropertyKey('artist_id')
+        company_id = mgmt.getPropertyKey('company_id')
+        master_id = mgmt.getPropertyKey('master_id')
+        release_id = mgmt.getPropertyKey('release_id')
+        track_id = mgmt.getPropertyKey('track_id')
+        mgmt.buildIndex('by_artist_id', Vertex.class).addKey(artist_id).unique().buildCompositeIndex()
+        mgmt.buildIndex('by_company_id', Vertex.class).addKey(company_id).unique().buildCompositeIndex()
+        mgmt.buildIndex('by_master_id', Vertex.class).addKey(master_id).unique().buildCompositeIndex()
+        mgmt.buildIndex('by_release_id', Vertex.class).addKey(release_id).unique().buildCompositeIndex()
+        mgmt.buildIndex('by_track_id', Vertex.class).addKey(track_id).unique().buildCompositeIndex()
+
+        // Mixed indices
+        name = mgmt.getPropertyKey('name')
+        random = mgmt.getPropertyKey('name')
+        mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXT.getParameter()).buildMixedIndex('search')
+        mgmt.buildIndex('by_random', Vertex.class).addKey(name).buildMixedIndex('search')
+
+        mgmt.commit()
+        """
+    )
 
 
 @pytest.mark.asyncio
@@ -32,7 +62,7 @@ async def test_format_schema(goblin_app):
         random = mgmt.makePropertyKey('random').dataType(Float.class).cardinality(SINGLE).make()
         release_id = mgmt.makePropertyKey('release_id').dataType(Integer.class).cardinality(SINGLE).make()
         role = mgmt.makePropertyKey('role').dataType(String.class).cardinality(SINGLE).make()
-        style = mgmt.makePropertyKey('style').dataType(String.class).cardinality(SET).make()
+        styles = mgmt.makePropertyKey('styles').dataType(String.class).cardinality(SET).make()
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
 
