@@ -51,9 +51,13 @@ services:
     environment:
       JANUS_PROPS_TEMPLATE: cql-es
       gremlinserver.channelizer: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
+      gremlinserver.gremlinPool: 24
+      gremlinserver.threadPoolWorker: 24
       janusgraph.index.search.hostname: elasticsearch
+      janusgraph.query.force-index: "true"
       janusgraph.schema.default: "none"
       janusgraph.storage.batch-loading: "true"
+      janusgraph.storage.buffer-size: 8192
       janusgraph.storage.hostname: cassandra
       janusgraph.storage.port: 9042
     image: janusgraph/janusgraph:0.5
