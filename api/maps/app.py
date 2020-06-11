@@ -7,12 +7,15 @@ from .views import routes
 async def error_middleware(app, handler):
     async def middleware_handler(request):
         try:
-            response = await handler(request)
-            return response
+            return await handler(request)
         except aiohttp.web.HTTPException as exception:
             return aiohttp.web.json_response(
                 {"status": exception.status, "reason": exception.reason},
                 status=exception.status,
+            )
+        except Exception as exception:
+            return aiohttp.web.json_response(
+                {"status": 400, "reason": "Bad Request", "extra": str(exception)}, status=400,
             )
 
     return middleware_handler

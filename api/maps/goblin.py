@@ -115,10 +115,14 @@ def format_schema(goblin_app):
         )
     lines.extend(["", "// Indices"])
     for label, _ in sorted(goblin_app.vertices.items()):
-        lines.append(f"mgmt.buildIndex('by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()")
-    lines.extend([
-        "mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
-        "mgmt.buildIndex('by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
-    ])
+        lines.append(
+            f"mgmt.buildIndex('by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
+        )
+    lines.extend(
+        [
+            "mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
+            "mgmt.buildIndex('by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
+        ]
+    )
     lines.extend(["", "mgmt.commit()"])
     return "\n".join(lines)
