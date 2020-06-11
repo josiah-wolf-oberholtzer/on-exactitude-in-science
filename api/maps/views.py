@@ -1,5 +1,7 @@
+import random
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
+from gremlin_python.process.traversal import P
 
 from maps.gremlin import textContainsFuzzy
 
@@ -46,10 +48,8 @@ async def get_vertex_by_goblin_id(request):
 
 @routes.get("/vertex/{vertex_label}/{vertex_entity_id}")
 async def get_vertex_by_label(request):
-    vertex_label = request.match_info.get("vertex_label")
+    vertex_label = validate_vertex_label(request)
     vertex_entity_id = request.match_info.get("vertex_entity_id")
-    if vertex_label not in goblin_app.vertices:
-        raise aiohttp.web.HTTPNotFound()
     session = await request.app["goblin"].session()
     traversal = (
         session.g.V()
@@ -66,6 +66,39 @@ async def get_vertex_by_label(request):
     return aiohttp.web.json_response({"vertex": result})
 
 
+@routes.get("/random")
+@routes.get("/random/{vertex_label}")
+async def get_random(request):
+    vertex_label = validate_vertex_label(request)
+    session = await request.app["goblin"].session()
+    predicates = [P.lt, P.lte, P.gt, P.gte]
+    for i in range(10):
+        random.shuffle(predicates)
+        has = ["random", predicates[0](random.random())]
+        if vertex_label:
+            has.insert(0, vertex_label)
+        traversal = (
+            session.g.V()
+            .has(*has)
+            .limit(20)
+            .sample(1)
+            .project("vid", "label", "values")
+            .by(__.id())
+            .by(__.label())
+            .by(__.valueMap())
+        )
+        result = await traversal.toList()
+        if len(result):
+            break
+    else:
+        raise aiohttp.web.HTTPBadRequest()
+    for entry in result:
+        values = entry.pop("values")
+        entry["name"] = values["name"][0]
+        entry["eid"] = values[f"{entry['label']}_id"][0]
+    return aiohttp.web.json_response({"result": result[0]})
+
+
 def validate_limit(request):
     limit = request.query.get("limit", 20)
     try:
@@ -79,80 +112,46 @@ def validate_limit(request):
     return limit
 
 
-@routes.get("/search")
-async def search(request):
-    query = request.query.get("q", "")
-    if not query or len(query) < 3:
-        raise aiohttp.web.HTTPBadRequest(reason="Query too short")
-    limit = validate_limit(request)
-    session = await request.app["goblin"].session()
-    traversal = (
-        session.g.V()
-        .has("name", textContainsFuzzy(query))
-        .limit(limit)
-        .project("vid", "label", "name")
-        .by(__.id())
-        .by(__.label())
-        .by(__.properties("name").value())
-        .toList()
-    )
-    result = await traversal
-    return aiohttp.web.json_response({
-        "limit": limit,
-        "query": query,
-        "result": result,
-    })
-
-
-@routes.get("/search/{vertex_label}")
-async def search_by_label(request):
+def validate_vertex_label(request):
     vertex_label = request.match_info.get("vertex_label")
-    if vertex_label not in request.app["goblin"].vertices:
+    if vertex_label and vertex_label not in request.app["goblin"].vertices:
         raise aiohttp.web.HTTPNotFound()
+    return vertex_label
+
+
+@routes.get("/search")
+@routes.get("/search/{vertex_label}")
+async def search(request):
+    vertex_label = validate_vertex_label(request)
     query = request.query.get("q", "")
     if not query or len(query) < 3:
         raise aiohttp.web.HTTPBadRequest(reason="Query too short")
     limit = validate_limit(request)
     session = await request.app["goblin"].session()
+    has = ["name", textContainsFuzzy(query)]
+    if vertex_label:
+        has.insert(0, vertex_label)
     traversal = (
         session.g.V()
-        .has(vertex_label, "name", textContainsFuzzy(query))
+        .has(*has)
         .limit(limit)
-        .project("vid", "label", "name")
+        .project("vid", "label", "values")
         .by(__.id())
         .by(__.label())
-        .by(__.properties("name").value())
+        .by(__.valueMap())
         .toList()
     )
     result = await traversal
+    for entry in result:
+        values = entry.pop("values")
+        entry["name"] = values["name"][0]
+        entry["eid"] = values[f"{entry['label']}_id"][0]
     return aiohttp.web.json_response({
         "limit": limit,
         "query": query,
         "result": result,
-        "vertex_label": vertex_label,
+        **({"vertex_label": vertex_label} if vertex_label else {}),
     })
-
-
-"""
-@routes.get(
-    "/edge/{source_label}/{source_entity_id}/{edge_label}/{target_label}/{target_entity_id}"
-)
-async def edge_edge(request):
-    goblin_app = request.app["goblin"]
-    source_label = request.match_info.get("source_label")
-    source_entity_id = request.match_info.get("source_entity_id")
-    edge_label = request.match_info.get("edge_label")
-    target_label = request.match_info.get("target_label")
-    target_entity_id = request.match_info.get("target_entity_id")
-    if (
-        source_label not in goblin_app.vertices
-        or target_label not in goblin_app.vertices
-        or edge_label not in goblin_app.edges
-    ):
-        raise aiohttp.web.HTTPNotFound()
-    session = await request.app["goblin"].session()
-    return aiohttp.web.json_response({"edge": "yes"})
-"""
 
 
 """
@@ -164,16 +163,4 @@ async def get_locality(request):
     if vertex_label not in goblin_app.vertices:
         raise aiohttp.web.HTTPNotFound()
     return aiohttp.web.json_response({"locality": "yes"})
-"""
-
-
-"""
-@routes.get("/random")
-async def get_random(request):
-    goblin_app = request.app["goblin"]
-    session = await goblin_app.session()
-    traversal = session.g
-    traversal = traversal.valueMap(True)
-    result = await traversal.next()
-    return aiohttp.web.json_response({"result": result})
 """
