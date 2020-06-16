@@ -102,7 +102,6 @@ async def test_search_by_label(api_client, testdata):
                 "vid": ...,
             },
         ],
-        "vertex_label": "company",
     }
 
 
@@ -147,5 +146,4 @@ async def test_vertex_by_label(api_client, testdata):
             "vid": ...,
             "year": 1999,
         },
-        "vertex_label": "release",
     }

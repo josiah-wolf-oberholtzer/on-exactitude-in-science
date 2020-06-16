@@ -99,7 +99,6 @@ async def get_random(request):
     return aiohttp.web.json_response(
         {
             "result": result[0],
-            **({"vertex_label": vertex_label} if vertex_label else {}),
         }
     )
 
@@ -125,7 +124,6 @@ async def get_search(request):
             "limit": limit,
             "query": query,
             "result": result,
-            **({"vertex_label": vertex_label} if vertex_label else {}),
         }
     )
 
@@ -148,6 +146,5 @@ async def get_vertex(request):
     return aiohttp.web.json_response(
         {
             "result": cleanup_vertex(result, request.app["goblin"]),
-            **({"vertex_label": vertex_label} if vertex_label else {}),
         }
     )
