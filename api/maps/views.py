@@ -1,4 +1,5 @@
 import random
+
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P
@@ -30,8 +31,7 @@ def validate_vertex_label(request):
 
 def project_vertex(traversal):
     return (
-        traversal
-        .project("vid", "label", "values")
+        traversal.project("vid", "label", "values")
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
@@ -42,7 +42,10 @@ def cleanup_vertex(result, goblin_app):
     vertex = goblin_app.vertices[result["label"]]
     for key, value in result["values"].items():
         prop = vertex.__properties__[key]
-        if value and getattr(prop, "cardinality", Cardinality.single) == Cardinality.single:
+        if (
+            value
+            and getattr(prop, "cardinality", Cardinality.single) == Cardinality.single
+        ):
             result["values"][key] = value[0]
     result["values"].pop("random")
     result["eid"] = result["values"].pop(result["label"] + "_id")
@@ -50,12 +53,8 @@ def cleanup_vertex(result, goblin_app):
 
 
 @routes.get("/")
-async def index(request):
-    return aiohttp.web.json_response({"message": "hello world!"})
-
-
 @routes.get("/health")
-async def health(request):
+async def get_health(request):
     try:
         client = await request.app["goblin"].cluster.connect()
         response = await client.submit("100 - 1")
@@ -65,27 +64,16 @@ async def health(request):
         return aiohttp.web.json_response({"status": str(e)}, status=500)
 
 
-@routes.get("/vertex/{vertex_goblin_id}")
-async def get_vertex_by_goblin_id(request):
-    vertex_goblin_id = request.match_info.get("vertex_goblin_id")
-    session = await request.app["goblin"].session()
-    traversal = project_vertex(session.g.V(vertex_goblin_id)).next()
-    result = await traversal
-    if not result:
-        raise aiohttp.web.HTTPNotFound()
-    return aiohttp.web.json_response({"vertex": cleanup_vertex(result, request.app["goblin"])})
-
-
-@routes.get("/vertex/{vertex_label}/{vertex_entity_id}")
-async def get_vertex_by_label(request):
+@routes.get("/locality/{vertex_id}")
+@routes.get("/locality/{vertex_label}/{vertex_id}")
+async def get_locality(request):
     vertex_label = validate_vertex_label(request)
-    vertex_entity_id = request.match_info.get("vertex_entity_id")
+    vertex_id = request.match_info.get("vertex_id")
     session = await request.app["goblin"].session()
-    traversal = project_vertex(session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_entity_id)).next()
-    result = await traversal
-    if not result:
-        raise aiohttp.web.HTTPNotFound()
-    return aiohttp.web.json_response({"vertex": cleanup_vertex(result, request.app["goblin"])})
+    traversal = session.g.V(1874649136).bothE().bothV().dedup().tree()
+    result = await traversal.next()
+    print(result)
+    return aiohttp.web.json_response({"result": result,})
 
 
 @routes.get("/random")
@@ -107,12 +95,17 @@ async def get_random(request):
         raise aiohttp.web.HTTPBadRequest()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
-    return aiohttp.web.json_response({"result": result[0]})
+    return aiohttp.web.json_response(
+        {
+            "result": result[0],
+            **({"vertex_label": vertex_label} if vertex_label else {}),
+        }
+    )
 
 
 @routes.get("/search")
 @routes.get("/search/{vertex_label}")
-async def search(request):
+async def get_search(request):
     vertex_label = validate_vertex_label(request)
     query = request.query.get("q", "")
     if not query or len(query) < 3:
@@ -126,9 +119,34 @@ async def search(request):
     result = await traversal.toList()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
-    return aiohttp.web.json_response({
-        "limit": limit,
-        "query": query,
-        "result": result,
-        **({"vertex_label": vertex_label} if vertex_label else {}),
-    })
+    return aiohttp.web.json_response(
+        {
+            "limit": limit,
+            "query": query,
+            "result": result,
+            **({"vertex_label": vertex_label} if vertex_label else {}),
+        }
+    )
+
+
+@routes.get("/vertex/{vertex_id}")
+@routes.get("/vertex/{vertex_label}/{vertex_id}")
+async def get_vertex(request):
+    vertex_label = validate_vertex_label(request)
+    vertex_id = request.match_info.get("vertex_id")
+    session = await request.app["goblin"].session()
+    if vertex_label:
+        traversal = project_vertex(
+            session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+        )
+    else:
+        traversal = project_vertex(session.g.V(vertex_id))
+    result = await traversal.next()
+    if not result:
+        raise aiohttp.web.HTTPNotFound()
+    return aiohttp.web.json_response(
+        {
+            "result": cleanup_vertex(result, request.app["goblin"]),
+            **({"vertex_label": vertex_label} if vertex_label else {}),
+        }
+    )

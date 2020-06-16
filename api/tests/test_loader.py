@@ -8,8 +8,9 @@ from maps import loader
 
 
 @pytest.mark.asyncio
-async def test_loader_run(session):
-    await loader.load(Path(__file__).parent, consumer_count=1)
+@pytest.mark.parametrize("consumer_count", [1, 2, 4, 8])
+async def test_loader_run(goblin_app, session, consumer_count):
+    await loader.load(goblin_app, Path(__file__).parent, consumer_count=consumer_count)
     await asyncio.sleep(1)
     vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
     edge_counts = await (session.traversal().E().groupCount().by(__.label())).next()

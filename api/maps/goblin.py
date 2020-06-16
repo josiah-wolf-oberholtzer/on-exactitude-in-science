@@ -26,6 +26,9 @@ PropertyKey = collections.namedtuple("PropertyKey", ["name", "data_type", "card"
 
 
 class GoblinManager:
+    def __init__(self, aliases=None):
+        self.aliases = aliases
+
     async def __aenter__(self) -> goblin.Goblin:
         return await self.setup_goblin()
 
@@ -35,7 +38,7 @@ class GoblinManager:
     async def setup_goblin(self) -> goblin.Goblin:
         self.goblin_app = await goblin.Goblin.open(
             loop=asyncio.get_running_loop(),
-            # aliases={"g": "g"},
+            aliases=self.aliases,
             get_hashable_id=self.get_hashable_id,
             scheme=os.environ.get("GOBLIN_SCHEME", "ws"),
             hosts=[os.environ.get("GOBLIN_HOST", "janusgraph")],
@@ -60,15 +63,17 @@ class GoblinManager:
         return value["@value"]["relationId"]
 
 
-async def get_session():
-    manager = GoblinManager()
+async def get_session(aliases=None):
+    manager = GoblinManager(aliases=aliases)
     goblin_app = await manager.setup_goblin()
     session = await goblin_app.session()
     return session
 
 
-async def install_schema(goblin_app):
-    definition = format_schema(goblin_app)
+async def install_schema(goblin_app, graph_name="graph"):
+    definition = format_schema(goblin_app, graph_name=graph_name)
+    print("graph_name:", graph_name)
+    print("definition", definition)
     start_time = datetime.datetime.now()
     logger.info("Processing schema ...")
     client = await goblin_app.cluster.connect()
@@ -77,10 +82,10 @@ async def install_schema(goblin_app):
     logger.info("Processed schema in {}".format(datetime.datetime.now() - start_time))
 
 
-def format_schema(goblin_app):
+def format_schema(goblin_app, graph_name="graph"):
     lines = [
-        "graph.tx().rollback()",
-        "mgmt = graph.openManagement()",
+        f"{graph_name}.tx().rollback()",
+        f"mgmt = {graph_name}.openManagement()",
     ]
     lines.extend(["", "// Vertex labels"])
     for label, vertex in sorted(goblin_app.vertices.items()):
@@ -116,12 +121,13 @@ def format_schema(goblin_app):
     lines.extend(["", "// Indices"])
     for label, _ in sorted(goblin_app.vertices.items()):
         lines.append(
-            f"mgmt.buildIndex('by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
+            f"mgmt.buildIndex('{graph_name}_by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
         )
     lines.extend(
         [
-            "mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
-            "mgmt.buildIndex('by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
         ]
     )
     lines.extend(["", "mgmt.commit()"])

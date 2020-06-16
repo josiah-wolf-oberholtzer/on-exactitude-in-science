@@ -13,12 +13,15 @@ from maps import entities, goblin, xml
 logger = logging.getLogger(__name__)
 
 
-async def load(path, consumer_count=1, limit=None):
+async def load(goblin_app, path, consumer_count=1, limit=None):
     logger.info("Loading data ...")
     start_time = datetime.datetime.now()
     cache = setup_cache()
     iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
-    tasks = [consumer(iterator, cache, consumer_id=i) for i in range(consumer_count)]
+    tasks = [
+        consumer(goblin_app, iterator, cache, consumer_id=i)
+        for i in range(consumer_count)
+    ]
     await asyncio.gather(*tasks)
     logger.info(str({k: len(v) for k, v in cache.items()}))
     logger.info("Loaded data in {}".format(datetime.datetime.now() - start_time))
@@ -54,24 +57,23 @@ def producer(path: Path, consumer_count=1, limit=None):
         yield None
 
 
-async def consumer(iterator, cache, consumer_id=1):
+async def consumer(goblin_app, iterator, cache, consumer_id=1):
     procedures = {
         xml.Artist: load_artist,
         xml.Company: load_company,
         xml.Master: load_master,
         xml.Release: load_release,
     }
-    async with goblin.GoblinManager() as goblin_app:
-        session = await goblin_app.session()
-        while (iterator_output := next(iterator)) is not None:
-            i, xml_entity = iterator_output
-            procedure = procedures[type(xml_entity)]
-            vid = await procedure(xml_entity, session, cache)
-            if not i % 100:
-                logger.info(
-                    f"[{consumer_id}] {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}, vid: {vid}] "
-                    + str({k: len(v) for k, v in cache.items()})
-                )
+    session = await goblin_app.session()
+    while (iterator_output := next(iterator)) is not None:
+        i, xml_entity = iterator_output
+        procedure = procedures[type(xml_entity)]
+        vid = await procedure(xml_entity, session, cache)
+        if not i % 100:
+            logger.info(
+                f"[{consumer_id}] {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}, vid: {vid}] "
+                + str({k: len(v) for k, v in cache.items()})
+            )
 
 
 async def load_artist(xml_artist, session, cache):

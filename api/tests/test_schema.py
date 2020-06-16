@@ -1,45 +1,15 @@
 import pytest
 from uqbar.strings import normalize
 
-from maps.goblin import format_indices, format_schema, load_schema
-
-
-@pytest.mark.asyncio
-async def test_format_indices(goblin_app):
-    assert format_indices(goblin_app) == normalize(
-        """
-        graph.tx().rollback()
-        mgmt = graph.openManagement()
-
-        // Composite indices
-        artist_id = mgmt.getPropertyKey('artist_id')
-        company_id = mgmt.getPropertyKey('company_id')
-        master_id = mgmt.getPropertyKey('master_id')
-        release_id = mgmt.getPropertyKey('release_id')
-        track_id = mgmt.getPropertyKey('track_id')
-        mgmt.buildIndex('by_artist_id', Vertex.class).addKey(artist_id).unique().buildCompositeIndex()
-        mgmt.buildIndex('by_company_id', Vertex.class).addKey(company_id).unique().buildCompositeIndex()
-        mgmt.buildIndex('by_master_id', Vertex.class).addKey(master_id).unique().buildCompositeIndex()
-        mgmt.buildIndex('by_release_id', Vertex.class).addKey(release_id).unique().buildCompositeIndex()
-        mgmt.buildIndex('by_track_id', Vertex.class).addKey(track_id).unique().buildCompositeIndex()
-
-        // Mixed indices
-        name = mgmt.getPropertyKey('name')
-        random = mgmt.getPropertyKey('name')
-        mgmt.buildIndex('by_name', Vertex.class).addKey(name, Mapping.TEXT.getParameter()).buildMixedIndex('search')
-        mgmt.buildIndex('by_random', Vertex.class).addKey(name).buildMixedIndex('search')
-
-        mgmt.commit()
-        """
-    )
+from maps.goblin import format_schema
 
 
 @pytest.mark.asyncio
 async def test_format_schema(goblin_app):
-    assert format_schema(goblin_app) == normalize(
+    assert format_schema(goblin_app, "foo") == normalize(
         """
-        graph.tx().rollback()
-        mgmt = graph.openManagement()
+        foo.tx().rollback()
+        mgmt = foo.openManagement()
 
         // Vertex labels
         artist = mgmt.makeVertexLabel('artist').make()
@@ -56,6 +26,7 @@ async def test_format_schema(goblin_app):
         formats = mgmt.makePropertyKey('formats').dataType(String.class).cardinality(SET).make()
         genres = mgmt.makePropertyKey('genres').dataType(String.class).cardinality(SET).make()
         is_main_release = mgmt.makePropertyKey('is_main_release').dataType(Boolean.class).cardinality(SINGLE).make()
+        last_modified = mgmt.makePropertyKey('last_modified').dataType(Float.class).cardinality(SINGLE).make()
         master_id = mgmt.makePropertyKey('master_id').dataType(Integer.class).cardinality(SINGLE).make()
         name = mgmt.makePropertyKey('name').dataType(String.class).cardinality(SINGLE).make()
         position = mgmt.makePropertyKey('position').dataType(String.class).cardinality(SINGLE).make()
@@ -67,20 +38,25 @@ async def test_format_schema(goblin_app):
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
 
         // Edge labels
-        alias_of = mgmt.makeEdgeLabel('alias_of').multiplicity(SIMPLE).make()
-        credited_with = mgmt.makeEdgeLabel('credited_with').multiplicity(SIMPLE).make()
-        includes = mgmt.makeEdgeLabel('includes').multiplicity(SIMPLE).make()
-        member_of = mgmt.makeEdgeLabel('member_of').multiplicity(SIMPLE).make()
-        released = mgmt.makeEdgeLabel('released').multiplicity(SIMPLE).make()
-        released_on = mgmt.makeEdgeLabel('released_on').multiplicity(SIMPLE).make()
-        subrelease_of = mgmt.makeEdgeLabel('subrelease_of').multiplicity(SIMPLE).make()
-        subsidiary_of = mgmt.makeEdgeLabel('subsidiary_of').multiplicity(SIMPLE).make()
+        alias_of = mgmt.makeEdgeLabel('alias_of').multiplicity(MULTI).make()
+        credited_with = mgmt.makeEdgeLabel('credited_with').multiplicity(MULTI).make()
+        includes = mgmt.makeEdgeLabel('includes').multiplicity(MULTI).make()
+        member_of = mgmt.makeEdgeLabel('member_of').multiplicity(MULTI).make()
+        released = mgmt.makeEdgeLabel('released').multiplicity(MULTI).make()
+        released_on = mgmt.makeEdgeLabel('released_on').multiplicity(MULTI).make()
+        subrelease_of = mgmt.makeEdgeLabel('subrelease_of').multiplicity(MULTI).make()
+        subsidiary_of = mgmt.makeEdgeLabel('subsidiary_of').multiplicity(MULTI).make()
+
+        // Indices
+        mgmt.buildIndex('foo_by_artist_id', Vertex.class).addKey(artist_id).indexOnly(artist).unique().buildCompositeIndex()
+        mgmt.buildIndex('foo_by_company_id', Vertex.class).addKey(company_id).indexOnly(company).unique().buildCompositeIndex()
+        mgmt.buildIndex('foo_by_master_id', Vertex.class).addKey(master_id).indexOnly(master).unique().buildCompositeIndex()
+        mgmt.buildIndex('foo_by_release_id', Vertex.class).addKey(release_id).indexOnly(release).unique().buildCompositeIndex()
+        mgmt.buildIndex('foo_by_track_id', Vertex.class).addKey(track_id).indexOnly(track).unique().buildCompositeIndex()
+        mgmt.buildIndex('foo_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_random', Vertex.class).addKey(random).buildMixedIndex('search')
 
         mgmt.commit()
         """
     )
-
-
-@pytest.mark.asyncio
-async def test_load_schema(goblin_app):
-    await load_schema(goblin_app)
