@@ -42,7 +42,7 @@ async def test_random_by_label(api_client, testdata):
 
 @pytest.mark.asyncio
 async def test_search(api_client, testdata):
-    await asyncio.sleep(0.25)  # Let elasticsearch catch up
+    await asyncio.sleep(0.5)  # Let elasticsearch catch up
     response = await api_client.get("/search?q=Mood+Swing&limit=10")
     assert response.status == 200
     json = await response.json()
@@ -56,17 +56,14 @@ async def test_search(api_client, testdata):
             {
                 "eid": 8,
                 "label": "artist",
-                "values": {"name": "Mood II Swing"},
+                "name": "Mood II Swing",
                 "vid": ...,
             },
             {
                 "eid": "3-3",
                 "label": "track",
-                "values": {
-                    "name": "When The Funk Hits The Fan (Mood II Swing "
-                    "When The Dub Hits The Fan)",
-                    "position": "3",
-                },
+                "name": "When The Funk Hits The Fan (Mood II Swing When The Dub Hits The Fan)",
+                "position": "3",
                 "vid": ...,
             },
         ],
@@ -89,19 +86,19 @@ async def test_search_by_label(api_client, testdata):
             {
                 "eid": 3,
                 "label": "company",
-                "values": {"name": "Seasons Recordings"},
+                "name": "Seasons Recordings",
                 "vid": ...,
             },
             {
                 "eid": 66542,
                 "label": "company",
-                "values": {"name": "Seasons Limited"},
+                "name": "Seasons Limited",
                 "vid": ...,
             },
             {
                 "eid": 297127,
                 "label": "company",
-                "values": {"name": "Seasons Classics"},
+                "name": "Seasons Classics",
                 "vid": ...,
             },
         ],
@@ -117,18 +114,16 @@ async def test_vertex_by_goblin_id(api_client, testdata):
     response = await api_client.get(f"/vertex/{vid}")
     assert await response.json() == {
         "result": {
+            "country": "Sweden",
             "eid": 1,
+            "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
+            "genres": ["Electronic"],
+            "is_main_release": True,
             "label": "release",
-            "values": {
-                "country": "Sweden",
-                "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
-                "genres": ["Electronic"],
-                "is_main_release": True,
-                "name": "Stockholm",
-                "styles": ["Deep House"],
-                "year": 1999,
-            },
+            "name": "Stockholm",
+            "styles": ["Deep House"],
             "vid": vid,
+            "year": 1999,
         },
     }
 
@@ -141,18 +136,16 @@ async def test_vertex_by_label(api_client, testdata):
     json["result"]["vid"] = ...
     assert json == {
         "result": {
+            "country": "Sweden",
             "eid": 1,
+            "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
+            "genres": ["Electronic"],
+            "is_main_release": True,
             "label": "release",
-            "values": {
-                "country": "Sweden",
-                "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
-                "genres": ["Electronic"],
-                "is_main_release": True,
-                "name": "Stockholm",
-                "styles": ["Deep House"],
-                "year": 1999,
-            },
+            "name": "Stockholm",
+            "styles": ["Deep House"],
             "vid": ...,
+            "year": 1999,
         },
         "vertex_label": "release",
     }

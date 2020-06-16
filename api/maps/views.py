@@ -49,6 +49,7 @@ def cleanup_vertex(result, goblin_app):
             result["values"][key] = value[0]
     result["values"].pop("random")
     result["eid"] = result["values"].pop(result["label"] + "_id")
+    result.update(result.pop("values"))
     return result
 
 
