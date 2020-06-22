@@ -17,8 +17,7 @@ pytest_plugins = 'aiohttp.pytest_plugin'
 async def goblin_app(event_loop):
     async with goblin.GoblinManager(aliases={"g": "tg"}) as goblin_app:
         session = await goblin_app.session()
-        while (await session.g.V().has("random", P.gte(0.0)).count().next()):
-            await session.g.V().has("random", P.gte(0.0)).limit(1000).drop().next()
+        await session.g.V().drop().toList()
         yield goblin_app
 
 

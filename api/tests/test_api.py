@@ -147,3 +147,13 @@ async def test_vertex_by_label(api_client, testdata):
             "year": 1999,
         },
     }
+
+
+@pytest.mark.asyncio
+async def test_locality_by_label(api_client, testdata):
+    response = await api_client.get("/locality/release/1")
+    assert response.status == 200
+    json = await response.json()
+    json["result"]["vid"] = ...
+    assert json == {
+    }

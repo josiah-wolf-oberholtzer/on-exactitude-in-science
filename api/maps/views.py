@@ -29,6 +29,20 @@ def validate_vertex_label(request):
     return vertex_label
 
 
+def project_edge(traversal):
+    return (
+        traversal.project("source", "edge", "target")
+        .by(project_vertex(__.outV()))
+        .by(
+            __.project("id", "label", "values")
+            .by(__.id())
+            .by(__.label())
+            .by(__.valueMap())
+        )
+        .by(project_vertex(__.inV()))
+    )
+
+
 def project_vertex(traversal):
     return (
         traversal.project("vid", "label", "values")
@@ -36,6 +50,12 @@ def project_vertex(traversal):
         .by(__.label())
         .by(__.valueMap())
     )
+
+
+def cleanup_edge(result):
+    result["id"] = result["id"]["@value"]["relationId"]
+    result.update(result.pop("values", {}))
+    return result
 
 
 def cleanup_vertex(result, goblin_app):
@@ -71,10 +91,30 @@ async def get_locality(request):
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
     session = await request.app["goblin"].session()
-    traversal = session.g.V(1874649136).bothE().bothV().dedup().tree()
-    result = await traversal.next()
-    print(result)
-    return aiohttp.web.json_response({"result": result,})
+    if vertex_label:
+        traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+    else:
+        traversal = session.g.V(vertex_id)
+    traversal = traversal.union(
+        project_vertex(__.identity()),
+        project_edge(__.bothE()),
+    )
+    result = await traversal.toList()
+    edges = []
+    vertices = {}
+    root_vertex = cleanup_vertex(result[0], request.app["goblin"])
+    vertices[root_vertex["vid"]] = root_vertex
+    for entry in result[1:]:
+        source = cleanup_vertex(entry["source"], request.app["goblin"])
+        target = cleanup_vertex(entry["target"], request.app["goblin"])
+        vertices.update({source["vid"]: source, target["vid"]: target})
+        edge = cleanup_edge(entry["edge"])
+        edge.update(source_vid=source["vid"], target_vid=target["vid"])
+        edges.append(edge)
+    return aiohttp.web.json_response({"result": {
+        "edges": edges,
+        "vertices": [vertex for _, vertex in sorted(vertices.items())]
+    }})
 
 
 @routes.get("/random")
