@@ -24,8 +24,8 @@ async def test_random(api_client, testdata):
         response = await api_client.get("/random")
         assert response.status == 200
         results.append(await response.json())
-    assert len(set([result["result"]["label"] for result in results])) > 1 
-    assert len(set([result["result"]["eid"] for result in results])) > 1 
+    assert len(set([result["result"]["label"] for result in results])) > 1
+    assert len(set([result["result"]["eid"] for result in results])) > 1
 
 
 @pytest.mark.asyncio
@@ -37,7 +37,7 @@ async def test_random_by_label(api_client, testdata):
             assert response.status == 200
             results.append(await response.json())
         assert all(result["result"]["label"] == label for result in results)
-        assert len(set([result["result"]["eid"] for result in results])) > 1 
+        assert len(set([result["result"]["eid"] for result in results])) > 1
 
 
 @pytest.mark.asyncio
@@ -53,12 +53,7 @@ async def test_search(api_client, testdata):
         "limit": 10,
         "query": "Mood Swing",
         "result": [
-            {
-                "eid": 8,
-                "label": "artist",
-                "name": "Mood II Swing",
-                "vid": ...,
-            },
+            {"eid": 8, "label": "artist", "name": "Mood II Swing", "vid": ...,},
             {
                 "eid": "3-3",
                 "label": "track",
@@ -83,18 +78,8 @@ async def test_search_by_label(api_client, testdata):
         "limit": 10,
         "query": "Seasons",
         "result": [
-            {
-                "eid": 3,
-                "label": "company",
-                "name": "Seasons Recordings",
-                "vid": ...,
-            },
-            {
-                "eid": 66542,
-                "label": "company",
-                "name": "Seasons Limited",
-                "vid": ...,
-            },
+            {"eid": 3, "label": "company", "name": "Seasons Recordings", "vid": ...,},
+            {"eid": 66542, "label": "company", "name": "Seasons Limited", "vid": ...,},
             {
                 "eid": 297127,
                 "label": "company",
@@ -155,5 +140,4 @@ async def test_locality_by_label(api_client, testdata):
     assert response.status == 200
     json = await response.json()
     json["result"]["vid"] = ...
-    assert json == {
-    }
+    assert json == {}

@@ -2,7 +2,7 @@ import random
 
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Cardinality, P
+from gremlin_python.process.traversal import Cardinality, P, Scope
 
 from maps.gremlin import textContainsFuzzy
 
@@ -90,14 +90,15 @@ async def get_health(request):
 async def get_locality(request):
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
+    if vertex_label != "track":
+        vertex_id = int(vertex_id)
     session = await request.app["goblin"].session()
     if vertex_label:
         traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
     else:
         traversal = session.g.V(vertex_id)
     traversal = traversal.union(
-        project_vertex(__.identity()),
-        project_edge(__.bothE()),
+        project_vertex(__.identity()), project_edge(__.bothE()),
     )
     result = await traversal.toList()
     edges = []
@@ -111,10 +112,14 @@ async def get_locality(request):
         edge = cleanup_edge(entry["edge"])
         edge.update(source_vid=source["vid"], target_vid=target["vid"])
         edges.append(edge)
-    return aiohttp.web.json_response({"result": {
-        "edges": edges,
-        "vertices": [vertex for _, vertex in sorted(vertices.items())]
-    }})
+    return aiohttp.web.json_response(
+        {
+            "result": {
+                "edges": edges,
+                "vertices": [vertex for _, vertex in sorted(vertices.items())],
+            }
+        }
+    )
 
 
 @routes.get("/random")
@@ -136,11 +141,7 @@ async def get_random(request):
         raise aiohttp.web.HTTPBadRequest()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
-    return aiohttp.web.json_response(
-        {
-            "result": result[0],
-        }
-    )
+    return aiohttp.web.json_response({"result": result[0],})
 
 
 @routes.get("/search")
@@ -160,11 +161,7 @@ async def get_search(request):
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
     return aiohttp.web.json_response(
-        {
-            "limit": limit,
-            "query": query,
-            "result": result,
-        }
+        {"limit": limit, "query": query, "result": result,}
     )
 
 
@@ -173,6 +170,8 @@ async def get_search(request):
 async def get_vertex(request):
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
+    if vertex_label != "track":
+        vertex_id = int(vertex_id)
     session = await request.app["goblin"].session()
     if vertex_label:
         traversal = project_vertex(
@@ -184,7 +183,58 @@ async def get_vertex(request):
     if not result:
         raise aiohttp.web.HTTPNotFound()
     return aiohttp.web.json_response(
-        {
-            "result": cleanup_vertex(result, request.app["goblin"]),
-        }
+        {"result": cleanup_vertex(result, request.app["goblin"]),}
     )
+
+
+@routes.get("/path/{source_label}/{source_id}/{target_label}/{target_id}")
+async def get_path(request):
+    source_label = request.match_info.get("source_label")
+    target_label = request.match_info.get("target_label")
+    source_id = request.match_info.get("source_id")
+    target_id = request.match_info.get("target_id")
+    if source_label and source_label not in request.app["goblin"].vertices:
+        raise aiohttp.web.HTTPNotFound()
+    elif target_label and target_label not in request.app["goblin"].vertices:
+        raise aiohttp.web.HTTPNotFound()
+    if source_label != "track":
+        source_id = int(source_id)
+    if target_label != "track":
+        target_id = int(target_id)
+    session = await request.app["goblin"].session()
+    traversal = (
+        session.g.V()
+        .has(source_label, f"{source_label}_id", source_id)
+        .repeat(__.bothE().otherV().simplePath())
+        .until(
+            __.has(target_label, f"{target_label}_id", target_id).or_().loops().is_(6)
+        )
+        .has(target_label, f"{target_label}_id", target_id)
+        .limit(1)
+        .path()
+        .index()
+        .map(
+            __.unfold()
+            .filter(__.unfold().tail().math("_ % 2").is_(1))
+            .limit(Scope.local, 1)
+            .project("source", "edge", "target")
+            .by(project_vertex(__.outV()))
+            .by(
+                __.project("id", "label", "values")
+                .by(__.id())
+                .by(__.label())
+                .by(__.valueMap())
+            )
+            .by(project_vertex(__.inV()))
+            .fold()
+        )
+    )
+    result = await traversal.toList()
+    if not result:
+        raise aiohttp.web.HTTPNotFound()
+    for path in result:
+        for entry in path:
+            cleanup_vertex(entry["source"], request.app["goblin"])
+            cleanup_vertex(entry["target"], request.app["goblin"])
+            cleanup_edge(entry["edge"])
+    return aiohttp.web.json_response({"result": result})

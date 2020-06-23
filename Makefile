@@ -19,7 +19,7 @@ wait-for-janusgraph:
 	docker-compose run --rm janusgraph-healthcheck
 
 load-data: wait-for-janusgraph
-	docker-compose run --rm api python3 -m maps data load --limit 1000 --workers 8
+	docker-compose run --rm api python3 -m maps data load --limit 10000 --workers 8
 
 load-schema: wait-for-janusgraph
 	docker-compose run --rm api python3 -m maps schema load
