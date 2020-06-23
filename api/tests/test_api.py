@@ -139,5 +139,12 @@ async def test_locality_by_label(api_client, testdata):
     response = await api_client.get("/locality/release/1")
     assert response.status == 200
     json = await response.json()
-    json["result"]["vid"] = ...
-    assert json == {}
+    assert json
+
+
+@pytest.mark.asyncio
+async def test_path(api_client, testdata):
+    response = await api_client.get("/path/artist/1/release/1")
+    assert response.status == 200
+    json = await response.json()
+    assert json
