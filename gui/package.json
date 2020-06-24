@@ -5,14 +5,22 @@
   "repository": "https://github.com/josiah-wolf-oberholtzer/on-exactitude-in-science",
   "license": "MIT",
   "scripts": {
-    "build": "webpack -d",
-    "build-production": "webpack -p",
-    "watch": "webpack -d --watch"
+    "build": "webpack -d --config webpack.config.js",
+    "build-production": "webpack -p --config webpack.config.js",
+    "watch": "webpack -d --watch --config webpack.config.js"
   },
   "dependencies": {
-    "d3-force": "^2.0.1"
+    "d3-force-3d": "^2.1.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.6.0",
+    "html-webpack-plugin": "^4.3.0",
+    "sass": "^1.26.9",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.2.1",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12"
   }
