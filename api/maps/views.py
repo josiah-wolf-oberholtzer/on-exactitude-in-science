@@ -45,7 +45,7 @@ def project_edge(traversal):
 
 def project_vertex(traversal):
     return (
-        traversal.project("vid", "label", "values")
+        traversal.project("id", "label", "values")
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
@@ -104,13 +104,13 @@ async def get_locality(request):
     edges = []
     vertices = {}
     root_vertex = cleanup_vertex(result[0], request.app["goblin"])
-    vertices[root_vertex["vid"]] = root_vertex
+    vertices[root_vertex["id"]] = root_vertex
     for entry in result[1:]:
         source = cleanup_vertex(entry["source"], request.app["goblin"])
         target = cleanup_vertex(entry["target"], request.app["goblin"])
-        vertices.update({source["vid"]: source, target["vid"]: target})
+        vertices.update({source["id"]: source, target["id"]: target})
         edge = cleanup_edge(entry["edge"])
-        edge.update(source_vid=source["vid"], target_vid=target["vid"])
+        edge.update(source=source["id"], target=target["id"])
         edges.append(edge)
     return aiohttp.web.json_response(
         {

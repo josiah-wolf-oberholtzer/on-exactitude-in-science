@@ -47,19 +47,19 @@ async def test_search(api_client, testdata):
     assert response.status == 200
     json = await response.json()
     for entry in json["result"]:
-        entry["vid"] = ...
+        entry["id"] = ...
     json["result"].sort(key=lambda x: (x["label"], x["eid"]))
     assert json == {
         "limit": 10,
         "query": "Mood Swing",
         "result": [
-            {"eid": 8, "label": "artist", "name": "Mood II Swing", "vid": ...,},
+            {"eid": 8, "label": "artist", "name": "Mood II Swing", "id": ...,},
             {
                 "eid": "3-3",
+                "id": ...,
                 "label": "track",
                 "name": "When The Funk Hits The Fan (Mood II Swing When The Dub Hits The Fan)",
                 "position": "3",
-                "vid": ...,
             },
         ],
     }
@@ -72,19 +72,19 @@ async def test_search_by_label(api_client, testdata):
     assert response.status == 200
     json = await response.json()
     for entry in json["result"]:
-        entry["vid"] = ...
+        entry["id"] = ...
     json["result"].sort(key=lambda x: x["eid"])
     assert json == {
         "limit": 10,
         "query": "Seasons",
         "result": [
-            {"eid": 3, "label": "company", "name": "Seasons Recordings", "vid": ...,},
-            {"eid": 66542, "label": "company", "name": "Seasons Limited", "vid": ...,},
+            {"eid": 3, "label": "company", "name": "Seasons Recordings", "id": ...,},
+            {"eid": 66542, "label": "company", "name": "Seasons Limited", "id": ...,},
             {
                 "eid": 297127,
+                "id": ...,
                 "label": "company",
                 "name": "Seasons Classics",
-                "vid": ...,
             },
         ],
     }
@@ -94,19 +94,19 @@ async def test_search_by_label(api_client, testdata):
 async def test_vertex_by_goblin_id(api_client, testdata):
     response = await api_client.get("/vertex/release/1")
     json = await response.json()
-    vid = json["result"]["vid"]
-    response = await api_client.get(f"/vertex/{vid}")
+    id = json["result"]["id"]
+    response = await api_client.get(f"/vertex/{id}")
     assert await response.json() == {
         "result": {
             "country": "Sweden",
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
+            "id": id,
             "is_main_release": True,
             "label": "release",
             "name": "Stockholm",
             "styles": ["Deep House"],
-            "vid": vid,
             "year": 1999,
         },
     }
@@ -117,18 +117,18 @@ async def test_vertex_by_label(api_client, testdata):
     response = await api_client.get("/vertex/release/1")
     assert response.status == 200
     json = await response.json()
-    json["result"]["vid"] = ...
+    json["result"]["id"] = ...
     assert json == {
         "result": {
             "country": "Sweden",
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
+            "id": ...,
             "is_main_release": True,
             "label": "release",
             "name": "Stockholm",
             "styles": ["Deep House"],
-            "vid": ...,
             "year": 1999,
         },
     }
