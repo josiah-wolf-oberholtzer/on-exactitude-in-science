@@ -4,6 +4,14 @@ import { JSDOM } from 'jsdom';
 
 d3.namespaces.custom = 'https://d3js.org/namespace/custom';
 
+function initSimulation() {
+  return d3force3d.forceSimulation()
+    .force('links', d3force3d.forceLink().id((d) => d.id))
+    .force('charge', d3force3d.forceManyBody())
+    .force('center', d3force3d.forceCenter())
+    .force('collide', d3force3d.forceCollide());
+}
+
 const sceneGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
@@ -11,7 +19,7 @@ const sceneGraph = () => {
     edgeNodes = [],
     dom = new JSDOM(),
     scene = d3.select(dom.window.document.body).append('custom:scene'),
-    simulation = d3force3d.forceSimulation();
+    simulation = initSimulation();
 
   function updateMaps(vertices, edges) {
     const newNodeMap = new Map(),
@@ -74,6 +82,8 @@ const sceneGraph = () => {
     updateMaps(vertices, edges);
     updateNodeArrays();
     updateDataJoins();
+    simulation.nodes(Array.from(nodeMap.values()));
+    simulation.force('links').links(Array.from(linkMap.values()));
   }
 
   return {
