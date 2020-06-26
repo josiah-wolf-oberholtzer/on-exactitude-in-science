@@ -4,22 +4,21 @@ import { JSDOM } from 'jsdom';
 
 d3.namespaces.custom = 'https://d3js.org/namespace/custom';
 
-function initSimulation() {
-  return d3force3d.forceSimulation()
-    .force('links', d3force3d.forceLink().id((d) => d.id))
-    .force('charge', d3force3d.forceManyBody())
-    .force('center', d3force3d.forceCenter())
-    .force('collide', d3force3d.forceCollide());
-}
-
 const sceneGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
     vertexNodes = [],
     edgeNodes = [],
     dom = new JSDOM(),
-    scene = d3.select(dom.window.document.body).append('custom:scene'),
-    simulation = initSimulation();
+    event = d3.dispatch('vertexEnter', 'vertexUpdate', 'vertexExit', 'edgeEnter', 'edgeUpdate', 'edgeExit'),
+    simulation = d3force3d.forceSimulation()
+      .numDimensions(3)
+      .force('links', d3force3d.forceLink().id((d) => d.id))
+      .force('charge', d3force3d.forceManyBody())
+      .force('center', d3force3d.forceCenter())
+      .force('collide', d3force3d.forceCollide());
+
+  d3.select(dom.window.document.body).append('custom:scene');
 
   function updateMaps(vertices, edges) {
     const newNodeMap = new Map(),
@@ -70,15 +69,36 @@ const sceneGraph = () => {
   }
 
   function updateDataJoins() {
-    const vertexSelection = scene.selectAll('vertex').data(vertexNodes, (d) => d.id),
-      edgeSelection = scene.selectAll('edge').data(edgeNodes, (d) => d.id);
-    vertexSelection.enter().append('custom:vertex').attr('id', (d) => d.id);
-    vertexSelection.exit().remove();
-    edgeSelection.enter().append('custom:edge').attr('id', (d) => d.id);
-    edgeSelection.exit().remove();
+    const shadowScene = d3.select(dom.window.document).selectAll('scene');
+    shadowScene.selectAll('vertex')
+      .data(vertexNodes, (d) => d.id)
+      .join(
+        (enter) => enter
+          .append('custom:vertex')
+          .attr('id', (d) => d.id)
+          .each((vertex) => event.call('vertexEnter', vertex)),
+        (update) => update
+          .each((vertex) => event.call('vertexUpdate', vertex)),
+        (exit) => exit
+          .each((vertex) => event.call('vertexExit', vertex))
+          .remove(),
+      );
+    shadowScene.selectAll('edge')
+      .data(edgeNodes, (d) => d.id)
+      .join(
+        (enter) => enter
+          .append('custom:edge')
+          .attr('id', (d) => d.id)
+          .each((edge) => event.call('edgeEnter', edge)),
+        (update) => update
+          .each((edge) => event.call('edgeUpdate', edge)),
+        (exit) => exit
+          .each((edge) => event.call('edgeExit', edge))
+          .remove(),
+      );
   }
 
-  function update(vertices, edges) {
+  function updateSceneGraph(vertices, edges) {
     updateMaps(vertices, edges);
     updateNodeArrays();
     updateDataJoins();
@@ -86,13 +106,20 @@ const sceneGraph = () => {
     simulation.force('links').links(Array.from(linkMap.values()));
   }
 
+  function step() {
+    if (simulation.alpha >= simulation.alphaMin) {
+      simulation.tick();
+    }
+  }
+
   return {
-    dom: () => dom,
     linkMap: () => linkMap,
     nodeMap: () => nodeMap,
-    scene: () => scene,
+    on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
+    shadowScene: () => dom.window.document.getElementsByTagName('scene')[0],
     simulation: () => simulation,
-    update,
+    step,
+    update: updateSceneGraph,
   };
 };
 

@@ -46,21 +46,19 @@ const { expect } = chai,
 
 describe('Scene Graph', () => {
   describe('Initially', () => {
-    const graph = sceneGraph(),
-      scene = graph.dom().window.document.getElementsByTagName('scene')[0];
+    const graph = sceneGraph();
     it('will have empty maps', () => {
       expect(graph.nodeMap().size).to.equal(0);
       expect(graph.linkMap().size).to.equal(0);
     });
     it('will have an empty scene', () => {
-      expect(pretty(scene.outerHTML)).to.equal(dedent(`
+      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene></scene>
       `));
     });
   });
   describe('After one update', () => {
-    const graph = sceneGraph(),
-      scene = graph.dom().window.document.getElementsByTagName('scene')[0];
+    const graph = sceneGraph();
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     it('will have three nodes in its node map', () => {
       const nodes = filterObjects(
@@ -101,7 +99,7 @@ describe('Scene Graph', () => {
       );
     });
     it('will have a scene with two vertices and one edge', () => {
-      expect(pretty(scene.outerHTML)).to.equal(dedent(`
+      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene>
           <vertex id="1"></vertex>
           <vertex id="2"></vertex>
@@ -111,8 +109,7 @@ describe('Scene Graph', () => {
     });
   });
   describe('After two updates', () => {
-    const graph = sceneGraph(),
-      scene = graph.dom().window.document.getElementsByTagName('scene')[0];
+    const graph = sceneGraph();
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
     it('will have one old node and one new node', () => {
@@ -151,7 +148,7 @@ describe('Scene Graph', () => {
       ]);
     });
     it('will have a scene with one old vertex, one new vertex, and one new edge', () => {
-      expect(pretty(scene.outerHTML)).to.equal(dedent(`
+      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene>
           <vertex id="2"></vertex>
           <vertex id="3"></vertex>
