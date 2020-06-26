@@ -1,7 +1,2 @@
-function component() {
-  const element = document.createElement('div');
-  element.innerHTML = 'Hello world!';
-  return element;
-}
-
-document.body.appendChild(component());
+export { default as data } from './data';
+export { default as sceneGraph } from './sceneGraph';

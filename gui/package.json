@@ -5,18 +5,23 @@
   "repository": "https://github.com/josiah-wolf-oberholtzer/on-exactitude-in-science",
   "license": "MIT",
   "scripts": {
+    "babel-node": "node_modules/@babel/node/bin/babel-node.js",
     "build": "webpack -d --config webpack.config.js",
     "build-production": "webpack -p --config webpack.config.js",
     "lint": "eslint --fix src/ test/",
-    "test": "mocha './test/**/*.spec.js' --require @babel/register",
+    "test": "mocha --require @babel/register './test/**/*.spec.js'",
     "watch": "webpack -d --watch --config webpack.config.js"
   },
   "dependencies": {
+    "d3": "^5.16.0",
     "d3-force-3d": "^2.1.0",
-    "react": "^16.13.1"
+    "jsdom": "^16.2.2",
+    "react": "^16.13.1",
+    "three": "^0.118.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
+    "@babel/node": "^7.10.3",
     "@babel/polyfill": "^7.10.1",
     "@babel/preset-env": "^7.10.3",
     "@babel/register": "^7.10.3",
@@ -24,8 +29,10 @@
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
     "babel-loader": "^8.1.0",
+    "babel-node": "^0.0.1-security",
     "chai": "^4.2.0",
     "css-loader": "^3.6.0",
+    "dedent": "^0.7.0",
     "eslint": "^7.3.1",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-plugin-import": "^2.21.2",
@@ -34,11 +41,24 @@
     "eslint-plugin-react-hooks": "^4.0.4",
     "html-webpack-plugin": "^4.3.0",
     "mocha": "^8.0.1",
+    "pretty": "^2.0.0",
     "sass": "^1.26.9",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",
     "ts-node": "^8.10.2",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12"
+  },
+  "mocha": {
+    "frameworks": [
+      "mocha",
+      "chai"
+    ],
+    "reporters": [
+      "mocha"
+    ],
+    "mochaReporter": {
+      "showDiff": true
+    }
   }
 }

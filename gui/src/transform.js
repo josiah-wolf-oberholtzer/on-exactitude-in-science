@@ -1,21 +1,23 @@
 const transform = (vertices, edges) => {
-  const nodeMap = new Map();
-  const linkMap = new Map();
+  const nodeMap = new Map(),
+    linkMap = new Map();
   vertices.forEach((vertex) => {
     nodeMap.set(vertex.id, vertex);
   });
   edges.forEach((edge) => {
-    nodeMap.set(edge.id, edge);
-    const sourceLink = {
-      id: `${edge.source}-${edge.id}`,
-      source: edge.source,
-      target: edge.id,
-    };
-    const targetLink = {
-      id: `${edge.id}-${edge.target}`,
-      source: edge.id,
-      target: edge.target,
-    };
+    const link = edge,
+      sourceLink = {
+        id: `${link.source}-${link.id}`,
+        source: link.source,
+        target: link.id,
+      },
+      targetLink = {
+        id: `${link.id}-${link.target}`,
+        source: link.id,
+        target: link.target,
+      };
+    link.intermediate = true;
+    nodeMap.set(link.id, link);
     linkMap.set(sourceLink.id, sourceLink);
     linkMap.set(targetLink.id, targetLink);
   });

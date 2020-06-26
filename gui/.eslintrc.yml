@@ -13,4 +13,9 @@ parserOptions:
   sourceType: module
 plugins:
   - react
-rules: {}
+rules:
+  one-var:
+  - 2
+  - var: always
+    let: always
+    const: always
