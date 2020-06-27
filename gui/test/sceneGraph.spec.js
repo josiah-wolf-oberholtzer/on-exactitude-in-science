@@ -47,19 +47,37 @@ const { expect } = chai,
 describe('Scene Graph', () => {
   describe('Initially', () => {
     const graph = sceneGraph();
+
     it('will have empty maps', () => {
       expect(graph.nodeMap().size).to.equal(0);
       expect(graph.linkMap().size).to.equal(0);
     });
+
     it('will have an empty scene', () => {
       expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene></scene>
       `));
     });
   });
+
   describe('After one update', () => {
-    const graph = sceneGraph();
+    const graph = sceneGraph(),
+      eventMap = new Map([
+        ['vertexEnter', []],
+        ['vertexUpdate', []],
+        ['vertexExit', []],
+        ['edgeEnter', []],
+        ['edgeUpdate', []],
+        ['edgeExit', []],
+      ]);
+    graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
+    graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
+    graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
+    graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
+    graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
+    graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
     graph.update([vertices[0], vertices[1]], [edges[0]]);
+
     it('will have three nodes in its node map', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
@@ -90,6 +108,7 @@ describe('Scene Graph', () => {
         },
       ]);
     });
+
     it('will have two links in its link map', () => {
       expect(Array.from(graph.linkMap().keys())).to.deep.equal(
         [
@@ -98,6 +117,7 @@ describe('Scene Graph', () => {
         ],
       );
     });
+
     it('will have a scene with two vertices and one edge', () => {
       expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene>
@@ -107,11 +127,38 @@ describe('Scene Graph', () => {
         </scene>
       `));
     });
+
+    it('will have dispatched mutation events', () => {
+      expect(Array.from(eventMap.entries())).to.deep.equal([
+        ['vertexEnter', [1, 2]],
+        ['vertexUpdate', []],
+        ['vertexExit', []],
+        ['edgeEnter', ['aaaaa-aaa-aaa-aaaaaa']],
+        ['edgeUpdate', []],
+        ['edgeExit', []],
+      ]);
+    });
   });
+
   describe('After two updates', () => {
-    const graph = sceneGraph();
+    const graph = sceneGraph(),
+      eventMap = new Map([
+        ['vertexEnter', []],
+        ['vertexUpdate', []],
+        ['vertexExit', []],
+        ['edgeEnter', []],
+        ['edgeUpdate', []],
+        ['edgeExit', []],
+      ]);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
+    graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
+    graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
+    graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
+    graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
+    graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
+    graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
     graph.update([vertices[1], vertices[2]], [edges[1]]);
+
     it('will have one old node and one new node', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
@@ -141,12 +188,14 @@ describe('Scene Graph', () => {
         },
       ]);
     });
+
     it('will have two new links', () => {
       expect(Array.from(graph.linkMap().keys())).to.deep.equal([
         '2-bbbbb-bbb-bbb-bbbbbb',
         'bbbbb-bbb-bbb-bbbbbb-3',
       ]);
     });
+
     it('will have a scene with one old vertex, one new vertex, and one new edge', () => {
       expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
         <scene>
@@ -155,6 +204,48 @@ describe('Scene Graph', () => {
           <edge id="bbbbb-bbb-bbb-bbbbbb"></edge>
         </scene>
       `));
+    });
+
+    it('will have dispatched mutation events', () => {
+      expect(Array.from(eventMap.entries())).to.deep.equal([
+        ['vertexEnter', [3]],
+        ['vertexUpdate', [2]],
+        ['vertexExit', [1]],
+        ['edgeEnter', ['bbbbb-bbb-bbb-bbbbbb']],
+        ['edgeUpdate', []],
+        ['edgeExit', ['aaaaa-aaa-aaa-aaaaaa']],
+      ]);
+    });
+  });
+
+  describe('After tick', () => {
+    const graph = sceneGraph(),
+      eventMap = new Map([
+        ['vertexEnter', []],
+        ['vertexUpdate', []],
+        ['vertexExit', []],
+        ['edgeEnter', []],
+        ['edgeUpdate', []],
+        ['edgeExit', []],
+      ]);
+    graph.update(vertices, edges);
+    graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
+    graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
+    graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
+    graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
+    graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
+    graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
+    graph.tick();
+
+    it('will have dispatched mutation events', () => {
+      expect(Array.from(eventMap.entries())).to.deep.equal([
+        ['vertexEnter', []],
+        ['vertexUpdate', [1, 2, 3]],
+        ['vertexExit', []],
+        ['edgeEnter', []],
+        ['edgeUpdate', ['aaaaa-aaa-aaa-aaaaaa', 'bbbbb-bbb-bbb-bbbbbb']],
+        ['edgeExit', []],
+      ]);
     });
   });
 });

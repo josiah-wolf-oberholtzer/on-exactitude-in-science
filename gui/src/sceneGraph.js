@@ -7,15 +7,15 @@ d3.namespaces.custom = 'https://d3js.org/namespace/custom';
 const sceneGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
-    vertexNodes = [],
-    edgeNodes = [],
     dom = new JSDOM(),
     event = d3.dispatch('vertexEnter', 'vertexUpdate', 'vertexExit', 'edgeEnter', 'edgeUpdate', 'edgeExit'),
     simulation = d3force3d.forceSimulation()
+      .stop()
+      .alpha(1)
       .numDimensions(3)
-      .force('links', d3force3d.forceLink().id((d) => d.id))
-      .force('charge', d3force3d.forceManyBody())
       .force('center', d3force3d.forceCenter())
+      .force('charge', d3force3d.forceManyBody())
+      .force('links', d3force3d.forceLink().id((d) => d.id))
       .force('collide', d3force3d.forceCollide());
 
   d3.select(dom.window.document.body).append('custom:scene');
@@ -56,9 +56,10 @@ const sceneGraph = () => {
     return { newNodeMap, newLinkMap };
   }
 
-  function updateNodeArrays() {
-    vertexNodes.length = 0;
-    edgeNodes.length = 0;
+  function updateDataJoins() {
+    const shadowScene = d3.select(dom.window.document).selectAll('scene'),
+      vertexNodes = [],
+      edgeNodes = [];
     nodeMap.forEach((node) => {
       if (node.type === 'vertex') {
         vertexNodes.push(node);
@@ -66,21 +67,17 @@ const sceneGraph = () => {
         edgeNodes.push(node);
       }
     });
-  }
-
-  function updateDataJoins() {
-    const shadowScene = d3.select(dom.window.document).selectAll('scene');
     shadowScene.selectAll('vertex')
       .data(vertexNodes, (d) => d.id)
       .join(
         (enter) => enter
           .append('custom:vertex')
           .attr('id', (d) => d.id)
-          .each((vertex) => event.call('vertexEnter', vertex)),
+          .each((vertex) => event.call('vertexEnter', vertex, vertex)),
         (update) => update
-          .each((vertex) => event.call('vertexUpdate', vertex)),
+          .each((vertex) => event.call('vertexUpdate', vertex, vertex)),
         (exit) => exit
-          .each((vertex) => event.call('vertexExit', vertex))
+          .each((vertex) => event.call('vertexExit', vertex, vertex))
           .remove(),
       );
     shadowScene.selectAll('edge')
@@ -89,26 +86,32 @@ const sceneGraph = () => {
         (enter) => enter
           .append('custom:edge')
           .attr('id', (d) => d.id)
-          .each((edge) => event.call('edgeEnter', edge)),
+          .each((edge) => event.call('edgeEnter', edge, edge)),
         (update) => update
-          .each((edge) => event.call('edgeUpdate', edge)),
+          .each((edge) => event.call('edgeUpdate', edge, edge)),
         (exit) => exit
-          .each((edge) => event.call('edgeExit', edge))
+          .each((edge) => event.call('edgeExit', edge, edge))
           .remove(),
       );
   }
 
-  function updateSceneGraph(vertices, edges) {
-    updateMaps(vertices, edges);
-    updateNodeArrays();
-    updateDataJoins();
+  function updateSimulation() {
     simulation.nodes(Array.from(nodeMap.values()));
     simulation.force('links').links(Array.from(linkMap.values()));
   }
 
-  function step() {
-    if (simulation.alpha >= simulation.alphaMin) {
+  function updateSceneGraph(vertices, edges) {
+    updateMaps(vertices, edges);
+    updateDataJoins();
+    updateSimulation();
+  }
+
+  function tick() {
+    if (simulation.alpha() >= simulation.alphaMin()) {
+      const shadowScene = d3.select(dom.window.document).selectAll('scene');
       simulation.tick();
+      shadowScene.selectAll('vertex').each((vertex) => event.call('vertexUpdate', vertex, vertex));
+      shadowScene.selectAll('edge').each((edge) => event.call('edgeUpdate', edge, edge));
     }
   }
 
@@ -118,7 +121,7 @@ const sceneGraph = () => {
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
     shadowScene: () => dom.window.document.getElementsByTagName('scene')[0],
     simulation: () => simulation,
-    step,
+    tick,
     update: updateSceneGraph,
   };
 };
