@@ -98,7 +98,14 @@ async def get_locality(request):
     else:
         traversal = session.g.V(vertex_id)
     traversal = traversal.union(
-        project_vertex(__.identity()), project_edge(__.bothE()),
+        project_vertex(__.identity()),
+        project_edge(
+            __.repeat(__.bothE().dedup().aggregate("x").otherV())
+            .times(3)
+            .cap("x")
+            .unfold()
+            .limit(333)
+        ),
     )
     result = await traversal.toList()
     edges = []

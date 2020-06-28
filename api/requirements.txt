@@ -1,4 +1,5 @@
 aiodns
+aiohttp-middlewares
 cchardet
 goblin==2.2.3
 gunicorn

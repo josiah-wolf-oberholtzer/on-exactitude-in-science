@@ -80,12 +80,7 @@ async def test_search_by_label(api_client, testdata):
         "result": [
             {"eid": 3, "label": "company", "name": "Seasons Recordings", "id": ...,},
             {"eid": 66542, "label": "company", "name": "Seasons Limited", "id": ...,},
-            {
-                "eid": 297127,
-                "id": ...,
-                "label": "company",
-                "name": "Seasons Classics",
-            },
+            {"eid": 297127, "id": ..., "label": "company", "name": "Seasons Classics",},
         ],
     }
 
