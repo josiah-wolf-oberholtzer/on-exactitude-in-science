@@ -1,7 +1,5 @@
 import chai from 'chai';
-import dedent from 'dedent';
-import pretty from 'pretty';
-import { sceneGraph } from '../src';
+import { sceneGraph } from '../src/sceneGraph';
 
 const { expect } = chai,
   vertices = [
@@ -51,12 +49,6 @@ describe('Scene Graph', () => {
     it('will have empty maps', () => {
       expect(graph.nodeMap().size).to.equal(0);
       expect(graph.linkMap().size).to.equal(0);
-    });
-
-    it('will have an empty scene', () => {
-      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
-        <scene></scene>
-      `));
     });
   });
 
@@ -116,16 +108,6 @@ describe('Scene Graph', () => {
           'aaaaa-aaa-aaa-aaaaaa-2',
         ],
       );
-    });
-
-    it('will have a scene with two vertices and one edge', () => {
-      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
-        <scene>
-          <vertex id="1"></vertex>
-          <vertex id="2"></vertex>
-          <edge id="aaaaa-aaa-aaa-aaaaaa"></edge>
-        </scene>
-      `));
     });
 
     it('will have dispatched mutation events', () => {
@@ -194,16 +176,6 @@ describe('Scene Graph', () => {
         '2-bbbbb-bbb-bbb-bbbbbb',
         'bbbbb-bbb-bbb-bbbbbb-3',
       ]);
-    });
-
-    it('will have a scene with one old vertex, one new vertex, and one new edge', () => {
-      expect(pretty(graph.shadowScene().outerHTML)).to.equal(dedent(`
-        <scene>
-          <vertex id="2"></vertex>
-          <vertex id="3"></vertex>
-          <edge id="bbbbb-bbb-bbb-bbbbbb"></edge>
-        </scene>
-      `));
     });
 
     it('will have dispatched mutation events', () => {

@@ -3,10 +3,11 @@ const path = require('path');
 
 module.exports = {
   entry: './src/index.js',
+  externals: ['child_process', 'fs', 'net', 'tls'],
   module: {
     rules: [
       {
-        test: /\.scss$/,
+        test: /\.s?css$/,
         use: ["style-loader", "css-loader", "sass-loader"]
       },
       {

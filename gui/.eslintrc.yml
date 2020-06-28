@@ -15,7 +15,12 @@ plugins:
   - react
 rules:
   one-var:
-  - 2
+  - error
   - var: always
     let: always
     const: always
+  import/no-named-default: 0
+  import/prefer-default-export: 0
+  no-param-reassign:
+  - error
+  - props: false
