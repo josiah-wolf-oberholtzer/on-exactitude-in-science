@@ -12,7 +12,10 @@ const canvas = document.getElementById('container'),
   s = sceneGraph();
 
 g.connect(s);
-s.update(data.result.vertices, data.result.edges);
 m.scene.add(g.object);
 m.on('render', () => s.tick());
 m.animate();
+
+fetch('http://localhost:9090/locality/artist/1', {mode: 'cors'})
+  .then(response => response.json())
+  .then(data => s.update(data.result.vertices, data.result.edges));

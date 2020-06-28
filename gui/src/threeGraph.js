@@ -9,7 +9,7 @@ const threeGraph = () => {
   let sceneGraph;
 
   function onVertexEnter(vertex) {
-    const material = new THREE.MeshStandardMaterial({ color: 0xee0808, flatShading: true }),
+    const material = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
       mesh = new THREE.Mesh(cubeGeometry, material),
       object = { vertex, mesh };
     object.mesh.position.x = vertex.x;

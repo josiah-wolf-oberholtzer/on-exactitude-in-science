@@ -9,11 +9,39 @@ const sceneGraph = () => {
       .stop()
       .alpha(1)
       .numDimensions(3)
-      .alphaDecay(0.01)
-      .velocityDecay(0.01)
-      .force('center', d3force3d.forceCenter())
-      .force('charge', d3force3d.forceManyBody())
-      .force('links', d3force3d.forceLink().id((d) => d.id));
+      .alphaDecay(0.005)
+      .velocityDecay(0.02)
+      .force('links', d3force3d.forceLink()
+        .id((d) => d.id)
+        .distance((d) => 50)
+        .iterations(2)
+      )
+      .force('charge', d3force3d.forceManyBody()
+        .distanceMax(1000)
+        .distanceMin(25)
+        .strength((d) => {
+            if (d.type === "edge") {
+                return 0;
+            } else {
+                return -60; 
+            }
+        })
+        .theta(0.75)
+      )
+      .force('collision', d3force3d.forceCollide()
+        .radius((d) => {
+            if (d.type === "edge") {
+                return 10;
+            }
+            const radius = (d.radius || 1) * 2;
+            if (d.selected) {
+                return radius + 100;
+            }
+            return radius;
+        })
+        .strength(0.25)
+      )
+      .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {
     const newNodeMap = new Map(),

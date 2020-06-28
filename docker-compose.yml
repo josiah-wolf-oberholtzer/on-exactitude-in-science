@@ -24,9 +24,9 @@ services:
     build:
       context: gui
     ports:
-    - 8080:8080
+    - 8080:80
     volumes:
-    - ./gui:/app
+    - ./gui/dist:/usr/share/nginx/html
   cassandra:
     image: cassandra:3.11.6
     ports:

@@ -12,15 +12,14 @@ const threeManager = (container) => {
     canvas = renderer.domElement,
     scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(
-      45, container.offsetWidth / container.offsetHeight, 1, 2000,
+      45, container.offsetWidth / container.offsetHeight, 1, 5000,
     ),
     renderPass = new RenderPass(scene, camera),
     fxaaPass = new ShaderPass(FXAAShader),
     controls = new OrbitControls(camera, canvas),
     event = dispatch('render'),
     hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444),
-    dirLight = new THREE.DirectionalLight(0xffffff, 0.8),
-    fog = new THREE.Fog(0xffffff, 1, 1000);
+    dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 
   function init() {
     fxaaPass.material.uniforms.resolution.value.x = 1 / (
@@ -30,6 +29,7 @@ const threeManager = (container) => {
     camera.position.z = 500;
     composer.addPass(fxaaPass);
     composer.addPass(renderPass);
+    controls.enableDamping = true;
     container.appendChild(canvas);
     dirLight.position.set(-3000, 1000, -1000);
     hemiLight.position.set(0, 1000, 0);
@@ -38,7 +38,7 @@ const threeManager = (container) => {
     scene.add(dirLight);
     scene.add(hemiLight);
     scene.background = new THREE.Color(0xffffff);
-    scene.fog = fog;
+    scene.fog = new THREE.FogExp2(0xffffff, 0.00075);
   }
 
   function render() {
@@ -49,6 +49,7 @@ const threeManager = (container) => {
   function animate() {
     requestAnimationFrame(animate);
     event.call('render', {}, {});
+    controls.update();
     render();
   }
 
