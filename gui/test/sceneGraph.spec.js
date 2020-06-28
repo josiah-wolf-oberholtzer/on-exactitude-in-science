@@ -73,7 +73,7 @@ describe('Scene Graph', () => {
     it('will have three nodes in its node map', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
-        ['eid', 'id', 'label', 'name', 'type', 'source', 'target', 'role'],
+        ['eid', 'id', 'label', 'name', 'type', 'role'],
       );
       expect(nodes).to.deep.equal([
         {
@@ -94,8 +94,6 @@ describe('Scene Graph', () => {
           id: 'aaaaa-aaa-aaa-aaaaaa',
           label: 'credited_with',
           role: 'Artwork By',
-          source: 1,
-          target: 2,
           type: 'edge',
         },
       ]);
@@ -144,7 +142,7 @@ describe('Scene Graph', () => {
     it('will have one old node and one new node', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
-        ['eid', 'id', 'label', 'name', 'type', 'source', 'target', 'role'],
+        ['eid', 'id', 'label', 'name', 'type', 'role'],
       );
       expect(nodes).to.deep.equal([
         {
@@ -164,8 +162,6 @@ describe('Scene Graph', () => {
         {
           id: 'bbbbb-bbb-bbb-bbbbbb',
           label: 'released_on',
-          source: 2,
-          target: 3,
           type: 'edge',
         },
       ]);

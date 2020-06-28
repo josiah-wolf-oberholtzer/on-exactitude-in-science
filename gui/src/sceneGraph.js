@@ -39,13 +39,16 @@ const sceneGraph = () => {
       newLinkMap.set(sourceLink.id, sourceLink);
       newLinkMap.set(targetLink.id, targetLink);
     });
+
     // links
     Array.from(linkMap.keys()).forEach((linkId) => {
       if (!newLinkMap.has(linkId)) linkMap.delete(linkId);
     });
+
     newLinkMap.forEach((newLink, linkId) => {
       linkMap.set(linkId, Object.assign(linkMap.get(linkId) || {}, newLink));
     });
+
     // calculate node exits
     Array.from(nodeMap.keys()).forEach((nodeId) => {
       if (!newNodeMap.has(nodeId)) {
@@ -53,23 +56,26 @@ const sceneGraph = () => {
         nodeMap.delete(nodeId);
       }
     });
+
     // calculate node updates and enters
     newNodeMap.forEach((newNode, nodeId) => {
       // TODO: disambiguate enters from exits
-      const node = nodeMap.get(nodeId);
-      if (node === undefined) {
-        nodeMap.set(nodeId, newNode);
-        enters.push(newNode);
+      if (nodeMap.has(nodeId)) {
+        const oldNode = nodeMap.get(nodeId);
+        Object.assign(oldNode, newNode);
+        updates.push(oldNode);
       } else {
-        Object.assign(node, newNode);
-        updates.push(node);
+        const enterNode = { ...newNode }; // don't modify incoming data
+        nodeMap.set(nodeId, enterNode);
+        enters.push(enterNode);
       }
     });
-    // keep track of enter/update/exit nodes by pushing to arrays
+
     // update the simulation
     simulation.nodes(Array.from(nodeMap.values()));
     simulation.force('links').links(Array.from(linkMap.values()));
-    // loop over previous created arrays, emit events via event.call(...)
+
+    // emit events
     enters.forEach((entity) => {
       if (entity.type === 'edge') {
         entity.source = nodeMap.get(entity.source);
