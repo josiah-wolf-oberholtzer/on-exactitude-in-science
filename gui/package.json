@@ -17,7 +17,8 @@
     "d3-force-3d": "^2.1.0",
     "normalize.css": "^8.0.1",
     "react": "^16.13.1",
-    "three": "^0.118.3"
+    "three": "^0.118.3",
+    "three-bmfont-text": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",

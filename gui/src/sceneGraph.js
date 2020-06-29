@@ -13,7 +13,7 @@ const sceneGraph = () => {
       .velocityDecay(0.02)
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => 33 + (d.index % 5) * 5)
+        .distance((d) => 33 + (d.index % 4) * 3)
         .iterations(3))
       .force('charge', d3force3d.forceManyBody()
         .distanceMax(1000)

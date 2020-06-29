@@ -1,7 +1,6 @@
 import 'normalize.css';
 import './index.css';
 
-import { data } from './data';
 import { sceneGraph } from './sceneGraph';
 import { threeGraph } from './threeGraph';
 import { threeManager } from './threeManager';

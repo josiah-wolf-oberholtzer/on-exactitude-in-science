@@ -5,7 +5,9 @@ const threeGraph = () => {
     cubeGeometry = new THREE.BoxGeometry(),
     cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
     ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
-    ringMaterial = new THREE.MeshBasicMaterial({ color: 0xeec808, flatShading: true, side: THREE.DoubleSide }),
+    ringMaterial = new THREE.MeshBasicMaterial({
+      color: 0xeec808, flatShading: true, side: THREE.DoubleSide,
+    }),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }),
     objects = new Map();
 

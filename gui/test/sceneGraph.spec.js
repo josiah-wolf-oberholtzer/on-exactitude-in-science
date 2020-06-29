@@ -70,7 +70,7 @@ describe('Scene Graph', () => {
     graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
     graph.update([vertices[0], vertices[1]], [edges[0]]);
 
-    it('will have three nodes in its node map', () => {
+    it('will have these nodes in its node map', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
         ['eid', 'id', 'label', 'name', 'type', 'role'],
@@ -84,11 +84,25 @@ describe('Scene Graph', () => {
           type: 'vertex',
         },
         {
+          eid: 111,
+          id: '1-rudder',
+          label: 'artist',
+          name: 'Foo',
+          type: 'rudder',
+        },
+        {
           eid: 222,
           id: 2,
           label: 'release',
           name: 'Bar',
           type: 'vertex',
+        },
+        {
+          eid: 222,
+          id: '2-rudder',
+          label: 'release',
+          name: 'Bar',
+          type: 'rudder',
         },
         {
           id: 'aaaaa-aaa-aaa-aaaaaa',
@@ -99,9 +113,11 @@ describe('Scene Graph', () => {
       ]);
     });
 
-    it('will have two links in its link map', () => {
+    it('will have these links in its link map', () => {
       expect(Array.from(graph.linkMap().keys())).to.deep.equal(
         [
+          '1-rudder',
+          '2-rudder',
           '1-aaaaa-aaa-aaa-aaaaaa',
           'aaaaa-aaa-aaa-aaaaaa-2',
         ],
@@ -139,7 +155,7 @@ describe('Scene Graph', () => {
     graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
     graph.update([vertices[1], vertices[2]], [edges[1]]);
 
-    it('will have one old node and one new node', () => {
+    it('will have these nodes', () => {
       const nodes = filterObjects(
         Array.from(graph.nodeMap().values()),
         ['eid', 'id', 'label', 'name', 'type', 'role'],
@@ -153,11 +169,25 @@ describe('Scene Graph', () => {
           type: 'vertex',
         },
         {
+          eid: 222,
+          id: '2-rudder',
+          label: 'release',
+          name: 'Bar',
+          type: 'rudder',
+        },
+        {
           eid: 333,
           id: 3,
           label: 'company',
           name: 'Baz',
           type: 'vertex',
+        },
+        {
+          eid: 333,
+          id: '3-rudder',
+          label: 'company',
+          name: 'Baz',
+          type: 'rudder',
         },
         {
           id: 'bbbbb-bbb-bbb-bbbbbb',
@@ -167,8 +197,10 @@ describe('Scene Graph', () => {
       ]);
     });
 
-    it('will have two new links', () => {
+    it('will have these links', () => {
       expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+        '2-rudder',
+        '3-rudder',
         '2-bbbbb-bbb-bbb-bbbbbb',
         'bbbbb-bbb-bbb-bbbbbb-3',
       ]);

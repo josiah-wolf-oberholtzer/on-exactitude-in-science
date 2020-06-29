@@ -73,6 +73,7 @@ const threeManager = (container) => {
 
   return {
     animate,
+    camera,
     canvas,
     controls,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
