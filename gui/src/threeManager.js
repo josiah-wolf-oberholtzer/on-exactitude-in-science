@@ -26,10 +26,11 @@ const threeManager = (container) => {
       container.offsetWidth * renderer.getPixelRatio());
     fxaaPass.material.uniforms.resolution.value.y = 1 / (
       container.offsetHeight * renderer.getPixelRatio());
-    camera.position.z = 500;
+    camera.position.z = 1000;
     composer.addPass(fxaaPass);
     composer.addPass(renderPass);
     controls.enableDamping = true;
+    controls.dampingFactory = 0.01;
     container.appendChild(canvas);
     dirLight.position.set(-3000, 1000, -1000);
     hemiLight.position.set(0, 1000, 0);
@@ -38,7 +39,7 @@ const threeManager = (container) => {
     scene.add(dirLight);
     scene.add(hemiLight);
     scene.background = new THREE.Color(0xffffff);
-    scene.fog = new THREE.FogExp2(0xffffff, 0.00075);
+    scene.fog = new THREE.FogExp2(0xffffff, 0.0005);
   }
 
   function render() {

@@ -13,34 +13,34 @@ const sceneGraph = () => {
       .velocityDecay(0.02)
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => 50)
-        .iterations(2)
-      )
+        .distance((d) => 33 + (d.index % 5) * 5)
+        .iterations(3))
       .force('charge', d3force3d.forceManyBody()
         .distanceMax(1000)
         .distanceMin(25)
         .strength((d) => {
-            if (d.type === "edge") {
-                return 0;
-            } else {
-                return -60; 
-            }
+          if (d.type === 'edge') {
+            return 0;
+          } if (d.type === 'rudder') {
+            return -60;
+          }
+          return -60;
         })
-        .theta(0.75)
-      )
+        .theta(0.75))
       .force('collision', d3force3d.forceCollide()
         .radius((d) => {
-            if (d.type === "edge") {
-                return 10;
-            }
-            const radius = (d.radius || 1) * 2;
-            if (d.selected) {
-                return radius + 100;
-            }
-            return radius;
+          if (d.type === 'edge') {
+            return 10;
+          } if (d.type === 'rudder') {
+            return 10;
+          }
+          const radius = (d.radius || 1) * 2;
+          if (d.selected) {
+            return radius + 100;
+          }
+          return radius;
         })
-        .strength(0.25)
-      )
+        .strength(0.25))
       .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {
@@ -50,7 +50,15 @@ const sceneGraph = () => {
       updates = [],
       exits = [];
     vertices.forEach((vertex) => {
+      const rudderId = `${vertex.id}-rudder`,
+        rudderNode = { ...vertex },
+        rudderLink = { id: rudderId, source: vertex.id, target: rudderId };
       newNodeMap.set(vertex.id, Object.assign(vertex, { type: 'vertex' }));
+      newNodeMap.set(
+        rudderId,
+        Object.assign(rudderNode, { id: rudderId, type: 'rudder' }),
+      );
+      newLinkMap.set(rudderId, rudderLink);
     });
     edges.forEach((edge) => {
       const sourceLink = {
@@ -108,17 +116,33 @@ const sceneGraph = () => {
       if (entity.type === 'edge') {
         entity.source = nodeMap.get(entity.source);
         entity.target = nodeMap.get(entity.target);
+      } else if (entity.type === 'vertex') {
+        entity.rudder = nodeMap.get(`${entity.id}-rudder`);
       }
-      event.call(`${entity.type}Enter`, entity, entity);
+      if (['edge', 'vertex'].includes(entity.type)) {
+        event.call(`${entity.type}Enter`, entity, entity);
+      }
     });
-    updates.forEach((entity) => event.call(`${entity.type}Update`, entity, entity));
-    exits.forEach((entity) => event.call(`${entity.type}Exit`, entity, entity));
+    updates.forEach((entity) => {
+      if (['edge', 'vertex'].includes(entity.type)) {
+        event.call(`${entity.type}Update`, entity, entity);
+      }
+    });
+    exits.forEach((entity) => {
+      if (['edge', 'vertex'].includes(entity.type)) {
+        event.call(`${entity.type}Exit`, entity, entity);
+      }
+    });
   }
 
   function tick() {
     if (simulation.alpha() >= simulation.alphaMin()) {
       simulation.tick();
-      nodeMap.forEach((entity) => event.call(`${entity.type}Update`, entity, entity));
+      nodeMap.forEach((entity) => {
+        if (['edge', 'vertex'].includes(entity.type)) {
+          event.call(`${entity.type}Update`, entity, entity);
+        }
+      });
     }
   }
 

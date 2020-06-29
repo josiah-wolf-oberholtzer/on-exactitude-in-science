@@ -3,30 +3,37 @@ import * as THREE from 'three';
 const threeGraph = () => {
   const graphObject = new THREE.Object3D(),
     cubeGeometry = new THREE.BoxGeometry(),
+    cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
+    ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
+    ringMaterial = new THREE.MeshBasicMaterial({ color: 0xeec808, flatShading: true, side: THREE.DoubleSide }),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }),
     objects = new Map();
 
   let sceneGraph;
 
   function onVertexEnter(vertex) {
-    const material = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
-      mesh = new THREE.Mesh(cubeGeometry, material),
-      object = { vertex, mesh };
-    object.mesh.position.x = vertex.x;
-    object.mesh.position.y = vertex.y;
-    object.mesh.position.z = vertex.z;
-    object.mesh.scale.x = 10;
-    object.mesh.scale.y = 10;
-    object.mesh.scale.z = 10;
+    const
+      cube = new THREE.Mesh(cubeGeometry, cubeMaterial),
+      ring = new THREE.Mesh(ringGeometry, ringMaterial),
+      object = { vertex, cube, ring };
+    cube.add(ring);
+    object.cube.position.x = vertex.x;
+    object.cube.position.y = vertex.y;
+    object.cube.position.z = vertex.z;
+    object.cube.scale.x = 10;
+    object.cube.scale.y = 10;
+    object.cube.scale.z = 10;
+    object.cube.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     objects.set(vertex.id, object);
-    graphObject.add(mesh);
+    graphObject.add(cube);
   }
 
   function onVertexUpdate(vertex) {
     const object = objects.get(vertex.id);
-    object.mesh.position.x = vertex.x;
-    object.mesh.position.y = vertex.y;
-    object.mesh.position.z = vertex.z;
+    object.cube.position.x = vertex.x;
+    object.cube.position.y = vertex.y;
+    object.cube.position.z = vertex.z;
+    object.cube.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
   }
 
   function onVertexExit() { }
