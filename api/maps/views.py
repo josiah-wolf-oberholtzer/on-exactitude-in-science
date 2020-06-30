@@ -104,7 +104,7 @@ async def get_locality(request):
             .times(3)
             .cap("x")
             .unfold()
-            .limit(333)
+            .limit(250)
         ),
     )
     result = await traversal.toList()

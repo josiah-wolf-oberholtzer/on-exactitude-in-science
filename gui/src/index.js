@@ -2,18 +2,16 @@ import 'normalize.css';
 import './index.css';
 
 import { ForceGraph } from './ForceGraph';
-import { threeGraph } from './threeGraph';
-import { threeManager } from './threeManager';
+import { ThreeGraph } from './ThreeGraph';
+import { ThreeManager } from './ThreeManager';
 
 const canvas = document.getElementById('container'),
-  m = threeManager(canvas),
-  g = threeGraph(),
-  forceGraph = ForceGraph();
+  forceGraph = ForceGraph(),
+  threeManager = ThreeManager(canvas),
+  threeGraph = ThreeGraph({ forceGraph, threeManager });
 
-g.connect(forceGraph);
-m.scene.add(g.object);
-m.on('render', () => forceGraph.tick());
-m.animate();
+threeManager.scene.add(threeGraph.object);
+threeManager.animate();
 
 fetch('http://localhost:9090/locality/artist/1', { mode: 'cors' })
   .then((response) => response.json())

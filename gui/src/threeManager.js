@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Interaction } from 'three.interaction';
 import { dispatch } from 'd3-dispatch';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -6,7 +7,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 
-const threeManager = (container) => {
+const ThreeManager = (container) => {
   const renderer = new THREE.WebGLRenderer(),
     composer = new EffectComposer(renderer),
     canvas = renderer.domElement,
@@ -14,6 +15,7 @@ const threeManager = (container) => {
     camera = new THREE.PerspectiveCamera(
       45, container.offsetWidth / container.offsetHeight, 1, 5000,
     ),
+    interaction = new Interaction(renderer, scene, camera),
     renderPass = new RenderPass(scene, camera),
     fxaaPass = new ShaderPass(FXAAShader),
     controls = new OrbitControls(camera, canvas),
@@ -66,7 +68,11 @@ const threeManager = (container) => {
     controls.update();
   }
 
-  window.addEventListener('resize', update, false);
+  function onWindowResize() {
+    update();
+  }
+
+  window.addEventListener('resize', onWindowResize, false);
 
   init();
   update();
@@ -81,4 +87,4 @@ const threeManager = (container) => {
   };
 };
 
-export { threeManager };
+export { ThreeManager };

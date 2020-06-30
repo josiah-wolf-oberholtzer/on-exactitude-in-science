@@ -1,41 +1,48 @@
 import * as THREE from 'three';
 
-const threeGraph = () => {
-  const graphObject = new THREE.Object3D(),
+const ThreeGraph = (opts) => {
+  const { forceGraph, threeManager } = opts,
+    graphObject = new THREE.Object3D(),
     cubeGeometry = new THREE.BoxGeometry(),
     cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
     ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
-    ringMaterial = new THREE.MeshBasicMaterial({
-      color: 0xeec808, flatShading: true, side: THREE.DoubleSide,
-    }),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }),
     objects = new Map();
 
-  let forceGraph;
-
   function onVertexEnter(vertex) {
-    const
-      cube = new THREE.Mesh(cubeGeometry, cubeMaterial),
-      ring = new THREE.Mesh(ringGeometry, ringMaterial),
-      object = { vertex, cube, ring };
-    cube.add(ring);
-    object.cube.position.x = vertex.x;
-    object.cube.position.y = vertex.y;
-    object.cube.position.z = vertex.z;
-    object.cube.scale.x = 10;
-    object.cube.scale.y = 10;
-    object.cube.scale.z = 10;
-    object.cube.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    const material = new THREE.MeshLambertMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+      parent = new THREE.Object3D(),
+      cube = new THREE.Mesh(cubeGeometry, material),
+      ring = new THREE.Mesh(ringGeometry, material),
+      object = { parent, vertex, cube, ring };
+    parent.add(cube);
+    parent.add(ring);
+    cube.on('mouseover', (ev) => { 
+      cube.currentHex = cube.material.color.getHex();
+      cube.material.color.setHex(0xff0000);
+      console.log("mouseover", event);
+    });
+    cube.on('mouseout', (ev) => {
+      cube.material.color.setHex(cube.currentHex);
+      console.log("mouseout", event)
+    });
+    object.parent.position.x = vertex.x;
+    object.parent.position.y = vertex.y;
+    object.parent.position.z = vertex.z;
+    object.parent.scale.x = 10;
+    object.parent.scale.y = 10;
+    object.parent.scale.z = 10;
+    object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     objects.set(vertex.id, object);
-    graphObject.add(cube);
+    graphObject.add(parent);
   }
 
   function onVertexUpdate(vertex) {
     const object = objects.get(vertex.id);
-    object.cube.position.x = vertex.x;
-    object.cube.position.y = vertex.y;
-    object.cube.position.z = vertex.z;
-    object.cube.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    object.parent.position.x = vertex.x;
+    object.parent.position.y = vertex.y;
+    object.parent.position.z = vertex.z;
+    object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
   }
 
   function onVertexExit() { }
@@ -64,22 +71,26 @@ const threeGraph = () => {
       points = curve.getPoints(50);
     object.geometry.setFromPoints(points);
   }
+
   function onEdgeExit() { }
 
-  function connect(graph) {
-    forceGraph = graph;
+  function init() {
     forceGraph.on('vertexEnter', onVertexEnter);
     forceGraph.on('vertexUpdate', onVertexUpdate);
     forceGraph.on('vertexExit', onVertexExit);
     forceGraph.on('edgeEnter', onEdgeEnter);
     forceGraph.on('edgeUpdate', onEdgeUpdate);
     forceGraph.on('edgeExit', onEdgeExit);
+    threeManager.scene.add(graphObject);
+    threeManager.on('render', () => forceGraph.tick());
   }
 
+  init();
+
   return {
-    connect,
     object: graphObject,
+    objects,
   };
 };
 
-export { threeGraph };
+export { ThreeGraph };
