@@ -11,7 +11,7 @@ const threeGraph = () => {
     lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }),
     objects = new Map();
 
-  let sceneGraph;
+  let forceGraph;
 
   function onVertexEnter(vertex) {
     const
@@ -67,13 +67,13 @@ const threeGraph = () => {
   function onEdgeExit() { }
 
   function connect(graph) {
-    sceneGraph = graph;
-    sceneGraph.on('vertexEnter', onVertexEnter);
-    sceneGraph.on('vertexUpdate', onVertexUpdate);
-    sceneGraph.on('vertexExit', onVertexExit);
-    sceneGraph.on('edgeEnter', onEdgeEnter);
-    sceneGraph.on('edgeUpdate', onEdgeUpdate);
-    sceneGraph.on('edgeExit', onEdgeExit);
+    forceGraph = graph;
+    forceGraph.on('vertexEnter', onVertexEnter);
+    forceGraph.on('vertexUpdate', onVertexUpdate);
+    forceGraph.on('vertexExit', onVertexExit);
+    forceGraph.on('edgeEnter', onEdgeEnter);
+    forceGraph.on('edgeUpdate', onEdgeUpdate);
+    forceGraph.on('edgeExit', onEdgeExit);
   }
 
   return {

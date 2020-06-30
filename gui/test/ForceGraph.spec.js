@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { sceneGraph } from '../src/sceneGraph';
+import { ForceGraph } from '../src/ForceGraph';
 
 const { expect } = chai,
   vertices = [
@@ -44,7 +44,7 @@ const { expect } = chai,
 
 describe('Scene Graph', () => {
   describe('Initially', () => {
-    const graph = sceneGraph();
+    const graph = ForceGraph();
 
     it('will have empty maps', () => {
       expect(graph.nodeMap().size).to.equal(0);
@@ -53,7 +53,7 @@ describe('Scene Graph', () => {
   });
 
   describe('After one update', () => {
-    const graph = sceneGraph(),
+    const graph = ForceGraph(),
       eventMap = new Map([
         ['vertexEnter', []],
         ['vertexUpdate', []],
@@ -137,7 +137,7 @@ describe('Scene Graph', () => {
   });
 
   describe('After two updates', () => {
-    const graph = sceneGraph(),
+    const graph = ForceGraph(),
       eventMap = new Map([
         ['vertexEnter', []],
         ['vertexUpdate', []],
@@ -219,7 +219,7 @@ describe('Scene Graph', () => {
   });
 
   describe('After tick', () => {
-    const graph = sceneGraph(),
+    const graph = ForceGraph(),
       eventMap = new Map([
         ['vertexEnter', []],
         ['vertexUpdate', []],

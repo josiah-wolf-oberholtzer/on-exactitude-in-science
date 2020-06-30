@@ -1,7 +1,7 @@
 import { dispatch } from 'd3-dispatch';
 import * as d3force3d from 'd3-force-3d';
 
-const sceneGraph = () => {
+const ForceGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
     event = dispatch('vertexEnter', 'vertexUpdate', 'vertexExit', 'edgeEnter', 'edgeUpdate', 'edgeExit'),
@@ -156,4 +156,4 @@ const sceneGraph = () => {
   };
 };
 
-export { sceneGraph };
+export { ForceGraph };
