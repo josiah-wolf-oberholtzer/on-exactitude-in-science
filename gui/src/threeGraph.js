@@ -1,31 +1,84 @@
 import * as THREE from 'three';
+import { DragControls } from './DragControls';
 
 const ThreeGraph = (opts) => {
   const { forceGraph, threeManager } = opts,
     graphObject = new THREE.Object3D(),
     cubeGeometry = new THREE.BoxGeometry(),
-    cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xeec808, flatShading: true }),
     ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
-    lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }),
+    lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
+    controls = new DragControls([], threeManager.camera, threeManager.canvas),
     objects = new Map();
 
+  controls.on('select', (ev) => {
+    console.log('select', ev);
+  });
+  controls.on('deselect', (ev) => {
+    console.log('deselect', ev);
+  });
+  controls.on('dragstart', (ev) => {
+    console.log('dragstart', ev);
+    threeManager.controls.enabled = false;
+  });
+  controls.on('drag', (ev) => {
+    console.log('drag', ev);
+    const { data } = ev.object.parent,
+      { vertex } = data,
+      { position } = ev;
+    vertex.fx = position.x;
+    vertex.fy = position.y;
+    vertex.fz = position.z;
+    forceGraph.reheat();
+  });
+  controls.on('dragend', (ev) => {
+    console.log('dragend', ev);
+    const { data } = ev.object.parent,
+      { vertex } = data,
+      { cube } = data,
+      { ring } = data;
+    vertex.fx = null;
+    vertex.fy = null;
+    vertex.fz = null;
+    cube.material.color.setHex(cube.material.oldColor);
+    ring.material.color.setHex(ring.material.oldColor);
+    threeManager.controls.enabled = true;
+  });
+  controls.on('mouseover', (ev) => {
+    console.log('mouseover', ev);
+    const { data } = ev.object.parent,
+      { cube } = data,
+      { ring } = data;
+    cube.material.oldColor = cube.material.color.getHex();
+    ring.material.oldColor = ring.material.color.getHex();
+    cube.material.color.setHex(0xff0000);
+    ring.material.color.setHex(0xff0000);
+  });
+  controls.on('mouseout', (ev) => {
+    console.log('mouseout', ev);
+    const { data } = ev.object.parent,
+      { cube } = data,
+      { ring } = data;
+    cube.material.color.setHex(cube.material.oldColor);
+    ring.material.color.setHex(ring.material.oldColor);
+  });
+
   function onVertexEnter(vertex) {
-    const material = new THREE.MeshLambertMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+    const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+      ringMaterial = new THREE.MeshPhongMaterial({ color: 0x08ccc8, side: THREE.DoubleSide }),
       parent = new THREE.Object3D(),
-      cube = new THREE.Mesh(cubeGeometry, material),
-      ring = new THREE.Mesh(ringGeometry, material),
-      object = { parent, vertex, cube, ring };
+      cube = new THREE.Mesh(cubeGeometry, cubeMaterial),
+      ring = new THREE.Mesh(ringGeometry, ringMaterial),
+      object = {
+        parent, vertex, cube, ring,
+      };
+    cube.receiveShadow = true;
+    cube.castShadow = true;
+    ring.receiveShadow = true;
+    ring.castShadow = true;
+    parent.data = object;
     parent.add(cube);
     parent.add(ring);
-    cube.on('mouseover', (ev) => { 
-      cube.currentHex = cube.material.color.getHex();
-      cube.material.color.setHex(0xff0000);
-      console.log("mouseover", event);
-    });
-    cube.on('mouseout', (ev) => {
-      cube.material.color.setHex(cube.currentHex);
-      console.log("mouseout", event)
-    });
+    controls.objects().push(cube);
     object.parent.position.x = vertex.x;
     object.parent.position.y = vertex.y;
     object.parent.position.z = vertex.z;

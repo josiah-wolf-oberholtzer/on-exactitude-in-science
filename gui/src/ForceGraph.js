@@ -9,7 +9,7 @@ const ForceGraph = () => {
       .stop()
       .alpha(1)
       .numDimensions(3)
-      .alphaDecay(0.005)
+      .alphaDecay(0.01)
       .velocityDecay(0.02)
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
@@ -20,11 +20,11 @@ const ForceGraph = () => {
         .distanceMin(25)
         .strength((d) => {
           if (d.type === 'edge') {
-            return 0;
+            return -30;
           } if (d.type === 'rudder') {
-            return -60;
+            return -30;
           }
-          return -60;
+          return -30;
         })
         .theta(0.75))
       .force('collision', d3force3d.forceCollide()
@@ -150,6 +150,7 @@ const ForceGraph = () => {
     linkMap: () => linkMap,
     nodeMap: () => nodeMap,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
+    reheat: () => simulation.alpha(1.0),
     simulation: () => simulation,
     tick,
     update,
