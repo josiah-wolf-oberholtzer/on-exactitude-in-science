@@ -1,12 +1,12 @@
 import React from "react";
 import { ForceGraph } from '../ForceGraph';
+import { SceneManager } from '../SceneManager';
 import { ThreeGraph } from '../ThreeGraph';
-import { ThreeManager } from '../ThreeManager';
 
 class Graph extends React.Component {
   componentDidMount() {
     const forceGraph = ForceGraph(),
-      threeManager = ThreeManager(this.mount),
+      threeManager = SceneManager(this.mount),
       threeGraph = ThreeGraph({ forceGraph, threeManager });
     threeManager.scene.add(threeGraph.object);
     threeManager.animate(true);

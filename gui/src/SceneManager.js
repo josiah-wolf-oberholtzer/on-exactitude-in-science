@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { dispatch } from 'd3-dispatch';
 
-const ThreeManager = (container) => {
+const SceneManager = (container) => {
   const renderer = new THREE.WebGLRenderer(),
     composer = new EffectComposer(renderer),
     canvas = renderer.domElement,
@@ -25,33 +23,37 @@ const ThreeManager = (container) => {
     hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444),
     pointLight = new THREE.PointLight(0xffffff, 1, 0, 2);
 
-  function init() {
-    initShaders();
-    camera.position.z = 1000;
-    controls.enableDamping = true;
-    controls.dampingFactory = 0.01;
-    container.appendChild(canvas);
-    pointLight.position.set(1, 1, 1);
-    pointLight.castShadow = true;
-    hemisphereLight.position.set(0, 1000, 0);
-    renderer.autoClear = false;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  function initShaders() {
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.0;
-    // scene.add(pointLight);
-    scene.add(hemisphereLight);
-    scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.FogExp2(0x000000, 0.000333);
-  }
-
-  function initShaders() {
     bloomPass.threshold = 0.0;
     bloomPass.strength = 1.0;
     bloomPass.radius = 0.0;
     composer.addPass(renderPass);
     composer.addPass(bloomPass);
+  }
+
+  function initShadows() {
+    pointLight.position.set(1, 1, 1);
+    pointLight.castShadow = true;
+    hemisphereLight.position.set(0, 1000, 0);
+    scene.add(pointLight);
+    scene.add(hemisphereLight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
+
+  function init() {
+    initShaders();
+    initShadows();
+    camera.position.z = 1000;
+    controls.enableDamping = true;
+    controls.dampingFactory = 0.01;
+    renderer.autoClear = false;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    scene.background = new THREE.Color(0x000000);
+    scene.fog = new THREE.FogExp2(0x000000, 0.000333);
+    container.appendChild(canvas);
   }
 
   function render() {
@@ -67,8 +69,6 @@ const ThreeManager = (container) => {
   }
 
   function update() {
-    const resX = 1 / (container.offsetWidth * renderer.getPixelRatio()),
-      resY = 1 / (container.offsetHeight * renderer.getPixelRatio());
     camera.aspect = container.offsetWidth / container.offsetHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(container.offsetWidth, container.offsetHeight);
@@ -87,7 +87,7 @@ const ThreeManager = (container) => {
 
   return {
     animate,
-    amera,
+    camera,
     canvas,
     controls,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
@@ -95,4 +95,4 @@ const ThreeManager = (container) => {
   };
 };
 
-export { ThreeManager };
+export { SceneManager };

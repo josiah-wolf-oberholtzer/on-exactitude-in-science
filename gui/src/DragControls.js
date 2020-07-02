@@ -11,10 +11,8 @@ const DragControls = (objects, _camera, canvas) => {
   const plane = new Plane(),
     raycaster = new Raycaster(),
     mouse = new Vector2(),
-    offset = new Vector3(),
     intersection = new Vector3(),
     worldPosition = new Vector3(),
-    inverseMatrix = new Matrix4(),
     intersections = [],
     dispatcher = dispatch(
       'drag', 'dragstart', 'dragend', 'mouseover', 'mouseout',
@@ -102,7 +100,7 @@ const DragControls = (objects, _camera, canvas) => {
     mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, _camera);
     if (dragged && enabled) {
-      raycaster.ray.intersectPlane(plane, intersection)
+      raycaster.ray.intersectPlane(plane, intersection);
       dispatcher.call('drag', null, { event, object: dragged, position: intersection });
     }
   }
@@ -141,7 +139,7 @@ const DragControls = (objects, _camera, canvas) => {
   function onDocumentTouchEnd(event) {
     event.preventDefault();
     if (dragged) {
-      dispatcher.call('dragend', null, dragged);
+      dispatcher.call('dragend', null, { event, object: dragged });
       dragged = null;
     }
     canvas.style.cursor = 'auto';
