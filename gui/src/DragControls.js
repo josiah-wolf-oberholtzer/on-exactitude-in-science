@@ -34,11 +34,7 @@ const DragControls = (objects, _camera, canvas) => {
     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, _camera);
     if (dragged && enabled) {
-      if (raycaster.ray.intersectPlane(plane, intersection)) {
-        // dragged.position.copy(intersection.sub(offset).applyMatrix4(inverseMatrix));
-      } else {
-        console.log('How?');
-      }
+      raycaster.ray.intersectPlane(plane, intersection);
       dispatcher.call('drag', null, { event, object: dragged, position: intersection });
       return;
     }
@@ -73,10 +69,7 @@ const DragControls = (objects, _camera, canvas) => {
     raycaster.intersectObjects(objects, true, intersections);
     if (intersections.length > 0) {
       dragged = (transformGroup === true) ? objects[0] : intersections[0].object;
-      if (raycaster.ray.intersectPlane(plane, intersection)) {
-        inverseMatrix.getInverse(dragged.parent.matrixWorld);
-        offset.copy(intersection).sub(worldPosition.setFromMatrixPosition(dragged.matrixWorld));
-      }
+      raycaster.ray.intersectPlane(plane, intersection);
       canvas.style.cursor = 'move';
       if (dragged !== selected) {
         if (selected) {
@@ -109,9 +102,7 @@ const DragControls = (objects, _camera, canvas) => {
     mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, _camera);
     if (dragged && enabled) {
-      if (raycaster.ray.intersectPlane(plane, intersection)) {
-        dragged.position.copy(intersection.sub(offset).applyMatrix4(inverseMatrix));
-      }
+      raycaster.ray.intersectPlane(plane, intersection)
       dispatcher.call('drag', null, { event, object: dragged, position: intersection });
     }
   }
@@ -131,10 +122,7 @@ const DragControls = (objects, _camera, canvas) => {
         _camera.getWorldDirection(plane.normal),
         worldPosition.setFromMatrixPosition(dragged.matrixWorld),
       );
-      if (raycaster.ray.intersectPlane(plane, intersection)) {
-        inverseMatrix.getInverse(dragged.parent.matrixWorld);
-        offset.copy(intersection).sub(worldPosition.setFromMatrixPosition(dragged.matrixWorld));
-      }
+      raycaster.ray.intersectPlane(plane, intersection);
       canvas.style.cursor = 'move';
       if (dragged !== selected) {
         if (selected) {

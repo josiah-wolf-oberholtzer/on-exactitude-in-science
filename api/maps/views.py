@@ -9,16 +9,16 @@ from maps.gremlin import textContainsFuzzy
 routes = aiohttp.web.RouteTableDef()
 
 
-def validate_limit(request):
-    limit = request.query.get("limit", 20)
+def validate_limit(request, default=20, minimum=1, maximum=100):
+    limit = request.query.get("limit", default)
     try:
         limit = int(limit)
     except Exception:
-        limit = 20
-    if limit <= 0:
-        limit = 20
-    if limit > 100:
-        limit = 100
+        limit = default
+    if limit < minimum:
+        limit = default
+    if limit > maximum:
+        limit = maximum
     return limit
 
 
@@ -88,6 +88,7 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
+    limit = validate_limit(request, default=250, minimum=50, maximum=500)
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
     if vertex_label != "track":
@@ -104,7 +105,7 @@ async def get_locality(request):
             .times(3)
             .cap("x")
             .unfold()
-            .limit(250)
+            .limit(limit)
         ),
     )
     result = await traversal.toList()

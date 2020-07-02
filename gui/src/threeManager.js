@@ -68,10 +68,10 @@ const ThreeManager = (container) => {
   }
 
   function animate() {
-    requestAnimationFrame(animate);
     event.call('render', {}, {});
     controls.update();
     render();
+    return requestAnimationFrame(animate);
   }
 
   function update() {
