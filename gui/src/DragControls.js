@@ -1,6 +1,5 @@
 import { dispatch } from 'd3-dispatch';
 import {
-  Matrix4,
   Plane,
   Raycaster,
   Vector2,

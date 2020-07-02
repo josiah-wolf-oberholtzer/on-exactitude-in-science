@@ -4,7 +4,9 @@ import { DragControls } from './DragControls';
 const ThreeGraph = (opts) => {
   const { forceGraph, threeManager } = opts,
     graphObject = new THREE.Object3D(),
+    geometry = new THREE.SphereGeometry(5, 32, 32),
     cubeGeometry = new THREE.BoxGeometry(),
+    tetrahedronGeometry = new THREE.TetrahedronGeometry(),
     ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
     controls = new DragControls([], threeManager.camera, threeManager.canvas),
