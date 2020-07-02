@@ -1,11 +1,6 @@
-#root {
+#graph {
     position: absolute;
     top: 0px;
     width: 100%;
     bottom: 0px;
-}
-
-.graph {
-    height: 100%;
-    width: 100%;
 }

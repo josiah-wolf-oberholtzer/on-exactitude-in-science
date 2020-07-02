@@ -1,11 +1,9 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
-// import { Interaction } from 'three.interaction';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { dispatch } from 'd3-dispatch';
 
@@ -19,12 +17,8 @@ const ThreeManager = (container) => {
     ),
     // interaction = new Interaction(renderer, scene, camera, { autoPreventDefault: true }),
     renderPass = new RenderPass(scene, camera),
-    fxaaPass = new ShaderPass(FXAAShader),
     bloomPass = new UnrealBloomPass(
       new THREE.Vector2(container.innerWidth, container.innerHeight), 1.5, 0.4, 0.85,
-    ),
-    outlinePass = new OutlinePass(
-      new THREE.Vector2(container.innerWidth, container.innerHeight), scene, camera,
     ),
     controls = new OrbitControls(camera, canvas),
     event = dispatch('render'),
@@ -32,18 +26,8 @@ const ThreeManager = (container) => {
     pointLight = new THREE.PointLight(0xffffff, 1, 0, 2);
 
   function init() {
-    fxaaPass.material.uniforms.resolution.value.x = 1 / (
-      container.offsetWidth * renderer.getPixelRatio());
-    fxaaPass.material.uniforms.resolution.value.y = 1 / (
-      container.offsetHeight * renderer.getPixelRatio());
-    bloomPass.threshold = 0.0;
-    bloomPass.strength = 1.0;
-    bloomPass.radius = 0.0;
+    initShaders();
     camera.position.z = 1000;
-    composer.addPass(renderPass);
-    composer.addPass(outlinePass);
-    composer.addPass(bloomPass);
-    composer.addPass(fxaaPass);
     controls.enableDamping = true;
     controls.dampingFactory = 0.01;
     container.appendChild(canvas);
@@ -60,6 +44,14 @@ const ThreeManager = (container) => {
     scene.add(hemisphereLight);
     scene.background = new THREE.Color(0x000000);
     scene.fog = new THREE.FogExp2(0x000000, 0.000333);
+  }
+
+  function initShaders() {
+    bloomPass.threshold = 0.0;
+    bloomPass.strength = 1.0;
+    bloomPass.radius = 0.0;
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
   }
 
   function render() {
@@ -81,9 +73,6 @@ const ThreeManager = (container) => {
     camera.updateProjectionMatrix();
     renderer.setSize(container.offsetWidth, container.offsetHeight);
     composer.setSize(container.offsetWidth, container.offsetHeight);
-    fxaaPass.material.uniforms.resolution.value.x = resX;
-    fxaaPass.material.uniforms.resolution.value.y = resY;
-    // renderer.shadowMap.needsUpdate = true;
     controls.update();
   }
 
@@ -98,11 +87,10 @@ const ThreeManager = (container) => {
 
   return {
     animate,
-    camera,
+    amera,
     canvas,
     controls,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
-    outlinePass,
     scene,
   };
 };

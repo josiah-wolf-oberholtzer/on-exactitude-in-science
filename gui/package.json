@@ -13,14 +13,14 @@
     "watch": "webpack -d --watch --config webpack.config.js"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "d3-dispatch": "^1.0.6",
     "d3-force-3d": "^2.1.0",
-    "normalize.css": "^8.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "three": "^0.118.3",
-    "three-bmfont-text": "^2.3.0",
-    "three.interaction": "^0.2.2"
+    "three-bmfont-text": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",

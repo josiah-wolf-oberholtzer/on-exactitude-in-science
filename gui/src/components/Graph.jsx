@@ -34,7 +34,7 @@ class Graph extends React.Component {
   }
 
   render() {
-    return <div className="graph" ref={ref => (this.mount = ref)} />
+    return <div id="graph" ref={ref => (this.mount = ref)} />
   }
 }
 
