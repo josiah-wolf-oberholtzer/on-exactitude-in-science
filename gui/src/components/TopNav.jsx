@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import { 
   AppBar,
   IconButton,
@@ -27,6 +28,12 @@ const TopNav = () => {
         <Typography variant="h6" className={classes.title}>
           On Exactitude In Science
         </Typography>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/artist/1">Artist</Link></li>
+          <li><Link to="/company/1">Company</Link></li>
+          <li><Link to="/404">404</Link></li>
+        </ul>
         <RandomButton />
         <SearchButton />
       </Toolbar>
@@ -34,4 +41,4 @@ const TopNav = () => {
   );
 }
 
-export { TopNav };
+export default TopNav;

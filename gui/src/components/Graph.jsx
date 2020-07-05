@@ -1,7 +1,7 @@
 import React from "react";
-import { ForceGraph } from '../ForceGraph';
-import { SceneManager } from '../SceneManager';
-import { ThreeGraph } from '../ThreeGraph';
+import { ForceGraph } from '../graphics/ForceGraph';
+import { SceneManager } from '../graphics/SceneManager';
+import { ThreeGraph } from '../graphics/ThreeGraph';
 
 class Graph extends React.Component {
   componentDidMount() {
@@ -10,7 +10,7 @@ class Graph extends React.Component {
       threeGraph = ThreeGraph({ forceGraph, threeManager });
     threeManager.scene.add(threeGraph.object);
     threeManager.animate(true);
-    fetch('http://localhost:9090/locality/artist/1', { mode: 'cors' })
+    fetch('http://localhost:9090/locality/artist/1?limit=50', { mode: 'cors' })
       .then((response) => response.json())
       .then((data) => forceGraph.update(data.result.vertices, data.result.edges));
     this.forceGraph = forceGraph;
@@ -38,4 +38,4 @@ class Graph extends React.Component {
   }
 }
 
-export { Graph };
+export default Graph;

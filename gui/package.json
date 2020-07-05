@@ -15,16 +15,23 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@reduxjs/toolkit": "^1.4.0",
+    "axios": "^0.19.2",
+    "connected-react-router": "^6.8.0",
     "d3-dispatch": "^1.0.6",
     "d3-force-3d": "^2.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0",
+    "react-router-dom": "^5.2.0",
+    "redux": "^4.0.5",
     "three": "^0.118.3",
     "three-bmfont-text": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",
     "@babel/node": "^7.10.3",
+    "@babel/plugin-transform-runtime": "^7.10.4",
     "@babel/polyfill": "^7.10.1",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-react": "^7.10.4",

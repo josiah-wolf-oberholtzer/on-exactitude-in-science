@@ -4,24 +4,35 @@ import { DragControls } from './DragControls';
 const ThreeGraph = (opts) => {
   const { forceGraph, threeManager } = opts,
     graphObject = new THREE.Object3D(),
-    geometry = new THREE.SphereGeometry(5, 32, 32),
-    cubeGeometry = new THREE.BoxGeometry(),
-    tetrahedronGeometry = new THREE.TetrahedronGeometry(),
-    ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
-    lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
     controls = new DragControls([], threeManager.camera, threeManager.canvas),
+    lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
+    cubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5),
+    cylinderGeometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 32),
+    sphereGeometry = new THREE.SphereGeometry(0.75, 32, 32),
+    tetrahedronGeometry = new THREE.TetrahedronGeometry(1.5),
+    ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
+    labelToGeo = {
+      artist: tetrahedronGeometry,
+      company: cubeGeometry,
+      master: sphereGeometry,
+      release: sphereGeometry,
+      track: cylinderGeometry,
+    },
     objects = new Map();
 
   controls.on('select', (ev) => {
     console.log('select', ev);
   });
+
   controls.on('deselect', (ev) => {
     console.log('deselect', ev);
   });
+
   controls.on('dragstart', (ev) => {
     console.log('dragstart', ev);
     threeManager.controls.enabled = false;
   });
+
   controls.on('drag', (ev) => {
     console.log('drag', ev);
     const { data } = ev.object.parent,
@@ -32,55 +43,59 @@ const ThreeGraph = (opts) => {
     vertex.fz = position.z;
     forceGraph.reheat();
   });
+
   controls.on('dragend', (ev) => {
     console.log('dragend', ev);
     const { data } = ev.object.parent,
       { vertex } = data,
-      { cube } = data,
+      { entity } = data,
       { ring } = data;
     vertex.fx = null;
     vertex.fy = null;
     vertex.fz = null;
-    cube.material.color.setHex(cube.material.oldColor);
+    entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
     threeManager.controls.enabled = true;
   });
+
   controls.on('mouseover', (ev) => {
     console.log('mouseover', ev);
     const { data } = ev.object.parent,
-      { cube } = data,
+      { entity } = data,
       { ring } = data;
-    cube.material.oldColor = cube.material.color.getHex();
+    entity.material.oldColor = entity.material.color.getHex();
     ring.material.oldColor = ring.material.color.getHex();
-    cube.material.color.setHex(0xff0000);
+    entity.material.color.setHex(0xff0000);
     ring.material.color.setHex(0xff0000);
   });
+
   controls.on('mouseout', (ev) => {
     console.log('mouseout', ev);
     const { data } = ev.object.parent,
-      { cube } = data,
+      { entity } = data,
       { ring } = data;
-    cube.material.color.setHex(cube.material.oldColor);
+    entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
   });
 
   function onVertexEnter(vertex) {
-    const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+    const entityMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
       ringMaterial = new THREE.MeshPhongMaterial({ color: 0x08ccc8, side: THREE.DoubleSide }),
       parent = new THREE.Object3D(),
-      cube = new THREE.Mesh(cubeGeometry, cubeMaterial),
+      entityGeometry = labelToGeo[vertex.label],
+      entity = new THREE.Mesh(entityGeometry, entityMaterial),
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
       object = {
-        parent, vertex, cube, ring,
+        parent, vertex, entity, ring,
       };
-    cube.receiveShadow = true;
-    cube.castShadow = true;
+    entity.receiveShadow = true;
+    entity.castShadow = true;
     ring.receiveShadow = true;
     ring.castShadow = true;
     parent.data = object;
-    parent.add(cube);
+    parent.add(entity);
     parent.add(ring);
-    controls.objects().push(cube);
+    controls.objects().push(entity);
     object.parent.position.x = vertex.x;
     object.parent.position.y = vertex.y;
     object.parent.position.z = vertex.z;
