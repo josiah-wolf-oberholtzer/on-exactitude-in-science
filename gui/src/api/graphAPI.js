@@ -13,3 +13,9 @@ export const fetchGraphByVertex = async (id, roles = []) => {
     response = await axios.get(url);
   return response;
 };
+
+export const fetchRandomVertex = async () => {
+  const url = `${urlBase}/random`,
+    response = await axios.get(url);
+  return response;
+};

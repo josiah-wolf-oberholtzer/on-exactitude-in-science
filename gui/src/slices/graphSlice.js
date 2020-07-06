@@ -1,25 +1,39 @@
+import { replace } from 'connected-react-router'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as graphAPI from '../api/graphAPI';
 
 export const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
   async (spec, { getState, rejectWithValue, requestId }) => {
-    console.log("PAYLOAD");
-    const { currentRequestId, loading } = getState().graph;
-    if (loading !== true || requestId !== currentRequestId) {
-      return;
-    }
     try {
       const response = await graphAPI.fetchGraphByEntity(spec.label, spec.id);
       return response.data.result;
     } catch (err) {
-      if (!error.response) {
+      if (!err.response) {
         throw err;
       }
-      return rejectWithValue(error.response.message);
+      return rejectWithValue(err.response.message);
     }
   },
 );
+
+export const fetchRandom = createAsyncThunk(
+  'graph/fetchRandom',
+  async (spec, { dispatch, getState, rejectWithValue, requestId }) => {
+    try {
+      const response = await graphAPI.fetchRandomVertex();
+      console.log("fetchRandom.payload", response);
+      const { label, eid } = response.data.result;
+      dispatch(replace(`/${label}/${eid}`));
+      return response.data.result;
+    } catch (err) {
+      if (!err.response) {
+        throw err;
+      }
+      return rejectWithValue(err.response.message);
+    }
+  },
+)
 
 const graphSlice = createSlice({
   name: 'graph',
@@ -27,37 +41,32 @@ const graphSlice = createSlice({
     edges: [],
     vertices: [],
     loading: false,
-    currentRequestId: undefined,
     error: null,
   },
   reducers: {},
   extraReducers: {
     [fetchByEntity.pending]: (state, action) => {
-      console.log("PENDING", state, action);
-      if (state.loading === 'idle') {
-        state.loading = true;
-        state.currentRequestId = action.meta.requestId;
-      }
+      state.loading = true;
     },
     [fetchByEntity.fulfilled]: (state, action) => {
-      console.log("FULFILLED", state, action);
-      const { requestId } = action.meta;
-      if (state.loading === true && state.currentRequestId === requestId) {
-        state.currentRequestId = undefined;
-        state.vertices = [action.payload.vertices];
-        state.edges = [action.payload.edges];
-        state.loading = false;
-      }
+      const { center, edges, vertices } = action.payload;
+      state.vertices = vertices;
+      state.edges = edges;
+      state.loading = false;
+      document.title = `${center.name} | On Exactitude In Science`
     },
     [fetchByEntity.rejected]: (state, action) => {
-      console.log("REJECTED", state, action);
-      const { requestId } = action.meta;
-      if (state.loading === 'pending' && state.currentRequestId === requestId) {
-        state.currentRequestId = undefined;
-        state.error = action.error;
-        state.loading = false;
-      }
+      state.error = action.error;
+      state.loading = false;
     },
+    [fetchRandom.pending]: (state, action) => {
+      state.loading = true;
+    },
+    [fetchRandom.fulfilled]: (state, action) => {},
+    [fetchRandom.rejected]: (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    }
   },
 });
 
