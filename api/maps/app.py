@@ -1,8 +1,10 @@
 import re
+import traceback
 
 import aiohttp.web
 from aiohttp_middlewares import cors_middleware
 
+from .cache import Cache
 from .goblin import GoblinManager
 from .views import routes
 
@@ -12,13 +14,15 @@ async def error_middleware(app, handler):
         try:
             return await handler(request)
         except aiohttp.web.HTTPException as exception:
+            traceback.print_exc()
             return aiohttp.web.json_response(
                 {"status": exception.status, "reason": exception.reason},
                 status=exception.status,
             )
         except Exception as exception:
+            traceback.print_exc()
             return aiohttp.web.json_response(
-                {"status": 400, "reason": "Bad Request", "extra": str(exception)},
+                {"status": 400, "reason": "Bad Request", "message": str(exception)},
                 status=400,
             )
 
@@ -29,14 +33,20 @@ def init_app(aliases=None):
     aliases = aliases or {"g": "g"}
     app = aiohttp.web.Application(
         middlewares=[
+            cors_middleware(allow_all=True, origins=["http://localhost:8080",]),
             error_middleware,
-            cors_middleware(origins=[re.compile(r"^https?\:\/\/localhost")]),
         ]
     )
     app.router.add_routes(routes)
     goblin_manager = GoblinManager(aliases=aliases)
-    app.on_startup.append(goblin_manager.setup_app)
-    app.on_cleanup.append(goblin_manager.teardown_app)
+    app.on_startup.extend([
+        goblin_manager.on_startup,
+        Cache.on_startup,
+    ])
+    app.on_cleanup.extend([
+        goblin_manager.on_cleanup,
+        Cache.on_cleanup,
+    ])
     return app
 
 

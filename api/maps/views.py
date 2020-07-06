@@ -93,6 +93,10 @@ async def get_locality(request):
     vertex_id = request.match_info.get("vertex_id")
     if vertex_label != "track":
         vertex_id = int(vertex_id)
+    cache = request.app["cache"]
+    cache_key = str(request.rel_url).encode()
+    if (cached := await cache.get(cache_key)) is not None:
+        return aiohttp.web.json_response(cached)
     session = await request.app["goblin"].session()
     if vertex_label:
         traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
@@ -120,14 +124,15 @@ async def get_locality(request):
         edge = cleanup_edge(entry["edge"])
         edge.update(source=source["id"], target=target["id"])
         edges.append(edge)
-    return aiohttp.web.json_response(
-        {
-            "result": {
-                "edges": edges,
-                "vertices": [vertex for _, vertex in sorted(vertices.items())],
-            }
+    data = {
+        "result": {
+            "center": root_vertex,
+            "edges": edges,
+            "vertices": [vertex for _, vertex in sorted(vertices.items())],
         }
-    )
+    }
+    await cache.set(cache_key, data)
+    return aiohttp.web.json_response(data)
 
 
 @routes.get("/random")

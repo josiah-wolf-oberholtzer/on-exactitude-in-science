@@ -15,6 +15,7 @@ services:
       GUNICORN_WORKER_CLASS: aiohttp.worker.GunicornUVLoopWebWorker
     depends_on:
     - janusgraph-healthcheck
+    - memcached
     ports:
     - 9090:9090
     volumes:
@@ -58,3 +59,7 @@ services:
     depends_on:
     - janusgraph
     image: curlimages/curl:latest
+  memcached:
+    image: memcached:latest
+    ports:
+    - 11211:11211

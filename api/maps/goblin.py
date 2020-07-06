@@ -50,11 +50,11 @@ class GoblinManager:
     async def teardown_goblin(self):
         await self.goblin_app.close()
 
-    async def setup_app(self, app):
+    async def on_startup(self, app):
         goblin_app = await self.setup_goblin()
         app["goblin"] = goblin_app
 
-    async def teardown_app(self, app):
+    async def on_cleanup(self, app):
         await self.teardown_goblin()
 
     def get_hashable_id(self, value):
@@ -72,8 +72,6 @@ async def get_session(aliases=None):
 
 async def install_schema(goblin_app, graph_name="graph"):
     definition = format_schema(goblin_app, graph_name=graph_name)
-    print("graph_name:", graph_name)
-    print("definition", definition)
     start_time = datetime.datetime.now()
     logger.info("Processing schema ...")
     client = await goblin_app.cluster.connect()

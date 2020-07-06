@@ -1,7 +1,9 @@
 aiodns
 aiohttp-middlewares
+aiomcache
 cchardet
 goblin==2.2.3
 gunicorn
+msgpack
 uqbar
 uvloop
