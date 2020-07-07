@@ -19,3 +19,9 @@ export const fetchRandomVertex = async () => {
     response = await axios.get(url);
   return response;
 };
+
+export const search = async (query) => {
+  const url = `${urlBase}/search`,
+    response = axios.get(url, {params: {q: query}});
+  return response;
+}

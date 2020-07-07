@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import { DragControls } from './DragControls';
 
 const ThreeGraph = (opts) => {
-  const { forceGraph, threeManager } = opts,
+  const { forceGraph, sceneManager } = opts,
     graphObject = new THREE.Object3D(),
-    controls = new DragControls([], threeManager.camera, threeManager.canvas),
+    controls = new DragControls([], sceneManager.camera, sceneManager.canvas),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
     cubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5),
     cylinderGeometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 32),
@@ -30,7 +30,7 @@ const ThreeGraph = (opts) => {
 
   controls.on('dragstart', (ev) => {
     console.log('dragstart', ev);
-    threeManager.controls.enabled = false;
+    sceneManager.controls.enabled = false;
   });
 
   controls.on('drag', (ev) => {
@@ -55,7 +55,7 @@ const ThreeGraph = (opts) => {
     vertex.fz = null;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
-    threeManager.controls.enabled = true;
+    sceneManager.controls.enabled = true;
   });
 
   controls.on('mouseover', (ev) => {
@@ -86,7 +86,7 @@ const ThreeGraph = (opts) => {
       entity = new THREE.Mesh(entityGeometry, entityMaterial),
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
       object = {
-        parent, vertex, entity, ring,
+        parent, vertex, entity, ring, entityMaterial, ringMaterial,
       };
     entity.receiveShadow = true;
     entity.castShadow = true;
@@ -99,9 +99,11 @@ const ThreeGraph = (opts) => {
     object.parent.position.x = vertex.x;
     object.parent.position.y = vertex.y;
     object.parent.position.z = vertex.z;
+    /*
     object.parent.scale.x = 10;
     object.parent.scale.y = 10;
     object.parent.scale.z = 10;
+    */
     object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     objects.set(vertex.id, object);
     graphObject.add(parent);
@@ -115,7 +117,10 @@ const ThreeGraph = (opts) => {
     object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
   }
 
-  function onVertexExit() { }
+  function onVertexExit(vertex) {
+    const object = objects.get(vertex.id);
+    graphObject.remove(object.parent);
+  }
 
   function onEdgeEnter(edge) {
     const curve = new THREE.QuadraticBezierCurve3(
@@ -142,7 +147,10 @@ const ThreeGraph = (opts) => {
     object.geometry.setFromPoints(points);
   }
 
-  function onEdgeExit() { }
+  function onEdgeExit(edge) {
+    const object = objects.get(edge.id);
+    graphObject.remove(object.line);
+  }
 
   function init() {
     forceGraph.on('vertexEnter', onVertexEnter);
@@ -151,8 +159,8 @@ const ThreeGraph = (opts) => {
     forceGraph.on('edgeEnter', onEdgeEnter);
     forceGraph.on('edgeUpdate', onEdgeUpdate);
     forceGraph.on('edgeExit', onEdgeExit);
-    threeManager.scene.add(graphObject);
-    threeManager.on('render', () => forceGraph.tick());
+    sceneManager.scene.add(graphObject);
+    sceneManager.on('render', () => forceGraph.tick());
   }
 
   init();

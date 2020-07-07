@@ -9,39 +9,40 @@ const ForceGraph = () => {
       .stop()
       .alpha(1)
       .numDimensions(3)
-      .alphaDecay(0.01)
-      .velocityDecay(0.02)
-      .force('links', d3force3d.forceLink()
-        .id((d) => d.id)
-        .distance((d) => 33 + (d.index % 4) * 3)
-        .iterations(3))
+      .alphaDecay(0.001)
+      .velocityDecay(0.4)
       .force('charge', d3force3d.forceManyBody()
-        .distanceMax(1000)
+        .distanceMax(250)
         .distanceMin(25)
         .strength((d) => {
           if (d.type === 'edge') {
-            return -30;
+            return 0;
           } if (d.type === 'rudder') {
-            return -30;
+            return -1;
           }
-          return -30;
+          return -2;
         })
-        .theta(0.75))
+        .theta(0.9))
+      .force('links', d3force3d.forceLink()
+        .id((d) => d.id)
+        .distance((d) => 5 + (d.index % 3) * 0.25)
+        .iterations(2))
       .force('collision', d3force3d.forceCollide()
         .radius((d) => {
           if (d.type === 'edge') {
-            return 10;
+            return 2;
           } if (d.type === 'rudder') {
-            return 10;
+            return 1;
           }
           const radius = (d.radius || 1) * 2;
           if (d.selected) {
-            return radius + 100;
+            return radius + 5;
           }
           return radius;
         })
-        .strength(0.25))
-      .force('centering', d3force3d.forceCenter());
+        .strength(0.5))
+      .force('centering', d3force3d.forceCenter())
+      ;
 
   function update(vertices, edges) {
     const newNodeMap = new Map(),
@@ -50,15 +51,10 @@ const ForceGraph = () => {
       updates = [],
       exits = [];
     vertices.forEach((vertex) => {
-      const rudderId = `${vertex.id}-rudder`,
-        rudderNode = { ...vertex },
-        rudderLink = { id: rudderId, source: vertex.id, target: rudderId };
-      newNodeMap.set(vertex.id, Object.assign(vertex, { type: 'vertex' }));
-      newNodeMap.set(
-        rudderId,
-        Object.assign(rudderNode, { id: rudderId, type: 'rudder' }),
-      );
-      newLinkMap.set(rudderId, rudderLink);
+      const rudderId = `${vertex.id}-rudder`;
+      newNodeMap.set(vertex.id, { ...vertex, type: 'vertex' });
+      newNodeMap.set(rudderId, { ...vertex, id: rudderId, type: 'rudder' });
+      newLinkMap.set(rudderId, { id: rudderId, source: vertex.id, target: rudderId });
     });
     edges.forEach((edge) => {
       const sourceLink = {
@@ -71,7 +67,7 @@ const ForceGraph = () => {
           source: edge.id,
           target: edge.target,
         };
-      newNodeMap.set(edge.id, Object.assign(edge, { type: 'edge' }));
+      newNodeMap.set(edge.id, { ...edge, type: 'edge' });
       newLinkMap.set(sourceLink.id, sourceLink);
       newLinkMap.set(targetLink.id, targetLink);
     });

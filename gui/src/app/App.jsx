@@ -2,7 +2,7 @@ import React from 'react';
 import { ConnectedRouter } from 'connected-react-router'
 import { Switch, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
-import { Fetcher, Graph, Loading, TopNav } from '../components';
+import { Fetcher, Graph, Loading, Nav } from '../components';
 import { theme } from './theme';
 import { history } from './store';
 import { useRouteMatch } from "react-router-dom";
@@ -18,7 +18,8 @@ const App = () => {
       </Switch>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <TopNav />
+        <Graph />
+        <Nav />
         <Loading />
       </ThemeProvider>
     </ConnectedRouter>

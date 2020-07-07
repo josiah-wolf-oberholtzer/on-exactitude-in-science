@@ -1,22 +1,46 @@
 import React from "react";
+import { connect } from 'react-redux';
 import { ForceGraph } from '../graphics/ForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
 import { ThreeGraph } from '../graphics/ThreeGraph';
+import { fetchByEntity } from '../slices/graphSlice';
+
+const mapStateToProps = state => {
+  return {
+    center: state.graph.center,
+    edges: state.graph.edges,
+    vertices: state.graph.vertices,
+  } 
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    fetchByEntity: (label, id) => dispatch(fetchByEntity({label, id})),
+  }
+}
 
 class Graph extends React.Component {
+
+  static defaultProps = {
+    center: null,
+    edges: [],
+    vertices: [],
+  }
+
   componentDidMount() {
-    const forceGraph = ForceGraph(),
-      threeManager = SceneManager(this.mount),
-      threeGraph = ThreeGraph({ forceGraph, threeManager });
-    threeManager.scene.add(threeGraph.object);
-    threeManager.animate(true);
-    fetch('http://localhost:9090/locality/artist/1?limit=50', { mode: 'cors' })
-      .then((response) => response.json())
-      .then((data) => forceGraph.update(data.result.vertices, data.result.edges));
-    this.forceGraph = forceGraph;
-    this.threeManager = threeManager;
-    this.threeGraph = threeGraph;
+    this.forceGraph = ForceGraph();
+    this.sceneManager = SceneManager(this.mount);
+    this.threeGraph = ThreeGraph({
+        forceGraph: this.forceGraph,
+        sceneManager: this.sceneManager,
+    });
+    this.sceneManager.scene.add(this.threeGraph.object);
+    this.forceGraph.update(this.props.vertices, this.props.edges);
     this.start();
+  }
+
+  componentDidUpdate() {
+    this.forceGraph.update(this.props.vertices, this.props.edges);
   }
 
   componentWillUnmount() {
@@ -25,7 +49,7 @@ class Graph extends React.Component {
 
   start() {
     if (!this.frameId) {
-      this.frameId = requestAnimationFrame(this.threeManager.animate);
+      this.frameId = requestAnimationFrame(this.sceneManager.animate);
     }
   }
 
@@ -36,6 +60,9 @@ class Graph extends React.Component {
   render() {
     return <div id="graph" ref={ref => (this.mount = ref)} />
   }
-}
+};
 
-export default Graph;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Graph);

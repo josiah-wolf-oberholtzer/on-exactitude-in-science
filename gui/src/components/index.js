@@ -1,6 +1,6 @@
 import Fetcher from './Fetcher';
 import Graph from './Graph';
 import Loading from './Loading';
-import TopNav from './TopNav';
+import Nav from './Nav';
 
-export { Fetcher, Graph, Loading, TopNav };
+export { Fetcher, Graph, Loading, Nav };

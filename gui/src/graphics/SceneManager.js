@@ -46,7 +46,7 @@ const SceneManager = (container) => {
   function init() {
     initShaders();
     initShadows();
-    camera.position.z = 1000;
+    camera.position.z = 200;
     controls.enableDamping = true;
     controls.dampingFactory = 0.01;
     renderer.autoClear = false;
