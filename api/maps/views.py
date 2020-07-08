@@ -45,10 +45,12 @@ def project_edge(traversal):
 
 def project_vertex(traversal):
     return (
-        traversal.project("id", "label", "values")
+        traversal.project("id", "label", "values", "edge_count", "child_count",)
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
+        .by(__.bothE().count())
+        .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
     )
 
 
@@ -88,7 +90,7 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
-    limit = validate_limit(request, default=500, minimum=50, maximum=1000)
+    limit = validate_limit(request, default=200, minimum=50, maximum=1000)
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
     if vertex_label != "track":

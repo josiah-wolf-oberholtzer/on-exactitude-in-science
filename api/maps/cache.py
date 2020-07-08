@@ -8,7 +8,6 @@ import msgpack
 
 
 class Cache:
-
     def __init__(
         self,
         host=os.environ.get("MEMCACHED_HOST", "memcached"),

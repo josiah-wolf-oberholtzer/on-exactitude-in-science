@@ -53,8 +53,17 @@ async def test_search(api_client, testdata):
         "limit": 10,
         "query": "Mood Swing",
         "result": [
-            {"eid": 8, "label": "artist", "name": "Mood II Swing", "id": ...,},
             {
+                "child_count": 0,
+                "edge_count": 9,
+                "eid": 8,
+                "id": ...,
+                "label": "artist",
+                "name": "Mood II Swing",
+            },
+            {
+                "child_count": 0,
+                "edge_count": 3,
                 "eid": "3-3",
                 "id": ...,
                 "label": "track",
@@ -78,9 +87,30 @@ async def test_search_by_label(api_client, testdata):
         "limit": 10,
         "query": "Seasons",
         "result": [
-            {"eid": 3, "label": "company", "name": "Seasons Recordings", "id": ...,},
-            {"eid": 66542, "label": "company", "name": "Seasons Limited", "id": ...,},
-            {"eid": 297127, "id": ..., "label": "company", "name": "Seasons Classics",},
+            {
+                "child_count": 0,
+                "edge_count": 0,
+                "eid": 3,
+                "id": ...,
+                "label": "company",
+                "name": "Seasons Recordings",
+            },
+            {
+                "child_count": 0,
+                "edge_count": 0,
+                "eid": 66542,
+                "id": ...,
+                "label": "company",
+                "name": "Seasons Limited",
+            },
+            {
+                "child_count": 0,
+                "edge_count": 0,
+                "eid": 297127,
+                "id": ...,
+                "label": "company",
+                "name": "Seasons Classics",
+            },
         ],
     }
 
@@ -93,7 +123,9 @@ async def test_vertex_by_goblin_id(api_client, testdata):
     response = await api_client.get(f"/vertex/{id}")
     assert await response.json() == {
         "result": {
+            "child_count": 0,
             "country": "Sweden",
+            "edge_count": 12,
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
@@ -115,7 +147,9 @@ async def test_vertex_by_label(api_client, testdata):
     json["result"]["id"] = ...
     assert json == {
         "result": {
+            "child_count": 0,
             "country": "Sweden",
+            "edge_count": 12,
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
