@@ -1,14 +1,15 @@
 DATASET_YEAR ?= 2020
-DATASET_MONTH ?= 05
+DATASET_MONTH ?= 06
 DATASET_DAY ?= 01
 DATASET_TIMESTAMP := ${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}
+LIMIT ?= 50000
 
 fetch-dataset:
 	mkdir -p data/
-	curl http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_artists.xml.gz > data/discogs_${DATASET_TIMESTAMP}_artists.xml.gz
-	curl http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_labels.xml.gz > data/discogs_${DATASET_TIMESTAMP}_labels.xml.gz
-	curl http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_masters.xml.gz > data/discogs_${DATASET_TIMESTAMP}_masters.xml.gz
-	curl http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_releases.xml.gz > data/discogs_${DATASET_TIMESTAMP}_releases.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_artists.xml.gz > data/discogs_${DATASET_TIMESTAMP}_artists.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_labels.xml.gz > data/discogs_${DATASET_TIMESTAMP}_labels.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_masters.xml.gz > data/discogs_${DATASET_TIMESTAMP}_masters.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_releases.xml.gz > data/discogs_${DATASET_TIMESTAMP}_releases.xml.gz
 
 reset-janusgraph:
 	docker-compose stop
@@ -19,7 +20,7 @@ wait-for-janusgraph:
 	docker-compose run --rm janusgraph-healthcheck
 
 load-data: wait-for-janusgraph
-	docker-compose run --rm api python3 -m maps data load --limit 10000 --workers 8
+	docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers 8
 
 load-schema: wait-for-janusgraph
 	docker-compose run --rm api python3 -m maps schema load

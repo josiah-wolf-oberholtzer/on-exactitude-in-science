@@ -13,6 +13,7 @@ services:
       GUNICORN_RELOAD: "true"
       GUNICORN_WORKERS: 4
       GUNICORN_WORKER_CLASS: aiohttp.worker.GunicornUVLoopWebWorker
+      GUNICORN_ENABLE_STDIO_INHERITANCE: "true"
     depends_on:
     - janusgraph-healthcheck
     - memcached

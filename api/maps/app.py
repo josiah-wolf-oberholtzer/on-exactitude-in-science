@@ -14,15 +14,17 @@ async def error_middleware(app, handler):
         try:
             return await handler(request)
         except aiohttp.web.HTTPException as exception:
-            traceback.print_exc()
             return aiohttp.web.json_response(
                 {"status": exception.status, "reason": exception.reason},
                 status=exception.status,
             )
         except Exception as exception:
-            traceback.print_exc()
             return aiohttp.web.json_response(
-                {"status": 400, "reason": "Bad Request", "message": str(exception)},
+                {
+                    "status": 400,
+                    "reason": "Bad Request",
+                    "message": traceback.format_exc(),
+                },
                 status=400,
             )
 

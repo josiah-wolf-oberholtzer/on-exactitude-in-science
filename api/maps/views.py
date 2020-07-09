@@ -22,6 +22,17 @@ def validate_limit(request, default=20, minimum=1, maximum=100):
     return limit
 
 
+def validate_offset(request):
+    offset = request.query.get("offset", 0)
+    try:
+        offset = int(offset)
+    except Exception:
+        offset = 0
+    if offset < 0:
+        offset = 0
+    return offset
+
+
 def validate_vertex_label(request):
     vertex_label = request.match_info.get("vertex_label")
     if vertex_label and vertex_label not in request.app["goblin"].vertices:
@@ -90,15 +101,18 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
-    limit = validate_limit(request, default=200, minimum=50, maximum=1000)
+    limit = validate_limit(request, default=250, minimum=50, maximum=1000)
+    offset = validate_offset(request)
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
     if vertex_label != "track":
         vertex_id = int(vertex_id)
-    cache = request.app["cache"]
-    cache_key = str(request.rel_url).encode()
-    if (cached := await cache.get(cache_key)) is not None:
-        return aiohttp.web.json_response(cached)
+
+    # cache = request.app["cache"]
+    # cache_key = str(request.rel_url).encode()
+    # if (cached := await cache.get(cache_key)) is not None:
+    #    return aiohttp.web.json_response(cached)
+
     session = await request.app["goblin"].session()
     if vertex_label:
         traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
@@ -107,33 +121,66 @@ async def get_locality(request):
     traversal = traversal.union(
         project_vertex(__.identity()),
         project_edge(
-            __.repeat(__.bothE().dedup().aggregate("x").otherV())
-            .times(3)
-            .cap("x")
+            __.repeat(
+                __.choose(
+                    __.loops().is_(P.eq(0)),
+                    __.bothE().range(offset, offset + 50),
+                    __.local(__.bothE().sample(10)),
+                )
+                .dedup()
+                .aggregate("edges")
+                .otherV()
+                .where(__.bothE().count().is_(P.lt(100)))
+                .aggregate("vertices")
+            )
+            .until(__.cap("vertices").unfold().count().is_(P.gt(limit)))
+            .cap("edges")
             .unfold()
             .limit(limit)
         ),
     )
     result = await traversal.toList()
-    edges = []
+
+    edges = {}
     vertices = {}
     root_vertex = cleanup_vertex(result[0], request.app["goblin"])
     vertices[root_vertex["id"]] = root_vertex
-    for entry in result[1:]:
-        source = cleanup_vertex(entry["source"], request.app["goblin"])
-        target = cleanup_vertex(entry["target"], request.app["goblin"])
-        vertices.update({source["id"]: source, target["id"]: target})
-        edge = cleanup_edge(entry["edge"])
+    for i, entry in enumerate(result[1:]):
+        source, edge, target = entry["source"], entry["edge"], entry["target"]
+        if source["id"] not in vertices:
+            vertices[source["id"]] = cleanup_vertex(source, request.app["goblin"])
+        if target["id"] not in vertices:
+            vertices[target["id"]] = cleanup_vertex(target, request.app["goblin"])
+        edge = cleanup_edge(edge)
         edge.update(source=source["id"], target=target["id"])
-        edges.append(edge)
+        edges[edge["id"]] = edge
+
+    traversal = (
+        session.g.V()
+        .hasId(*sorted(vertices))
+        .bothE()
+        .where(__.otherV().hasId(*sorted(vertices)))
+        .dedup()
+        .project("id", "label", "values", "source", "target")
+        .by(__.id())
+        .by(__.label())
+        .by(__.valueMap())
+        .by(__.outV().id())
+        .by(__.inV().id())
+    )
+    result = await traversal.toList()
+    for edge in result:
+        edge = cleanup_edge(edge)
+        edges[edge["id"]] = edge
+
     data = {
         "result": {
             "center": root_vertex,
-            "edges": edges,
+            "edges": [edge for _, edge in sorted(edges.items())],
             "vertices": [vertex for _, vertex in sorted(vertices.items())],
         }
     }
-    await cache.set(cache_key, data)
+    # await cache.set(cache_key, data)
     return aiohttp.web.json_response(data)
 
 
