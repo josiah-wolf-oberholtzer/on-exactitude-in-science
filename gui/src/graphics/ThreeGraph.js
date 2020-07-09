@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
 
 const ThreeGraph = (opts) => {
@@ -18,19 +19,42 @@ const ThreeGraph = (opts) => {
       release: sphereGeometry,
       track: cylinderGeometry,
     },
-    objects = new Map();
+    objects = new Map(),
+    dispatcher = dispatch('doubleclick');
+
+  let previousClickObject = null,
+    previousClickTime = Date.now();
 
   controls.on('select', (ev) => {
     console.log('select', ev);
+    const { data } = ev.object.parent,
+      { ring } = data;
+    ring.material.oldColor = 0xff9933;
   });
 
   controls.on('deselect', (ev) => {
     console.log('deselect', ev);
+    const { data } = ev.object.parent,
+      { ring, vertex } = data;
+    ring.material.color.setHex(0x08ccc8);
+    vertex.fx = null;
+    vertex.fy = null;
+    vertex.fz = null;
   });
 
   controls.on('dragstart', (ev) => {
     console.log('dragstart', ev);
     sceneManager.controls.enabled = false;
+    const { data } = ev.object.parent,
+      { vertex } = data,
+      currentClickObject = data,
+      currentClickTime = Date.now();
+    if (currentClickObject === previousClickObject && (currentClickTime - previousClickTime) < 250) {
+      console.log('doubleclick');
+      dispatcher.call('doubleclick', vertex, vertex);
+    }
+    previousClickObject = currentClickObject;
+    previousClickTime = currentClickTime;
   });
 
   controls.on('drag', (ev) => {
@@ -50,9 +74,6 @@ const ThreeGraph = (opts) => {
       { vertex } = data,
       { entity } = data,
       { ring } = data;
-    vertex.fx = null;
-    vertex.fy = null;
-    vertex.fz = null;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
     sceneManager.controls.enabled = true;
@@ -96,6 +117,8 @@ const ThreeGraph = (opts) => {
     parent.add(entity);
     parent.add(ring);
     controls.objects().push(entity);
+    console.log(vertex);
+    object.parent.scale.setScalar(vertex.radius);
     object.parent.position.x = vertex.x;
     object.parent.position.y = vertex.y;
     object.parent.position.z = vertex.z;
@@ -168,6 +191,7 @@ const ThreeGraph = (opts) => {
   return {
     object: graphObject,
     objects,
+    on(name, _) { return arguments.length > 1 ? dispatcher.on(name, _) : dispatcher.on(name); },
   };
 };
 

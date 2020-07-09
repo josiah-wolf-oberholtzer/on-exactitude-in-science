@@ -1,4 +1,4 @@
-import { replace } from 'connected-react-router'
+import { replace } from 'connected-react-router';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import * as graphAPI from '../api/graphAPI';
 
@@ -19,10 +19,12 @@ export const fetchByEntity = createAsyncThunk(
 
 export const fetchRandom = createAsyncThunk(
   'graph/fetchRandom',
-  async (spec, { dispatch, getState, rejectWithValue, requestId }) => {
+  async (spec, {
+    dispatch, getState, rejectWithValue, requestId,
+  }) => {
     try {
       const response = await graphAPI.fetchRandomVertex();
-      console.log("fetchRandom.payload", response);
+      console.log('fetchRandom.payload', response);
       const { label, eid } = response.data.result;
       dispatch(replace(`/${label}/${eid}`));
       return response.data.result;
@@ -33,7 +35,7 @@ export const fetchRandom = createAsyncThunk(
       return rejectWithValue(err.response.message);
     }
   },
-)
+);
 
 const graphSlice = createSlice({
   name: 'graph',
@@ -53,7 +55,7 @@ const graphSlice = createSlice({
       state.vertices = vertices;
       state.edges = edges;
       state.loading = false;
-      document.title = `${center.name} | On Exactitude In Science`
+      document.title = `${center.name} | On Exactitude In Science`;
     },
     [fetchByEntity.rejected]: (state, action) => {
       state.error = action.error;
@@ -66,7 +68,7 @@ const graphSlice = createSlice({
     [fetchRandom.rejected]: (state, action) => {
       state.error = action.error;
       state.loading = false;
-    }
+    },
   },
 });
 

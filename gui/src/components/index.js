@@ -3,4 +3,6 @@ import Graph from './Graph';
 import Loading from './Loading';
 import Nav from './Nav';
 
-export { Fetcher, Graph, Loading, Nav };
+export {
+  Fetcher, Graph, Loading, Nav,
+};

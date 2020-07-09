@@ -4,7 +4,14 @@ import * as d3force3d from 'd3-force-3d';
 const ForceGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
-    event = dispatch('vertexEnter', 'vertexUpdate', 'vertexExit', 'edgeEnter', 'edgeUpdate', 'edgeExit'),
+    dispatcher = dispatch(
+      'vertexEnter',
+      'vertexUpdate',
+      'vertexExit',
+      'edgeEnter',
+      'edgeUpdate',
+      'edgeExit',
+    ),
     simulation = d3force3d.forceSimulation()
       .stop()
       .alpha(1)
@@ -13,7 +20,7 @@ const ForceGraph = () => {
       .velocityDecay(0.4)
       .force('charge', d3force3d.forceManyBody()
         .distanceMax(250)
-        .distanceMin(25)
+        .distanceMin(5)
         .strength((d) => {
           if (d.type === 'edge') {
             return 0;
@@ -22,10 +29,10 @@ const ForceGraph = () => {
           }
           return -2;
         })
-        .theta(0.9))
+        .theta(0.5))
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => 5 + (d.index % 3) * 0.25)
+        .distance((d) => 5 + (d.index % 100) / 100)
         .iterations(2))
       .force('collision', d3force3d.forceCollide()
         .radius((d) => {
@@ -40,10 +47,11 @@ const ForceGraph = () => {
           }
           return radius;
         })
-        .strength(0.5))
-      .force('centering', d3force3d.forceCenter())
-      ;
-
+        .strength(1))
+      .force('x', d3force3d.forceX().strength(0.005))
+      .force('y', d3force3d.forceY().strength(0.005))
+      .force('z', d3force3d.forceZ().strength(0.005))
+      .force('centering', d3force3d.forceCenter());
   function update(vertices, edges) {
     const newNodeMap = new Map(),
       newLinkMap = new Map(),
@@ -51,8 +59,13 @@ const ForceGraph = () => {
       updates = [],
       exits = [];
     vertices.forEach((vertex) => {
-      const rudderId = `${vertex.id}-rudder`;
-      newNodeMap.set(vertex.id, { ...vertex, type: 'vertex' });
+      const rudderId = `${vertex.id}-rudder`,
+        childCount = vertex.child_count;
+      newNodeMap.set(vertex.id, {
+        ...vertex,
+        radius: Math.sqrt(vertex.child_count + 1),
+        type: 'vertex',
+      });
       newNodeMap.set(rudderId, { ...vertex, id: rudderId, type: 'rudder' });
       newLinkMap.set(rudderId, { id: rudderId, source: vertex.id, target: rudderId });
     });
@@ -94,7 +107,9 @@ const ForceGraph = () => {
       // TODO: disambiguate enters from exits
       if (nodeMap.has(nodeId)) {
         const oldNode = nodeMap.get(nodeId);
-        Object.assign(oldNode, newNode);
+        if (oldNode.type !== 'edge') {
+          Object.assign(oldNode, newNode);
+        }
         updates.push(oldNode);
       } else {
         const enterNode = { ...newNode }; // don't modify incoming data
@@ -116,19 +131,37 @@ const ForceGraph = () => {
         entity.rudder = nodeMap.get(`${entity.id}-rudder`);
       }
       if (['edge', 'vertex'].includes(entity.type)) {
-        event.call(`${entity.type}Enter`, entity, entity);
+        dispatcher.call(`${entity.type}Enter`, entity, entity);
       }
     });
     updates.forEach((entity) => {
       if (['edge', 'vertex'].includes(entity.type)) {
-        event.call(`${entity.type}Update`, entity, entity);
+        dispatcher.call(`${entity.type}Update`, entity, entity);
       }
     });
     exits.forEach((entity) => {
       if (['edge', 'vertex'].includes(entity.type)) {
-        event.call(`${entity.type}Exit`, entity, entity);
+        dispatcher.call(`${entity.type}Exit`, entity, entity);
       }
     });
+  }
+
+  function pin(nodeID, x, y, z) {
+    const node = nodeMap.get(nodeID);
+    if (node) {
+      node.fx = x;
+      node.fy = y;
+      node.fz = z;
+    }
+  }
+
+  function unpin(nodeID) {
+    const node = nodeMap.get(nodeID);
+    if (node) {
+      node.fx = null;
+      node.fy = null;
+      node.fz = null;
+    }
   }
 
   function tick() {
@@ -136,7 +169,7 @@ const ForceGraph = () => {
       simulation.tick();
       nodeMap.forEach((entity) => {
         if (['edge', 'vertex'].includes(entity.type)) {
-          event.call(`${entity.type}Update`, entity, entity);
+          dispatcher.call(`${entity.type}Update`, entity, entity);
         }
       });
     }
@@ -145,11 +178,13 @@ const ForceGraph = () => {
   return {
     linkMap: () => linkMap,
     nodeMap: () => nodeMap,
-    on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
+    on(name, _) { return arguments.length > 1 ? dispatcher.on(name, _) : dispatcher.on(name); },
     reheat: () => simulation.alpha(1.0),
     simulation: () => simulation,
     tick,
     update,
+    pin,
+    unpin,
   };
 };
 

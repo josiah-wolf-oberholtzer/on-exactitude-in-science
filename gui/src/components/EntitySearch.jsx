@@ -21,9 +21,11 @@ const EntitySearch = (props) => {
   const fetch = throttle(() => {
     graphAPI.search(inputValue).then((response) => {
       let newOptions = [];
+      /*
       if (value) {
         newOptions = [value];
       }
+      */
       if (response.data.result) {
         newOptions = [...newOptions, ...response.data.result];
       }
@@ -35,21 +37,26 @@ const EntitySearch = (props) => {
 
   return (
     <Autocomplete
+      blurOnSelect
       clearOnBlur
       clearOnEscape
-      filterOptions={(x) => x}
+      selectOnFocus
       filterSelectedOptions
+      filterOptions={(x) => x}
       getOptionLabel={(option) => option.name}
       getOptionSelected={(option, value) => option.id === value.id}
+      noOptionsText='Start searching... e.g. "bjork"'
       onInputChange={(event, newInputValue) => {
         setInputValue(newInputValue);
       }}
       onChange={(event, newValue) => {
-        setOptions(newValue ? [newValue, ...options] : options);
-        setValue(newValue);
+        // setOptions(newValue ? [newValue, ...options] : options);
         if (newValue !== null) {
           props.push(newValue.label, newValue.eid);
         }
+        setOptions([]);
+        setValue(null);
+        setInputValue("");
       }}
       options={options}
       renderInput={(params) => (
@@ -70,7 +77,7 @@ const EntitySearch = (props) => {
           </Grid>
         </Grid>
       )}
-      style={{ width: 300 }}
+      style={{ width: 400 }}
       value={value}
     />
   )

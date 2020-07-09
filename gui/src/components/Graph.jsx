@@ -34,6 +34,9 @@ class Graph extends React.Component {
         forceGraph: this.forceGraph,
         sceneManager: this.sceneManager,
     });
+    this.threeGraph.on("doubleclick", (vertex) => {
+      this.props.fetchByEntity(vertex.label, vertex.eid);
+    });
     this.sceneManager.scene.add(this.threeGraph.object);
     this.forceGraph.update(this.props.vertices, this.props.edges);
     this.start();
@@ -48,13 +51,11 @@ class Graph extends React.Component {
   }
 
   start() {
-    if (!this.frameId) {
-      this.frameId = requestAnimationFrame(this.sceneManager.animate);
-    }
+    this.sceneManager.start();
   }
 
   stop() {
-    cancelAnimationFrame(this.frameId);
+    this.sceneManager.stop();
   }
 
   render() {

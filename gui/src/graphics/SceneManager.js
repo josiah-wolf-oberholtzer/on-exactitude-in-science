@@ -23,6 +23,8 @@ const SceneManager = (container) => {
     hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444),
     pointLight = new THREE.PointLight(0xffffff, 1, 0, 2);
 
+  let frameId;
+
   function initShaders() {
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.0;
@@ -52,7 +54,7 @@ const SceneManager = (container) => {
     renderer.autoClear = false;
     renderer.setPixelRatio(window.devicePixelRatio);
     scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.FogExp2(0x000000, 0.000333);
+    scene.fog = new THREE.Fog(0x000000, 100, 500);
     container.appendChild(canvas);
   }
 
@@ -61,11 +63,30 @@ const SceneManager = (container) => {
     composer.render();
   }
 
-  function animate() {
+  function animateA() {
     event.call('render', {}, {});
     controls.update();
     render();
-    return requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animateB);
+  }
+
+  function animateB() {
+    event.call('render', {}, {});
+    controls.update();
+    render();
+    frameId = requestAnimationFrame(animateA);
+  }
+
+  function start() {
+    if (!this.frameId) {
+      requestAnimationFrame(animateA);
+    }
+  }
+
+  function stop() {
+    if (this.frameId) {
+      cancelAnimationFrame(this.frameId);
+    }
   }
 
   function update() {
@@ -86,12 +107,13 @@ const SceneManager = (container) => {
   update();
 
   return {
-    animate,
     camera,
     canvas,
     controls,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
     scene,
+    start,
+    stop,
   };
 };
 
