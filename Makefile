@@ -29,3 +29,6 @@ load-schema-test: wait-for-janusgraph
 	docker-compose run --rm api python3 -m maps schema --graph testgraph load
 
 load-from-scratch: reset-janusgraph wait-for-janusgraph load-schema load-schema-test load-data
+
+build-gui:
+	cd gui && yarn install && yarn build

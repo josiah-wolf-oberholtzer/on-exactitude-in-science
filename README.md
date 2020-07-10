@@ -5,6 +5,12 @@ Map of the World
 
 ## Quickstart
 
+Fetch the Discogs dataset:
+
+```
+make fetch-dataset
+```
+
 Pull and build Docker images:
 
 ```
@@ -12,20 +18,28 @@ docker-compose pull
 docker-compose build
 ```
 
-Bring Cassandra, Elasticsearch and Janusgraph online:
+Bring JanusGraph online and populate it:
 
 ```
-docker-compose up -d cassandra elasticsearch janusgraph
+make LIMIT=10000 load-from-scratch
 ```
 
-Wait for Janusgraph to come online:
+Bring the API container online:
 
 ```
-docker-compose run --rm janusgraph-healthcheck
+docker-compose up -d api
 ```
 
-Load the Discogs dataset into Janusgraph:
+Build the GUI:
 
 ```
-docker-compose run --rm api python3 -m maps
+make build-gui
 ```
+
+Bring the GUI container online:
+
+```
+docker-compose up -d gui
+```
+
+Now you can visit localhost:8080 to see.
