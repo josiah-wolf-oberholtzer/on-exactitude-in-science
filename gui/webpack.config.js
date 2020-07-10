@@ -16,7 +16,11 @@ module.exports = {
         resolve: {
           extensions: ['.js', '.jsx'],
         }
-      }
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf|fnt)$/,
+        use: ["file-loader"],
+      },
     ]
   },
   output: {

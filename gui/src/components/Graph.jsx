@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from 'react-redux';
 import { ForceGraph } from '../graphics/ForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
+import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
 import { fetchByEntity } from '../slices/graphSlice';
 
@@ -10,6 +11,7 @@ const mapStateToProps = state => {
     center: state.graph.center,
     edges: state.graph.edges,
     vertices: state.graph.vertices,
+    cameraNonce: state.camera.nonce,
   } 
 }
 
@@ -27,23 +29,46 @@ class Graph extends React.Component {
     vertices: [],
   }
 
-  componentDidMount() {
+  updateCamera(prevProps, nextProps) {
+    if (prevProps.cameraNonce != nextProps.cameraNonce) {
+      this.sceneManager.camera.position.set(0, 0, 200);
+      this.sceneManager.camera.rotation.set(0, 0, 0);
+      this.sceneManager.controls.target.set(0, 0, 0);
+      this.sceneManager.controls.enableDamping = false;
+      this.sceneManager.controls.update();
+      this.sceneManager.controls.enableDamping = true;
+    }
+  }
+
+  updateGraph(prevProps, nextProps) {
+    if (
+      prevProps.edges != nextProps.edges ||
+      prevProps.vertices != nextProps.vertices
+    ) {
+      this.forceGraph.update(nextProps.vertices, nextProps.edges);
+    }
+  }
+
+  componentDidMount(prevProps) {
     this.forceGraph = ForceGraph();
     this.sceneManager = SceneManager(this.mount);
+    this.textLoader = TextLoader();
     this.threeGraph = ThreeGraph({
         forceGraph: this.forceGraph,
         sceneManager: this.sceneManager,
+        textLoader: this.textLoader,
     });
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.fetchByEntity(vertex.label, vertex.eid);
     });
     this.sceneManager.scene.add(this.threeGraph.object);
-    this.forceGraph.update(this.props.vertices, this.props.edges);
+    this.updateGraph({}, this.props);
     this.start();
   }
 
-  componentDidUpdate() {
-    this.forceGraph.update(this.props.vertices, this.props.edges);
+  componentDidUpdate(prevProps) {
+    this.updateGraph(prevProps, this.props);
+    this.updateCamera(prevProps, this.props);
   }
 
   componentWillUnmount() {

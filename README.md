@@ -1,6 +1,8 @@
 # on-exactitude-in-science
 Map of the World
 
+<img src="screenshot.png" />
+
 ## Quickstart
 
 Pull and build Docker images:

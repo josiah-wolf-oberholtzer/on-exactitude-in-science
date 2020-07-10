@@ -12,11 +12,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const mapStateToProps = state => ({ loading: state.graph.loading })
+const mapStateToProps = state => ({ loading: state.graph.loading });
 
 const mapDispatchToProps = dispatch => ({
   setLoading: loading => dispatch(setLoading(loading))
-})
+});
 
 const Loading = (props) => {
   const classes = useStyles();

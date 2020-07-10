@@ -3,7 +3,7 @@ import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
 
 const ThreeGraph = (opts) => {
-  const { forceGraph, sceneManager } = opts,
+  const { forceGraph, sceneManager, textLoader } = opts,
     graphObject = new THREE.Object3D(),
     controls = new DragControls([], sceneManager.camera, sceneManager.canvas),
     lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
@@ -117,16 +117,10 @@ const ThreeGraph = (opts) => {
     parent.add(entity);
     parent.add(ring);
     controls.objects().push(entity);
-    console.log(vertex);
     object.parent.scale.setScalar(vertex.radius);
     object.parent.position.x = vertex.x;
     object.parent.position.y = vertex.y;
     object.parent.position.z = vertex.z;
-    /*
-    object.parent.scale.x = 10;
-    object.parent.scale.y = 10;
-    object.parent.scale.z = 10;
-    */
     object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     objects.set(vertex.id, object);
     graphObject.add(parent);

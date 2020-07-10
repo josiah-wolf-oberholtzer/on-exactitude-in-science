@@ -54,7 +54,7 @@ const SceneManager = (container) => {
     renderer.autoClear = false;
     renderer.setPixelRatio(window.devicePixelRatio);
     scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.Fog(0x000000, 100, 500);
+    scene.fog = new THREE.Fog(0x000000, 100, 333);
     container.appendChild(canvas);
   }
 
