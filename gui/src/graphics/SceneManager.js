@@ -78,14 +78,14 @@ const SceneManager = (container) => {
   }
 
   function start() {
-    if (!this.frameId) {
+    if (!frameId) {
       requestAnimationFrame(animateA);
     }
   }
 
   function stop() {
-    if (this.frameId) {
-      cancelAnimationFrame(this.frameId);
+    if (frameId) {
+      cancelAnimationFrame(frameId);
     }
   }
 

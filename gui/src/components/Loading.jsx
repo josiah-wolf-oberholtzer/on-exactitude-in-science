@@ -3,7 +3,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { setLoading } from '../slices/loadingSlice';
 
 const useStyles = makeStyles((theme) => ({
   backdrop: {
@@ -14,10 +13,6 @@ const useStyles = makeStyles((theme) => ({
 
 const mapStateToProps = state => ({ loading: state.graph.loading });
 
-const mapDispatchToProps = dispatch => ({
-  setLoading: loading => dispatch(setLoading(loading))
-});
-
 const Loading = (props) => {
   const classes = useStyles();
   return (
@@ -25,7 +20,6 @@ const Loading = (props) => {
       <Backdrop
         className={classes.backdrop}
         open={props.loading}
-        onClick={() => props.setLoading(false)}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
@@ -33,7 +27,4 @@ const Loading = (props) => {
   );
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Loading)
+export default connect(mapStateToProps)(Loading)

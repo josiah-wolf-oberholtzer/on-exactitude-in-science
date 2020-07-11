@@ -59,8 +59,7 @@ const ForceGraph = () => {
       updates = [],
       exits = [];
     vertices.forEach((vertex) => {
-      const rudderId = `${vertex.id}-rudder`,
-        childCount = vertex.child_count;
+      const rudderId = `${vertex.id}-rudder`;
       newNodeMap.set(vertex.id, {
         ...vertex,
         radius: Math.sqrt(vertex.child_count + 1),

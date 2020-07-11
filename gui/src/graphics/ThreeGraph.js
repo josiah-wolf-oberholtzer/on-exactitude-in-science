@@ -49,7 +49,10 @@ const ThreeGraph = (opts) => {
       { vertex } = data,
       currentClickObject = data,
       currentClickTime = Date.now();
-    if (currentClickObject === previousClickObject && (currentClickTime - previousClickTime) < 250) {
+    if (
+      (currentClickObject === previousClickObject)
+      && ((currentClickTime - previousClickTime) < 250)
+    ) {
       console.log('doubleclick');
       dispatcher.call('doubleclick', vertex, vertex);
     }
@@ -71,9 +74,7 @@ const ThreeGraph = (opts) => {
   controls.on('dragend', (ev) => {
     console.log('dragend', ev);
     const { data } = ev.object.parent,
-      { vertex } = data,
-      { entity } = data,
-      { ring } = data;
+      { entity, ring } = data;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
     sceneManager.controls.enabled = true;

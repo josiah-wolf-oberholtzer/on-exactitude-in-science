@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
@@ -32,6 +33,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       hash: true,
       template: path.resolve(__dirname, "src", "index.html"),
-    })
+    }),
+    new webpack.ProvidePlugin({
+      THREE: 'three'
+    }),
   ]
 };
