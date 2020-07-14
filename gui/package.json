@@ -21,6 +21,7 @@
     "connected-react-router": "^6.8.0",
     "d3-dispatch": "^1.0.6",
     "d3-force-3d": "^2.1.0",
+    "d3-timer": "^1.0.10",
     "history": "^4.7.2",
     "immutable": "^4.0.0-rc.1",
     "load-bmfont": "^1.4.1",
@@ -65,6 +66,7 @@
     "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "worker-loader": "^2.0.0"
   }
 }

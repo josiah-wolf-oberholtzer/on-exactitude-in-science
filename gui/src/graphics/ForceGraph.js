@@ -4,14 +4,7 @@ import * as d3force3d from 'd3-force-3d';
 const ForceGraph = () => {
   const nodeMap = new Map(),
     linkMap = new Map(),
-    dispatcher = dispatch(
-      'vertexEnter',
-      'vertexUpdate',
-      'vertexExit',
-      'edgeEnter',
-      'edgeUpdate',
-      'edgeExit',
-    ),
+    dispatcher = dispatch('ticked'),
     simulation = d3force3d.forceSimulation()
       .stop()
       .alpha(1)
@@ -20,7 +13,7 @@ const ForceGraph = () => {
       .velocityDecay(0.4)
       .force('charge', d3force3d.forceManyBody()
         .distanceMax(250)
-        .distanceMin(5)
+        .distanceMin(25)
         .strength((d) => {
           if (d.type === 'edge') {
             return 0;
@@ -52,12 +45,25 @@ const ForceGraph = () => {
       .force('y', d3force3d.forceY().strength(0.005))
       .force('z', d3force3d.forceZ().strength(0.005))
       .force('centering', d3force3d.forceCenter());
+
   function update(vertices, edges) {
     const newNodeMap = new Map(),
       newLinkMap = new Map(),
       enters = [],
       updates = [],
-      exits = [];
+      exits = [],
+      result = {
+        vertices: {
+          entrances: [],
+          updates: [],
+          exits: [],
+        },
+        edges: {
+          entrances: [],
+          updates: [],
+          exits: [],
+        },
+      };
     vertices.forEach((vertex) => {
       const rudderId = `${vertex.id}-rudder`;
       newNodeMap.set(vertex.id, {
@@ -123,26 +129,45 @@ const ForceGraph = () => {
 
     // emit events
     enters.forEach((entity) => {
-      if (entity.type === 'edge') {
-        entity.source = nodeMap.get(entity.source);
-        entity.target = nodeMap.get(entity.target);
-      } else if (entity.type === 'vertex') {
-        entity.rudder = nodeMap.get(`${entity.id}-rudder`);
-      }
-      if (['edge', 'vertex'].includes(entity.type)) {
-        dispatcher.call(`${entity.type}Enter`, entity, entity);
+      switch (entity.type) {
+        case 'edge':
+          entity.source = nodeMap.get(entity.source);
+          entity.target = nodeMap.get(entity.target);
+          result.edges.entrances.push(entity);
+          break;
+        case 'vertex':
+          entity.rudder = nodeMap.get(`${entity.id}-rudder`);
+          result.vertices.entrances.push(entity);
+          break;
+        default:
+          break;
       }
     });
     updates.forEach((entity) => {
-      if (['edge', 'vertex'].includes(entity.type)) {
-        dispatcher.call(`${entity.type}Update`, entity, entity);
+      switch (entity.type) {
+        case 'edge':
+          result.edges.updates.push(entity);
+          break;
+        case 'vertex':
+          result.vertices.updates.push(entity);
+          break;
+        default:
+          break;
       }
     });
     exits.forEach((entity) => {
-      if (['edge', 'vertex'].includes(entity.type)) {
-        dispatcher.call(`${entity.type}Exit`, entity, entity);
+      switch (entity.type) {
+        case 'edge':
+          result.edges.exits.push(entity);
+          break;
+        case 'vertex':
+          result.vertices.exits.push(entity);
+          break;
+        default:
+          break;
       }
     });
+    dispatcher.call('ticked', result, result);
   }
 
   function pin(nodeID, x, y, z) {
@@ -164,14 +189,34 @@ const ForceGraph = () => {
   }
 
   function tick() {
+    const result = {
+      vertices: {
+        entrances: [],
+        updates: [],
+        exits: [],
+      },
+      edges: {
+        entrances: [],
+        updates: [],
+        exits: [],
+      },
+    };
     if (simulation.alpha() >= simulation.alphaMin()) {
       simulation.tick();
       nodeMap.forEach((entity) => {
-        if (['edge', 'vertex'].includes(entity.type)) {
-          dispatcher.call(`${entity.type}Update`, entity, entity);
+        switch (entity.type) {
+          case 'edge':
+            result.edges.updates.push(entity);
+            break;
+          case 'vertex':
+            result.vertices.updates.push(entity);
+            break;
+          default:
+            break;
         }
       });
     }
+    dispatcher.call('ticked', result, result);
   }
 
   return {

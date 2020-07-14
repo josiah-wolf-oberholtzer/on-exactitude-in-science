@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from 'react-redux';
-import { ForceGraph } from '../graphics/ForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
 import { fetchByEntity } from '../slices/graphSlice';
+import ForceGraphWorkerProxy from '../workers/ForceGraphWorkerProxy';
 
 const mapStateToProps = state => {
   return {
@@ -50,7 +50,7 @@ class Graph extends React.Component {
   }
 
   componentDidMount(prevProps) {
-    this.forceGraph = ForceGraph();
+    this.forceGraph = ForceGraphWorkerProxy();
     this.sceneManager = SceneManager(this.mount);
     this.textLoader = TextLoader();
     this.threeGraph = ThreeGraph({
@@ -76,10 +76,12 @@ class Graph extends React.Component {
   }
 
   start() {
+    this.forceGraph.start();
     this.sceneManager.start();
   }
 
   stop() {
+    this.forceGraph.stop();
     this.sceneManager.stop();
   }
 

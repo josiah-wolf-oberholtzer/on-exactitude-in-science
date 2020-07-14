@@ -27,25 +27,23 @@ const ThreeGraph = (opts) => {
 
   controls.on('select', (ev) => {
     console.log('select', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { ring } = data;
     ring.material.oldColor = 0xff9933;
   });
 
   controls.on('deselect', (ev) => {
     console.log('deselect', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { ring, vertex } = data;
     ring.material.color.setHex(0x08ccc8);
-    vertex.fx = null;
-    vertex.fy = null;
-    vertex.fz = null;
+    forceGraph.unpin(vertex.id);
   });
 
   controls.on('dragstart', (ev) => {
     console.log('dragstart', ev);
     sceneManager.controls.enabled = false;
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { vertex } = data,
       currentClickObject = data,
       currentClickTime = Date.now();
@@ -62,18 +60,16 @@ const ThreeGraph = (opts) => {
 
   controls.on('drag', (ev) => {
     console.log('drag', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { vertex } = data,
       { position } = ev;
-    vertex.fx = position.x;
-    vertex.fy = position.y;
-    vertex.fz = position.z;
+    forceGraph.pin(vertex.id, position.x, position.y, position.z);
     forceGraph.reheat();
   });
 
   controls.on('dragend', (ev) => {
     console.log('dragend', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { entity, ring } = data;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
@@ -82,7 +78,7 @@ const ThreeGraph = (opts) => {
 
   controls.on('mouseover', (ev) => {
     console.log('mouseover', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { entity } = data,
       { ring } = data;
     entity.material.oldColor = entity.material.color.getHex();
@@ -93,7 +89,7 @@ const ThreeGraph = (opts) => {
 
   controls.on('mouseout', (ev) => {
     console.log('mouseout', ev);
-    const { data } = ev.object.parent,
+    const { data } = ev.object.group,
       { entity } = data,
       { ring } = data;
     entity.material.color.setHex(entity.material.oldColor);
@@ -101,43 +97,43 @@ const ThreeGraph = (opts) => {
   });
 
   function onVertexEnter(vertex) {
-    const entityMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+    const group = new THREE.Group(),
+      entityMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
       ringMaterial = new THREE.MeshPhongMaterial({ color: 0x08ccc8, side: THREE.DoubleSide }),
-      parent = new THREE.Object3D(),
       entityGeometry = labelToGeo[vertex.label],
       entity = new THREE.Mesh(entityGeometry, entityMaterial),
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
       object = {
-        parent, vertex, entity, ring, entityMaterial, ringMaterial,
+        group, vertex, entity, ring, entityMaterial, ringMaterial,
       };
     entity.receiveShadow = true;
     entity.castShadow = true;
     ring.receiveShadow = true;
     ring.castShadow = true;
-    parent.data = object;
-    parent.add(entity);
-    parent.add(ring);
+    group.data = object;
+    group.add(entity);
+    group.add(ring);
     controls.objects().push(entity);
-    object.parent.scale.setScalar(vertex.radius);
-    object.parent.position.x = vertex.x;
-    object.parent.position.y = vertex.y;
-    object.parent.position.z = vertex.z;
-    object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    object.group.scale.setScalar(vertex.radius);
+    object.group.position.x = vertex.x;
+    object.group.position.y = vertex.y;
+    object.group.position.z = vertex.z;
+    object.group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     objects.set(vertex.id, object);
-    graphObject.add(parent);
+    graphObject.add(group);
   }
 
   function onVertexUpdate(vertex) {
     const object = objects.get(vertex.id);
-    object.parent.position.x = vertex.x;
-    object.parent.position.y = vertex.y;
-    object.parent.position.z = vertex.z;
-    object.parent.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    object.group.position.x = vertex.x;
+    object.group.position.y = vertex.y;
+    object.group.position.z = vertex.z;
+    object.group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
   }
 
   function onVertexExit(vertex) {
     const object = objects.get(vertex.id);
-    graphObject.remove(object.parent);
+    graphObject.remove(object.group);
   }
 
   function onEdgeEnter(edge) {

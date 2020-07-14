@@ -1,13 +1,14 @@
 // import fnt16 from './Lato-Regular-16.fnt';
 import * as THREE from 'three';
 import { createGeometry } from 'three-bmfont-text';
-import { loadFont } from 'load-bmfont';
+import * as loadFont from 'load-bmfont';
 
 const TextLoader = () => {
   let font = null,
     texture = null;
 
   function loadFontAsync(path) {
+    console.log('loadFont', loadFont);
     return new Promise((resolve, reject) => {
       loadFont(path, (err, loadedFont) => {
         if (err !== null) {
