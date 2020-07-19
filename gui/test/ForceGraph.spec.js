@@ -1,5 +1,5 @@
 import chai from 'chai';
-import { ForceGraph } from '../src/graphics/ForceGraph';
+import { ForceGraph } from '../src/physics/ForceGraph';
 
 const { expect } = chai,
   vertices = [

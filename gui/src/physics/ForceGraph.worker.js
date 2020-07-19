@@ -1,5 +1,5 @@
 import { timer } from 'd3-timer';
-import { ForceGraph } from '../physics/ForceGraph';
+import { ForceGraph } from './ForceGraph';
 
 const forceGraph = ForceGraph();
 
