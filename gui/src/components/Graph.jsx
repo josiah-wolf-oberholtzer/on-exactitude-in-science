@@ -4,7 +4,7 @@ import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
 import { fetchByEntity } from '../slices/graphSlice';
-import ForceGraphWorkerProxy from '../workers/ForceGraphWorkerProxy';
+import ForceGraphWorkerProxy from '../physics/ForceGraphWorkerProxy';
 
 const mapStateToProps = state => {
   return {
