@@ -1,54 +1,57 @@
-// import fnt16 from './Lato-Regular-16.fnt';
+// import fnt16 from "./Lato-Regular-16.fnt";
 import * as THREE from 'three';
-import { createGeometry } from 'three-bmfont-text';
-import * as loadFont from 'load-bmfont';
 
 const TextLoader = () => {
-  let font = null,
-    texture = null;
+  const mainCanvas = new OffscreenCanvas(1, 1),
+    mainContext = mainCanvas.getContext('2d'),
+    font = '128px sans-serif',
+    fillStyle = '#fff',
+    borderWidth = 8;
 
-  function loadFontAsync(path) {
-    console.log('loadFont', loadFont);
-    return new Promise((resolve, reject) => {
-      loadFont(path, (err, loadedFont) => {
-        if (err !== null) {
-          reject(err);
-        } else {
-          font = loadedFont;
-          resolve(font);
-        }
-      });
-    });
+  function init() {
+    mainContext.font = font;
   }
 
-  function loadTextureAsync(path) {
-    return new Promise((resolve) => {
-      const textureLoader = new THREE.TextureLoader();
-      textureLoader.load(path, (loadedTexture) => {
-        texture = loadedTexture;
-        resolve(texture);
-      });
-    });
+  function loadCanvas(text) {
+    const textMetrics = mainContext.measureText(text),
+      { width } = textMetrics,
+      // TODO: Canvas height calculation needs to be different from text height calculation
+      //       for centering purposes.
+      height = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent,
+      canvas = new OffscreenCanvas(width + borderWidth * 2, height + borderWidth * 2),
+      context = canvas.getContext('2d');
+    console.log(text, textMetrics);
+    context.lineWidth = borderWidth;
+    context.font = font;
+    context.fillStyle = fillStyle;
+    context.fillText(text, 0, textMetrics.actualBoundingBoxAscent);
+    return canvas;
   }
 
-  const fontPromise = loadFontAsync('./font.fnt'),
-    texturePromise = loadTextureAsync('./font.png');
-
-  function load(text, geometryOptions = {}, materialOptions = {}) {
-    return (
-      Promise.all([fontPromise, texturePromise])
-        .then(() => {
-          const geometry = createGeometry({ ...geometryOptions, text }),
-            material = new THREE.MeshBasicMaterial({
-              color: 0xffffff, transparent: true, ...materialOptions, map: texture,
-            }),
-            mesh = new THREE.Mesh(geometry, material);
-          return mesh;
-        })
-    );
+  function loadTexture(canvas) {
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    return texture;
   }
 
-  return { load };
+  function loadMesh(text) {
+    const canvas = loadCanvas(text),
+      scale = 1 / 128,
+      width = canvas.width * scale,
+      height = canvas.height * scale,
+      texture = loadTexture(canvas),
+      material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+      }),
+      geometry = new THREE.PlaneBufferGeometry(width, height),
+      mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  }
+
+  init();
+
+  return { loadMesh };
 };
 
 export { TextLoader };

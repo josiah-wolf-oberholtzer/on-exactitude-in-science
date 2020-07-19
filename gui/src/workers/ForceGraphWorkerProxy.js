@@ -36,8 +36,8 @@ const ForceGraphWorkerProxy = () => {
     },
     reheat() { worker.postMessage(['reheat']); },
     tick() { worker.postMessage(['tick', { timestamp: Date.now() }]); },
-    start() { worker.postMessage(['start']) },
-    stop() { worker.postMessage(['stop']) },
+    start() { worker.postMessage(['start']); },
+    stop() { worker.postMessage(['stop']); },
     unpin(nodeId) { worker.postMessage(['unpin', { nodeId }]); },
     update(vertices, edges) { worker.postMessage(['update', { vertices, edges }]); },
   };

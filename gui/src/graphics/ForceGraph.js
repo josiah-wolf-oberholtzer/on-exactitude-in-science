@@ -167,6 +167,7 @@ const ForceGraph = () => {
           break;
       }
     });
+    simulation.alpha(1.0);
     dispatcher.call('ticked', result, result);
   }
 

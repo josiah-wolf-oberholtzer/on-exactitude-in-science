@@ -1,5 +1,5 @@
+import { timer } from 'd3-timer';
 import { ForceGraph } from '../graphics/ForceGraph';
-import { timer} from 'd3-timer';
 
 const forceGraph = ForceGraph();
 
@@ -14,7 +14,11 @@ onmessage = (event) => {
       break;
     case 'reheat':
       forceGraph.reheat();
-    case 'start':  // fall through
+      if (loop === null) {
+        loop = timer(() => forceGraph.tick(), 30);
+      }
+      break;
+    case 'start': // fall through
       if (loop === null) {
         loop = timer(() => forceGraph.tick(), 30);
       }

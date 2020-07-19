@@ -50,9 +50,9 @@ class Graph extends React.Component {
   }
 
   componentDidMount(prevProps) {
+    this.textLoader = TextLoader();
     this.forceGraph = ForceGraphWorkerProxy();
     this.sceneManager = SceneManager(this.mount);
-    this.textLoader = TextLoader();
     this.threeGraph = ThreeGraph({
         forceGraph: this.forceGraph,
         sceneManager: this.sceneManager,

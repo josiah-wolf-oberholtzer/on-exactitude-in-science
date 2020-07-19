@@ -6,7 +6,6 @@ const ThreeGraph = (opts) => {
   const { forceGraph, sceneManager, textLoader } = opts,
     graphObject = new THREE.Object3D(),
     controls = new DragControls([], sceneManager.camera, sceneManager.canvas),
-    lineMaterial = new THREE.LineBasicMaterial({ color: 0x3399cc }),
     cubeGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5),
     cylinderGeometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 32),
     sphereGeometry = new THREE.SphereGeometry(0.75, 32, 32),
@@ -19,33 +18,33 @@ const ThreeGraph = (opts) => {
       release: sphereGeometry,
       track: cylinderGeometry,
     },
-    objects = new Map(),
+    envelopes = new Map(),
     dispatcher = dispatch('doubleclick');
 
   let previousClickObject = null,
     previousClickTime = Date.now();
 
-  controls.on('select', (ev) => {
-    console.log('select', ev);
-    const { data } = ev.object.group,
-      { ring } = data;
+  controls.on('select', (event) => {
+    console.log('select', event);
+    const { envelope } = event.object.parent,
+      { ring } = envelope;
     ring.material.oldColor = 0xff9933;
   });
 
-  controls.on('deselect', (ev) => {
-    console.log('deselect', ev);
-    const { data } = ev.object.group,
-      { ring, vertex } = data;
+  controls.on('deselect', (event) => {
+    console.log('deselect', event);
+    const { envelope } = event.object.parent,
+      { ring, vertex } = envelope;
     ring.material.color.setHex(0x08ccc8);
     forceGraph.unpin(vertex.id);
   });
 
-  controls.on('dragstart', (ev) => {
-    console.log('dragstart', ev);
+  controls.on('dragstart', (event) => {
+    console.log('dragstart', event);
     sceneManager.controls.enabled = false;
-    const { data } = ev.object.group,
-      { vertex } = data,
-      currentClickObject = data,
+    const { envelope } = event.object.parent,
+      { vertex } = envelope,
+      currentClickObject = envelope,
       currentClickTime = Date.now();
     if (
       (currentClickObject === previousClickObject)
@@ -58,40 +57,38 @@ const ThreeGraph = (opts) => {
     previousClickTime = currentClickTime;
   });
 
-  controls.on('drag', (ev) => {
-    console.log('drag', ev);
-    const { data } = ev.object.group,
-      { vertex } = data,
-      { position } = ev;
+  controls.on('drag', (event) => {
+    console.log('drag', event);
+    const { envelope } = event.object.parent,
+      { vertex } = envelope,
+      { position } = event;
     forceGraph.pin(vertex.id, position.x, position.y, position.z);
     forceGraph.reheat();
   });
 
-  controls.on('dragend', (ev) => {
-    console.log('dragend', ev);
-    const { data } = ev.object.group,
-      { entity, ring } = data;
+  controls.on('dragend', (event) => {
+    console.log('dragend', event);
+    const { envelope } = event.object.parent,
+      { entity, ring } = envelope;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
     sceneManager.controls.enabled = true;
   });
 
-  controls.on('mouseover', (ev) => {
-    console.log('mouseover', ev);
-    const { data } = ev.object.group,
-      { entity } = data,
-      { ring } = data;
+  controls.on('mouseover', (event) => {
+    console.log('mouseover', event);
+    const { envelope } = event.object.parent,
+      { entity, ring } = envelope;
     entity.material.oldColor = entity.material.color.getHex();
     ring.material.oldColor = ring.material.color.getHex();
     entity.material.color.setHex(0xff0000);
     ring.material.color.setHex(0xff0000);
   });
 
-  controls.on('mouseout', (ev) => {
-    console.log('mouseout', ev);
-    const { data } = ev.object.group,
-      { entity } = data,
-      { ring } = data;
+  controls.on('mouseout', (event) => {
+    console.log('mouseout', event);
+    const { envelope } = event.object.parent,
+      { entity, ring } = envelope;
     entity.material.color.setHex(entity.material.oldColor);
     ring.material.color.setHex(ring.material.oldColor);
   });
@@ -103,37 +100,50 @@ const ThreeGraph = (opts) => {
       entityGeometry = labelToGeo[vertex.label],
       entity = new THREE.Mesh(entityGeometry, entityMaterial),
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
-      object = {
-        group, vertex, entity, ring, entityMaterial, ringMaterial,
+      textA = textLoader.loadMesh(vertex.name),
+      textB = textA.clone(false),
+      envelope = {
+        entity,
+        entityMaterial,
+        group,
+        ring,
+        ringMaterial,
+        textA,
+        textB,
+        vertex,
       };
     entity.receiveShadow = true;
     entity.castShadow = true;
     ring.receiveShadow = true;
     ring.castShadow = true;
-    group.data = object;
+    textA.position.set(0, 0, vertex.radius + textA.geometry.parameters.width / 2);
+    textB.position.set(0, 0, vertex.radius + textB.geometry.parameters.width / 2);
+    textA.rotation.set(0, Math.PI * 0.5, 0);
+    textB.rotation.set(0, Math.PI * 1.5, 0);
+    group.envelope = envelope;
     group.add(entity);
     group.add(ring);
+    group.add(textA);
+    group.add(textB);
+    entity.scale.setScalar(vertex.radius);
+    ring.scale.setScalar(vertex.radius);
+    group.position.set(vertex.x, vertex.y, vertex.z);
+    group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
     controls.objects().push(entity);
-    object.group.scale.setScalar(vertex.radius);
-    object.group.position.x = vertex.x;
-    object.group.position.y = vertex.y;
-    object.group.position.z = vertex.z;
-    object.group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
-    objects.set(vertex.id, object);
+    envelopes.set(vertex.id, envelope);
     graphObject.add(group);
   }
 
   function onVertexUpdate(vertex) {
-    const object = objects.get(vertex.id);
-    object.group.position.x = vertex.x;
-    object.group.position.y = vertex.y;
-    object.group.position.z = vertex.z;
-    object.group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    const envelope = envelopes.get(vertex.id),
+      { group } = envelope;
+    group.position.set(vertex.x, vertex.y, vertex.z);
+    group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
   }
 
   function onVertexExit(vertex) {
-    const object = objects.get(vertex.id);
-    graphObject.remove(object.group);
+    const envelope = envelopes.get(vertex.id);
+    graphObject.remove(envelope.group);
   }
 
   function onEdgeEnter(edge) {
@@ -144,26 +154,28 @@ const ThreeGraph = (opts) => {
       ),
       points = curve.getPoints(50),
       geometry = new THREE.BufferGeometry().setFromPoints(points),
+      lineColor = edge.label === 'alias_of' ? 0xcc9933 : 0x3399cc,
+      lineMaterial = new THREE.LineBasicMaterial({ color: lineColor }),
       line = new THREE.Line(geometry, lineMaterial),
-      object = { geometry, line, edge };
-    objects.set(edge.id, object);
+      envelope = {
+        curve, geometry, line, edge,
+      };
+    envelopes.set(edge.id, envelope);
     graphObject.add(line);
   }
 
   function onEdgeUpdate(edge) {
-    const object = objects.get(edge.id),
-      curve = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(edge.source.x, edge.source.y, edge.source.z),
-        new THREE.Vector3(edge.x, edge.y, edge.z),
-        new THREE.Vector3(edge.target.x, edge.target.y, edge.target.z),
-      ),
-      points = curve.getPoints(50);
-    object.geometry.setFromPoints(points);
+    const envelope = envelopes.get(edge.id),
+      { curve } = envelope;
+    curve.v0.set(edge.source.x, edge.source.y, edge.source.z);
+    curve.v1.set(edge.x, edge.y, edge.z);
+    curve.v2.set(edge.target.x, edge.target.y, edge.target.z);
+    envelope.geometry.setFromPoints(curve.getPoints(10));
   }
 
   function onEdgeExit(edge) {
-    const object = objects.get(edge.id);
-    graphObject.remove(object.line);
+    const envelope = envelopes.get(edge.id);
+    graphObject.remove(envelope.line);
   }
 
   function init() {
@@ -181,7 +193,7 @@ const ThreeGraph = (opts) => {
 
   return {
     object: graphObject,
-    objects,
+    envelopes,
     on(name, _) { return arguments.length > 1 ? dispatcher.on(name, _) : dispatcher.on(name); },
   };
 };

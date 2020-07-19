@@ -6,17 +6,17 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { dispatch } from 'd3-dispatch';
 
 const SceneManager = (container) => {
-  const renderer = new THREE.WebGLRenderer(),
+  const renderer = new THREE.WebGLRenderer({ antialias: true }),
     composer = new EffectComposer(renderer),
     canvas = renderer.domElement,
     scene = new THREE.Scene(),
     camera = new THREE.PerspectiveCamera(
-      45, container.offsetWidth / container.offsetHeight, 1, 5000,
+      45, window.innerWidth / window.innerHeight, 1, 5000,
     ),
     // interaction = new Interaction(renderer, scene, camera, { autoPreventDefault: true }),
     renderPass = new RenderPass(scene, camera),
     bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(container.innerWidth, container.innerHeight), 1.5, 0.4, 0.85,
+      new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85,
     ),
     controls = new OrbitControls(camera, canvas),
     event = dispatch('render'),
@@ -32,7 +32,7 @@ const SceneManager = (container) => {
     bloomPass.strength = 1.0;
     bloomPass.radius = 0.0;
     composer.addPass(renderPass);
-    composer.addPass(bloomPass);
+    // composer.addPass(bloomPass);
   }
 
   function initShadows() {
@@ -59,27 +59,21 @@ const SceneManager = (container) => {
   }
 
   function render() {
-    // renderer.render(scene, camera);
-    composer.render();
+    renderer.render(scene, camera);
+    // composer.render();
   }
 
-  function animateA() {
+  function animate() {
     event.call('render', {}, {});
-    controls.update();
+    // controls.update();
+    update();
     render();
-    frameId = requestAnimationFrame(animateB);
-  }
-
-  function animateB() {
-    event.call('render', {}, {});
-    controls.update();
-    render();
-    frameId = requestAnimationFrame(animateA);
+    frameId = requestAnimationFrame(animate);
   }
 
   function start() {
     if (!frameId) {
-      requestAnimationFrame(animateA);
+      requestAnimationFrame(animate);
     }
   }
 
@@ -90,10 +84,11 @@ const SceneManager = (container) => {
   }
 
   function update() {
-    camera.aspect = container.offsetWidth / container.offsetHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    composer.setSize(container.offsetWidth, container.offsetHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
     controls.update();
   }
 
