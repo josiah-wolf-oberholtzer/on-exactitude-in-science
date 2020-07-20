@@ -9,6 +9,8 @@ const manyBody = () => {
     positions = [],
     strength = constant(-30),
     strengths,
+    distanceMin2 = 1,
+    distanceMax2 = 10000000000.0,
     kernel;
 
   function kernel3d(positionsArray, strengthsArray) {
@@ -19,12 +21,17 @@ const manyBody = () => {
       const dx = positionsArray[i][0] - positionsArray[this.thread.x][0],
         dy = positionsArray[i][1] - positionsArray[this.thread.x][1],
         dz = positionsArray[i][2] - positionsArray[this.thread.x][2],
-        l = dx * dx + dy * dy + dz * dz,
-        w = (strengthsArray[i] * this.constants.alpha) / l;
-      if (i != this.thread.x) {
-        vx += dx * w;
-        vy += dy * w;
-        vz += dz * w;
+        l = dx * dx + dy * dy + dz * dz;
+      if (l < this.constants.distanceMax2) {
+        if (l < this.constants.distanceMin2) {
+          l = Math.sqrt(this.constants.distanceMin2 * l);
+        }
+        let w = (strengthsArray[i] * this.constants.alpha) / l;
+        if (i != this.thread.x) {
+          vx += dx * w;
+          vy += dy * w;
+          vz += dz * w;
+        }
       }
     }
     return [vx, vy, vz];
@@ -45,7 +52,12 @@ const manyBody = () => {
     const n = nodes.length,
       positions = collectPositions(),
       velocities = (
-        kernel.setConstants({alpha: _, size: n}),
+        kernel.setConstants({
+          alpha: _,
+          distanceMax2,
+          distanceMin2,
+          size: n
+        }),
         kernel(positions, strengths)
       )
       //velocityArray = velocities.toArray();
@@ -97,6 +109,22 @@ const manyBody = () => {
       return force;
     }
     return strength;
+  };
+
+  force.distanceMin = function(_) {
+    if (arguments.length) {
+      distanceMin2 = _ * _;
+      return force;
+    }
+    return Math.sqrt(distanceMin2);
+  };
+
+  force.distanceMax = function(_) {
+    if (arguments.length) {
+      distanceMax2 = _ * _;
+      return force;
+    }
+    return Math.sqrt(distanceMax2);
   };
 
   return force;

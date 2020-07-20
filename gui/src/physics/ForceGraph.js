@@ -27,6 +27,7 @@ const ForceGraph = () => {
         .theta(0.5))
       */
       .force('charge', forceManyBody()
+        .distanceMax(250)
         .strength((d) => {
           if (d.type === 'edge') {
             return 0;
@@ -55,9 +56,9 @@ const ForceGraph = () => {
         })
         .strength(1))
       */
-      .force('x', d3force3d.forceX().strength(0.005))
-      .force('y', d3force3d.forceY().strength(0.005))
-      .force('z', d3force3d.forceZ().strength(0.005))
+      .force('x', d3force3d.forceX().strength(0.05))
+      .force('y', d3force3d.forceY().strength(0.05))
+      .force('z', d3force3d.forceZ().strength(0.05))
       .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {
