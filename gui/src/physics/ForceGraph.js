@@ -27,19 +27,20 @@ const ForceGraph = () => {
         .theta(0.5))
       */
       .force('charge', forceManyBody()
-        .distanceMax(250)
+        .distanceMax(50)
         .strength((d) => {
           if (d.type === 'edge') {
-            return 0;
+            return 0.0;
           } if (d.type === 'rudder') {
-            return -1;
+            return -1.0;
           }
-          return -2;
+          return -2.0;
         }))
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
         .distance((d) => 5 + (d.index % 100) / 100)
-        .iterations(2))
+        .iterations(3)
+      )
       /*
       .force('collision', d3force3d.forceCollide()
         .radius((d) => {
@@ -56,9 +57,6 @@ const ForceGraph = () => {
         })
         .strength(1))
       */
-      .force('x', d3force3d.forceX().strength(0.05))
-      .force('y', d3force3d.forceY().strength(0.05))
-      .force('z', d3force3d.forceZ().strength(0.05))
       .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {

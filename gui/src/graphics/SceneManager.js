@@ -30,7 +30,7 @@ const SceneManager = (container) => {
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.0;
     bloomPass.threshold = 0.0;
-    bloomPass.strength = 2.0;
+    bloomPass.strength = 1.5;
     bloomPass.radius = 0.25;
     composer.addPass(renderPass);
     composer.addPass(bloomPass);
@@ -49,12 +49,12 @@ const SceneManager = (container) => {
   function init() {
     initShaders();
     initShadows();
-    camera.position.z = 200;
+    camera.position.z = 100;
     controls.enableDamping = true;
     controls.dampingFactory = 0.01;
     renderer.setPixelRatio(window.devicePixelRatio);
     scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.Fog(0x000000, 100, 333);
+    scene.fog = new THREE.Fog(0x000000, 50, 200);
     container.appendChild(canvas);
   }
 
