@@ -26,13 +26,14 @@ const SceneManager = (container) => {
   let frameId;
 
   function initShaders() {
+    renderer.autoClear = false;
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.0;
     bloomPass.threshold = 0.0;
-    bloomPass.strength = 1.0;
-    bloomPass.radius = 0.0;
+    bloomPass.strength = 2.0;
+    bloomPass.radius = 0.25;
     composer.addPass(renderPass);
-    // composer.addPass(bloomPass);
+    composer.addPass(bloomPass);
   }
 
   function initShadows() {
@@ -51,7 +52,6 @@ const SceneManager = (container) => {
     camera.position.z = 200;
     controls.enableDamping = true;
     controls.dampingFactory = 0.01;
-    renderer.autoClear = false;
     renderer.setPixelRatio(window.devicePixelRatio);
     scene.background = new THREE.Color(0x000000);
     scene.fog = new THREE.Fog(0x000000, 100, 333);
@@ -59,8 +59,8 @@ const SceneManager = (container) => {
   }
 
   function render() {
-    renderer.render(scene, camera);
-    // composer.render();
+    renderer.clear();
+    composer.render();
   }
 
   function animate() {
