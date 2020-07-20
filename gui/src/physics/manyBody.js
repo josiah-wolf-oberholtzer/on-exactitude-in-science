@@ -6,21 +6,19 @@ const manyBody = () => {
 
   let nodes = [],
     nDim = 2,
+    positions = [],
     strength = constant(-30),
     strengths,
     kernel;
 
   function kernel3d(positionsArray, strengthsArray) {
-    const thisX = positionsArray[this.thread.x][0],
-      thisY = positionsArray[this.thread.x][1],
-      thisZ = positionsArray[this.thread.x][2];
     let vx = 0.0,
       vy = 0.0,
       vz = 0.0;
     for (let i = 0; i < this.constants.size; i++) {
-      const dx = thisX - positionsArray[i][0],
-        dy = thisY - positionsArray[i][1],
-        dz = thisZ - positionsArray[i][2],
+      const dx = positionsArray[i][0] - positionsArray[this.thread.x][0],
+        dy = positionsArray[i][1] - positionsArray[this.thread.x][1],
+        dz = positionsArray[i][2] - positionsArray[this.thread.x][2],
         l = dx * dx + dy * dy + dz * dz,
         w = (strengthsArray[i] * this.constants.alpha) / l;
       if (i != this.thread.x) {
@@ -33,13 +31,11 @@ const manyBody = () => {
   }
 
   function collectPositions() {
-    const n = nodes.length,
-      positions = [];
+    const n = nodes.length;
     for (let i = 0; i < n; i++) {
-      const position = [nodes[i].x];
-      if (nDim > 1) { position.push(nodes[i].y); }
-      if (nDim > 2) { position.push(nodes[i].z); }
-      positions.push(position);
+      positions[nodes[i].index][0] = nodes[i].x;
+      if (nDim > 1) { positions[nodes[i].index][1] = nodes[i].y }
+      if (nDim > 2) { positions[nodes[i].index][2] = nodes[i].z }
     }
     return positions;
   }
@@ -51,9 +47,12 @@ const manyBody = () => {
       velocities = (
         kernel.setConstants({alpha: _, size: n}),
         kernel(positions, strengths)
-      );
+      )
+      //velocityArray = velocities.toArray();
+      ;
     for (let i = 0; i < n; i++) {
       const node = nodes[i],
+        // [vx, vy, vz] = velocityArray[i];
         [vx, vy, vz] = velocities[i];
       node.vx += vx;
       if (nDim > 1) { node.vy += vy; }
@@ -63,15 +62,22 @@ const manyBody = () => {
 
   function initialize() {
     if (!nodes.length) { return; }
-    const n = nodes.length;
+    const n = nodes.length,
+      settings = {
+        loopMaxIterations: n,
+        output: [n],
+        // pipeline: true,
+      };
     strengths = new Array(nodes.length);
+    positions = new Array(nodes.length);
     for (let i = 0; i < n; i++) {
       strengths[nodes[i].index] = +strength(nodes[i], i, nodes);
+      positions[nodes[i].index] = [0.0, 0.0, 0.0]
     }
     // if (nDim === 1) { kernel = gpu.createKernel(kernel1d); }
     // if (nDim === 2) { kernel = gpu.createKernel(kernel2d); }
-    if (nDim === 3) { kernel = gpu.createKernel(kernel3d); }
-    kernel.setOutput([n]).setLoopMaxIterations(n);
+    if (nDim === 3) { kernel = gpu.createKernel(kernel3d, settings); }
+    // console.log(kernel);
   }
 
   force.initialize = function (initNodes, numDimensions) {

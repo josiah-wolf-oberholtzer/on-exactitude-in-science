@@ -1,4 +1,3 @@
-// import fnt16 from "./Lato-Regular-16.fnt";
 import * as THREE from 'three';
 
 const TextLoader = () => {
@@ -20,7 +19,6 @@ const TextLoader = () => {
       height = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent,
       canvas = new OffscreenCanvas(width + borderWidth * 2, height + borderWidth * 2),
       context = canvas.getContext('2d');
-    console.log(text, textMetrics);
     context.lineWidth = borderWidth;
     context.font = font;
     context.fillStyle = fillStyle;

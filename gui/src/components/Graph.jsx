@@ -5,6 +5,7 @@ import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
 import { fetchByEntity } from '../slices/graphSlice';
 import ForceGraphWorkerProxy from '../physics/ForceGraphWorkerProxy';
+import { ForceGraph } from '../physics/ForceGraph';
 
 const mapStateToProps = state => {
   return {
@@ -51,7 +52,7 @@ class Graph extends React.Component {
 
   componentDidMount(prevProps) {
     this.textLoader = TextLoader();
-    this.forceGraph = ForceGraphWorkerProxy();
+    this.forceGraph = ForceGraph();
     this.sceneManager = SceneManager(this.mount);
     this.threeGraph = ThreeGraph({
         forceGraph: this.forceGraph,
@@ -76,12 +77,12 @@ class Graph extends React.Component {
   }
 
   start() {
-    this.forceGraph.start();
+    // this.forceGraph.start();
     this.sceneManager.start();
   }
 
   stop() {
-    this.forceGraph.stop();
+    // this.forceGraph.stop();
     this.sceneManager.stop();
   }
 
