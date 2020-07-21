@@ -19,7 +19,11 @@ const ThreeGraph = (opts) => {
       track: cylinderGeometry,
     },
     envelopes = new Map(),
-    dispatcher = dispatch('doubleclick');
+    dispatcher = dispatch(
+      'deselect',
+      'doubleclick',
+      'select',
+    );
 
   let previousClickObject = null,
     previousClickTime = Date.now();
@@ -29,8 +33,9 @@ const ThreeGraph = (opts) => {
     const { envelope } = event.object.parent,
       { ring, vertex } = envelope;
     ring.material.oldColor = 0xff9933;
-    //forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
-    //forceGraph.reheat();
+    forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
+    forceGraph.reheat();
+    dispatcher.call('select', vertex, vertex);
   });
 
   controls.on('deselect', (event) => {
@@ -39,6 +44,7 @@ const ThreeGraph = (opts) => {
       { ring, vertex } = envelope;
     ring.material.color.setHex(0x08ccc8);
     forceGraph.unpin(vertex.id);
+    dispatcher.call('deselect', vertex, vertex);
   });
 
   controls.on('dragstart', (event) => {

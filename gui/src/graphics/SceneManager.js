@@ -30,7 +30,7 @@ const SceneManager = (container) => {
     renderer.toneMapping = THREE.ReinhardToneMapping;
     renderer.toneMappingExposure = 1.0;
     bloomPass.threshold = 0.0;
-    bloomPass.strength = 1.5;
+    bloomPass.strength = 1.0;
     bloomPass.radius = 0.25;
     composer.addPass(renderPass);
     composer.addPass(bloomPass);
@@ -88,7 +88,7 @@ const SceneManager = (container) => {
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth * 2, window.innerHeight * 2);
     controls.update();
   }
 
