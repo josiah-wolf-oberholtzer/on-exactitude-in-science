@@ -35,9 +35,9 @@ const ThreeGraph = (opts) => {
     ring.material.oldColor = 0xff9933;
     forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
     forceGraph.reheat();
-    dispatcher.call('select', vertex, vertex);
     envelope.light = new THREE.PointLight(0xff0000, 4, 100, 2);
     event.object.parent.add(envelope.light);
+    dispatcher.call('select', vertex, vertex);
   });
 
   controls.on('deselect', (event) => {
@@ -46,8 +46,8 @@ const ThreeGraph = (opts) => {
       { ring, vertex, light } = envelope;
     ring.material.color.setHex(0x08ccc8);
     forceGraph.unpin(vertex.id);
-    dispatcher.call('deselect', vertex, vertex);
     event.object.parent.remove(light);
+    dispatcher.call('deselect', vertex, vertex);
   });
 
   controls.on('dragstart', (event) => {

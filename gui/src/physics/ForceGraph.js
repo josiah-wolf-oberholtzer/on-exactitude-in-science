@@ -12,20 +12,6 @@ const ForceGraph = () => {
       .numDimensions(3)
       .alphaDecay(0.001)
       .velocityDecay(0.4)
-      /*
-      .force('charge', d3force3d.forceGPU()
-        .distanceMax(250)
-        .distanceMin(25)
-        .strength((d) => {
-          if (d.type === 'edge') {
-            return 0;
-          } if (d.type === 'rudder') {
-            return -1;
-          }
-          return -2;
-        })
-        .theta(0.5))
-      */
       .force('charge', forceGPU()
         .distanceMax(50)
         .radius((d) => {
@@ -34,7 +20,7 @@ const ForceGraph = () => {
           } if (d.type === 'rudder') {
             return 1;
           }
-          const radius = (d.radius || 1) * 2;
+          const radius = (d.radius || 1);
           if (d.selected) {
             return radius + 5;
           }
@@ -42,32 +28,16 @@ const ForceGraph = () => {
         })
         .strength((d) => {
           if (d.type === 'edge') {
-            return 0.0;
+            return -0.25;
           } if (d.type === 'rudder') {
-            return -1.0;
+            return -0.5;
           }
-          return -2.0;
+          return -1.0;
         }))
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => 5 + (d.index % 100) / 100)
-        .iterations(3))
-      /*
-      .force('collision', d3force3d.forceCollide()
-        .radius((d) => {
-          if (d.type === 'edge') {
-            return 2;
-          } if (d.type === 'rudder') {
-            return 1;
-          }
-          const radius = (d.radius || 1) * 2;
-          if (d.selected) {
-            return radius + 5;
-          }
-          return radius;
-        })
-        .strength(1))
-      */
+        .distance((d) => 2)
+        .iterations(1))
       .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {

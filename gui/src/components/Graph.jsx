@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
-import { fetchByEntity } from '../slices/graphSlice';
+import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
 import ForceGraphWorkerProxy from '../physics/ForceGraphWorkerProxy';
 import { ForceGraph } from '../physics/ForceGraph';
 
@@ -19,6 +19,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     fetchByEntity: (label, id) => dispatch(fetchByEntity({label, id})),
+    selectEntity: (eid, label, name) => dispatch(selectEntity({eid, label, name})),
+    deselectEntity: () => dispatch(deselectEntity()),
   }
 }
 
@@ -32,7 +34,7 @@ class Graph extends React.Component {
 
   updateCamera(prevProps, nextProps) {
     if (prevProps.cameraNonce != nextProps.cameraNonce) {
-      this.sceneManager.camera.position.set(0, 0, 200);
+      this.sceneManager.camera.position.set(0, 0, 100);
       this.sceneManager.camera.rotation.set(0, 0, 0);
       this.sceneManager.controls.target.set(0, 0, 0);
       this.sceneManager.controls.enableDamping = false;
@@ -61,6 +63,12 @@ class Graph extends React.Component {
     });
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.fetchByEntity(vertex.label, vertex.eid);
+    });
+    this.threeGraph.on("select", (vertex) => {
+      this.props.selectEntity(vertex.eid, vertex.label, vertex.name);
+    });
+    this.threeGraph.on("deselect", (vertex) => {
+      this.props.deselectEntity();
     });
     this.sceneManager.scene.add(this.threeGraph.object);
     this.updateGraph({}, this.props);

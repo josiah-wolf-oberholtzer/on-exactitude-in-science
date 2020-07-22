@@ -36,11 +36,27 @@ const fetchByEntity = createAsyncThunk(
     name: 'graph',
     initialState: {
       edges: [],
-      vertices: [],
-      loading: false,
       error: null,
+      loading: false,
+      selected: {
+        eid: null,
+        label: null,
+        name: null,
+      },
+      vertices: [],
     },
-    reducers: {},
+    reducers: {
+      deselectEntity(state) {
+        state.selected.eid = null;
+        state.selected.label = null;
+        state.selected.name = null;
+      },
+      selectEntity(state, action) {
+        state.selected.eid = action.payload.eid;
+        state.selected.label = action.payload.label;
+        state.selected.name = action.payload.name;
+      }
+    },
     extraReducers: {
       [fetchByEntity.pending]: (state) => {
         state.loading = true;
@@ -65,8 +81,9 @@ const fetchByEntity = createAsyncThunk(
         state.loading = false;
       },
     },
-  });
+  }),
+  { deselectEntity, selectEntity } = graphSlice.actions;
 
-export { fetchByEntity, fetchRandom };
+export { deselectEntity, fetchByEntity, fetchRandom, selectEntity };
 
 export default graphSlice.reducer;

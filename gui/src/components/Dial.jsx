@@ -18,6 +18,25 @@ const useStyles = makeStyles((theme) => ({
   speedDialAction: {},
 }));
 
+const mapStateToProps = state => {
+  const discogsPrefix = "https://discogs.com",
+    eid = state.graph.selected.eid,
+    name = state.graph.selected.name,
+    label = state.graph.selected.label;
+  let discogsUrl = null;
+  if (label !== null) {
+    if (label === "track") {
+      const releaseEid = eid.split("-")[0];
+      discogsUrl = `${discogsPrefix}/release/${releaseEid}`;
+    } else if (label === "company") {
+      discogsUrl = `${discogsPrefix}/label/${eid}`;
+    } else {
+      discogsUrl = `${discogsPrefix}/${label}/${eid}`;
+    }
+  }
+  return { discogsUrl, eid, label, name }
+}
+
 const mapDispatchToProps = dispatch => ({
   refocusCamera: () => dispatch(refocusCamera()),
 });
@@ -55,28 +74,35 @@ const Dial = (props) => {
         tooltipOpen
         tooltipTitle="Focus"
       />
-      <SpeedDialAction
-        className={classes.speedDialAction}
-        key="connections"
-        icon={<AssessmentIcon />}
-        onClick={handleClose}
-        tooltipOpen
-        tooltipTitle="Connections"
-      />
-      <SpeedDialAction
-        className={classes.speedDialAction}
-        key="discogs"
-        icon={<AlbumIcon />}
-        onClick={handleClose}
-        tooltipOpen
-        tooltipTitle="Discogs"
-      />
+      { props.label !== null &&
+        <SpeedDialAction
+          className={classes.speedDialAction}
+          key="connections"
+          icon={<AssessmentIcon />}
+          onClick={handleClose}
+          tooltipOpen
+          tooltipTitle="Connections"
+        />
+      }
+      { props.label !== null &&
+        <SpeedDialAction
+          className={classes.speedDialAction}
+          key="discogs"
+          icon={<AlbumIcon />}
+          onClick={() => {
+            window.open(props.discogsUrl, "_blank");
+            handleClose();
+          }}
+          tooltipOpen
+          tooltipTitle="Discogs"
+        />
+      }
     </SpeedDial>
   )
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
 )(Dial);
 
