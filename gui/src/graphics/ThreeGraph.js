@@ -36,15 +36,18 @@ const ThreeGraph = (opts) => {
     forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
     forceGraph.reheat();
     dispatcher.call('select', vertex, vertex);
+    envelope.light = new THREE.PointLight(0xff0000, 4, 100, 2);
+    event.object.parent.add(envelope.light);
   });
 
   controls.on('deselect', (event) => {
     console.log('deselect', event);
     const { envelope } = event.object.parent,
-      { ring, vertex } = envelope;
+      { ring, vertex, light } = envelope;
     ring.material.color.setHex(0x08ccc8);
     forceGraph.unpin(vertex.id);
     dispatcher.call('deselect', vertex, vertex);
+    event.object.parent.remove(light);
   });
 
   controls.on('dragstart', (event) => {

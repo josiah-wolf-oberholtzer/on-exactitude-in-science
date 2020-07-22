@@ -1,36 +1,56 @@
 import { GPU } from 'gpu.js';
 
-const manyBody = () => {
-  const gpu = new GPU(),
-    constant = (x) => () => x;
+const forceGPU = () => {
+  const constant = (x) => () => x,
+    gpu = new GPU();
 
-  let nodes = [],
-    nDim = 2,
-    positions = [],
-    strength = constant(-30),
-    strengths,
+  let distanceMax2 = 10000000000.0,
     distanceMin2 = 1,
-    distanceMax2 = 10000000000.0,
-    kernel;
+    kernel,
+    nDim = 2,
+    nodes = [],
+    positions = [],
+    radii = [],
+    radius = constant(0),
+    strength = constant(-30),
+    strengths;
 
-  function kernel3d(positionsArray, strengthsArray) {
+  function kernel3d(positionsArray, radiiArray, strengthsArray) {
+    const thisX = positionsArray[this.thread.x][0],
+      thisY = positionsArray[this.thread.x][1],
+      thisZ = positionsArray[this.thread.x][2],
+      thisRadius = radiiArray[this.thread.x];
     let vx = 0.0,
       vy = 0.0,
-      vz = 0.0;
+      vz = 0.0,
+      weight = 0.0;
     for (let i = 0; i < this.constants.size; i++) {
-      const dx = positionsArray[i][0] - positionsArray[this.thread.x][0],
-        dy = positionsArray[i][1] - positionsArray[this.thread.x][1],
-        dz = positionsArray[i][2] - positionsArray[this.thread.x][2],
-        l = dx * dx + dy * dy + dz * dz;
-      if (l < this.constants.distanceMax2) {
-        if (l < this.constants.distanceMin2) {
-          l = Math.sqrt(this.constants.distanceMin2 * l);
+      const thatX = positionsArray[i][0],
+        thatY = positionsArray[i][1],
+        thatZ = positionsArray[i][2],
+        thatRadius = radiiArray[i],
+        thatStrength = strengthsArray[i],
+        deltaX = thatX - thisX,
+        deltaY = thatY - thisY,
+        deltaZ = thatZ - thisZ,
+        distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ,
+        cumRadius = thatRadius + thisRadius;
+      if (i != this.thread.x) {
+        if (distance < cumRadius * cumRadius) {
+          let otherDistance = (cumRadius - Math.sqrt(distance)) / (Math.sqrt(distance) * 1.0);
+          weight = this.constants.alpha * otherDistance * (thisRadius * thisRadius) / ((thisRadius * thisRadius) + thatRadius);
+          vx -= deltaX * weight;
+          vy -= deltaY * weight;
+          vz -= deltaZ * weight;
         }
-        let w = (strengthsArray[i] * this.constants.alpha) / l;
-        if (i != this.thread.x) {
-          vx += dx * w;
-          vy += dy * w;
-          vz += dz * w;
+        if (distance < this.constants.distanceMax2) {
+          if (distance < this.constants.distanceMin2) {
+            distance = Math.sqrt(this.constants.distanceMin2 * distance);
+          }
+          weight = (thatStrength * this.constants.alpha) / distance;
+          vx += deltaX * weight;
+          vy += deltaY * weight;
+          vz += deltaZ * weight;
         }
       }
     }
@@ -41,8 +61,8 @@ const manyBody = () => {
     const n = nodes.length;
     for (let i = 0; i < n; i++) {
       positions[nodes[i].index][0] = nodes[i].x;
-      if (nDim > 1) { positions[nodes[i].index][1] = nodes[i].y }
-      if (nDim > 2) { positions[nodes[i].index][2] = nodes[i].z }
+      if (nDim > 1) { positions[nodes[i].index][1] = nodes[i].y; }
+      if (nDim > 2) { positions[nodes[i].index][2] = nodes[i].z; }
     }
     return positions;
   }
@@ -56,15 +76,12 @@ const manyBody = () => {
           alpha: _,
           distanceMax2,
           distanceMin2,
-          size: n
+          size: n,
         }),
-        kernel(positions, strengths)
-      )
-      //velocityArray = velocities.toArray();
-      ;
+        kernel(positions, radii, strengths)
+      );
     for (let i = 0; i < n; i++) {
       const node = nodes[i],
-        // [vx, vy, vz] = velocityArray[i];
         [vx, vy, vz] = velocities[i];
       node.vx += vx;
       if (nDim > 1) { node.vy += vy; }
@@ -78,24 +95,52 @@ const manyBody = () => {
       settings = {
         loopMaxIterations: n,
         output: [n],
-        // pipeline: true,
       };
     strengths = new Array(nodes.length);
     positions = new Array(nodes.length);
     for (let i = 0; i < n; i++) {
+      radii[nodes[i].index] = +radius(nodes[i], i, nodes);
       strengths[nodes[i].index] = +strength(nodes[i], i, nodes);
-      positions[nodes[i].index] = [0.0, 0.0, 0.0]
+      positions[nodes[i].index] = [0.0, 0.0, 0.0];
     }
     // if (nDim === 1) { kernel = gpu.createKernel(kernel1d); }
     // if (nDim === 2) { kernel = gpu.createKernel(kernel2d); }
     if (nDim === 3) { kernel = gpu.createKernel(kernel3d, settings); }
-    // console.log(kernel);
   }
 
   force.initialize = function (initNodes, numDimensions) {
     nodes = initNodes;
     nDim = numDimensions;
     initialize();
+  };
+
+  force.distanceMax = function (_) {
+    if (arguments.length) {
+      distanceMax2 = _ * _;
+      return force;
+    }
+    return Math.sqrt(distanceMax2);
+  };
+
+  force.distanceMin = function (_) {
+    if (arguments.length) {
+      distanceMin2 = _ * _;
+      return force;
+    }
+    return Math.sqrt(distanceMin2);
+  };
+
+  force.radius = function (_) {
+    if (arguments.length) {
+      if (typeof _ === 'function') {
+        radius = _;
+      } else {
+        radius = constant(+_);
+      }
+      initialize();
+      return force;
+    }
+    return radius;
   };
 
   force.strength = function (_) {
@@ -111,23 +156,7 @@ const manyBody = () => {
     return strength;
   };
 
-  force.distanceMin = function(_) {
-    if (arguments.length) {
-      distanceMin2 = _ * _;
-      return force;
-    }
-    return Math.sqrt(distanceMin2);
-  };
-
-  force.distanceMax = function(_) {
-    if (arguments.length) {
-      distanceMax2 = _ * _;
-      return force;
-    }
-    return Math.sqrt(distanceMax2);
-  };
-
   return force;
 };
 
-export default manyBody;
+export default forceGPU;

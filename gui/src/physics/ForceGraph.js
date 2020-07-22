@@ -1,6 +1,6 @@
 import { dispatch } from 'd3-dispatch';
 import * as d3force3d from 'd3-force-3d';
-import forceManyBody from './manyBody';
+import forceGPU from './manyBody';
 
 const ForceGraph = () => {
   const nodeMap = new Map(),
@@ -13,7 +13,7 @@ const ForceGraph = () => {
       .alphaDecay(0.001)
       .velocityDecay(0.4)
       /*
-      .force('charge', d3force3d.forceManyBody()
+      .force('charge', d3force3d.forceGPU()
         .distanceMax(250)
         .distanceMin(25)
         .strength((d) => {
@@ -26,8 +26,20 @@ const ForceGraph = () => {
         })
         .theta(0.5))
       */
-      .force('charge', forceManyBody()
+      .force('charge', forceGPU()
         .distanceMax(50)
+        .radius((d) => {
+          if (d.type === 'edge') {
+            return 2;
+          } if (d.type === 'rudder') {
+            return 1;
+          }
+          const radius = (d.radius || 1) * 2;
+          if (d.selected) {
+            return radius + 5;
+          }
+          return radius;
+        })
         .strength((d) => {
           if (d.type === 'edge') {
             return 0.0;
@@ -39,8 +51,7 @@ const ForceGraph = () => {
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
         .distance((d) => 5 + (d.index % 100) / 100)
-        .iterations(3)
-      )
+        .iterations(3))
       /*
       .force('collision', d3force3d.forceCollide()
         .radius((d) => {

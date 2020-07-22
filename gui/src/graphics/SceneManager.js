@@ -20,8 +20,7 @@ const SceneManager = (container) => {
     ),
     controls = new OrbitControls(camera, canvas),
     event = dispatch('render'),
-    hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444),
-    pointLight = new THREE.PointLight(0xffffff, 1, 0, 2);
+    hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
 
   let frameId;
 
@@ -37,10 +36,10 @@ const SceneManager = (container) => {
   }
 
   function initShadows() {
-    pointLight.position.set(1, 1, 1);
-    pointLight.castShadow = true;
+    // pointLight.position.set(1, 1, 1);
+    // pointLight.castShadow = true;
     hemisphereLight.position.set(0, 1000, 0);
-    scene.add(pointLight);
+    // scene.add(pointLight);
     scene.add(hemisphereLight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
