@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   speedDial: {
     position: 'absolute',
     bottom: theme.spacing(2),
-    right: theme.spacing(2),
+    left: theme.spacing(2),
   },
   speedDialAction: {},
 }));
@@ -72,6 +72,7 @@ const Dial = (props) => {
             handleClose();
         }}
         tooltipOpen
+        tooltipPlacement="right"
         tooltipTitle="Focus"
       />
       { props.label !== null &&
@@ -81,6 +82,7 @@ const Dial = (props) => {
           icon={<AssessmentIcon />}
           onClick={handleClose}
           tooltipOpen
+          tooltipPlacement="right"
           tooltipTitle="Connections"
         />
       }
@@ -94,6 +96,7 @@ const Dial = (props) => {
             handleClose();
           }}
           tooltipOpen
+          tooltipPlacement="right"
           tooltipTitle="Discogs"
         />
       }

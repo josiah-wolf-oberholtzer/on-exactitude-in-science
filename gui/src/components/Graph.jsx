@@ -1,11 +1,11 @@
 import React from "react";
-import { connect } from 'react-redux';
+import { ForceGraph } from '../physics/ForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
+import { connect } from 'react-redux';
 import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
-import ForceGraphWorkerProxy from '../physics/ForceGraphWorkerProxy';
-import { ForceGraph } from '../physics/ForceGraph';
+import { push } from 'connected-react-router';
 
 const mapStateToProps = state => {
   return {
@@ -19,6 +19,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     fetchByEntity: (label, id) => dispatch(fetchByEntity({label, id})),
+    push: (label, id) => dispatch(push(`/${label}/${id}`)),
     selectEntity: (eid, label, name) => dispatch(selectEntity({eid, label, name})),
     deselectEntity: () => dispatch(deselectEntity()),
   }
@@ -62,7 +63,8 @@ class Graph extends React.Component {
         textLoader: this.textLoader,
     });
     this.threeGraph.on("doubleclick", (vertex) => {
-      this.props.fetchByEntity(vertex.label, vertex.eid);
+      //this.props.fetchByEntity(vertex.label, vertex.eid);
+      this.props.push(vertex.label, vertex.eid);
     });
     this.threeGraph.on("select", (vertex) => {
       this.props.selectEntity(vertex.eid, vertex.label, vertex.name);

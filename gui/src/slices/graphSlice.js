@@ -55,7 +55,7 @@ const fetchByEntity = createAsyncThunk(
         state.selected.eid = action.payload.eid;
         state.selected.label = action.payload.label;
         state.selected.name = action.payload.name;
-      }
+      },
     },
     extraReducers: {
       [fetchByEntity.pending]: (state) => {
@@ -84,6 +84,8 @@ const fetchByEntity = createAsyncThunk(
   }),
   { deselectEntity, selectEntity } = graphSlice.actions;
 
-export { deselectEntity, fetchByEntity, fetchRandom, selectEntity };
+export {
+  deselectEntity, fetchByEntity, fetchRandom, selectEntity,
+};
 
 export default graphSlice.reducer;

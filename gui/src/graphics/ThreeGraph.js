@@ -133,7 +133,9 @@ const ThreeGraph = (opts) => {
     textB.rotation.set(0, Math.PI * 1.5, 0);
     group.envelope = envelope;
     group.add(entity);
-    group.add(ring);
+    if (vertex.child_count) {
+      group.add(ring);
+    }
     group.add(textA);
     group.add(textB);
     entity.scale.setScalar(vertex.radius);

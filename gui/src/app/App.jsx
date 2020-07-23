@@ -1,11 +1,10 @@
 import React from 'react';
 import { ConnectedRouter } from 'connected-react-router'
-import { Switch, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
 import { Dial, EntityCaption, Fetcher, Graph, Loading, Nav } from '../components';
-import { theme } from './theme';
+import { Switch, Route } from 'react-router-dom';
 import { history } from './store';
-import { useRouteMatch } from "react-router-dom";
+import { theme } from './theme';
 
 const App = () => {
   return (
@@ -20,8 +19,8 @@ const App = () => {
         <CssBaseline />
         <Graph />
         <Nav />
-        <EntityCaption />
         <Dial />
+        <EntityCaption />
         <Loading />
       </ThemeProvider>
     </ConnectedRouter>

@@ -37,7 +37,7 @@ const forceGPU = () => {
         cumRadius = thatRadius + thisRadius;
       if (i != this.thread.x) {
         if (distance < cumRadius * cumRadius) {
-          let otherDistance = (cumRadius - Math.sqrt(distance)) / (Math.sqrt(distance) * 1.0);
+          const otherDistance = (cumRadius - Math.sqrt(distance)) / (Math.sqrt(distance) * 1.0);
           weight = this.constants.alpha * otherDistance * (thisRadius * thisRadius) / ((thisRadius * thisRadius) + thatRadius);
           vx -= deltaX * weight;
           vy -= deltaY * weight;

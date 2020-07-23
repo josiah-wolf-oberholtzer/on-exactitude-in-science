@@ -16,15 +16,11 @@ const ForceGraph = () => {
         .distanceMax(50)
         .radius((d) => {
           if (d.type === 'edge') {
-            return 2;
+            return 2.0;
           } if (d.type === 'rudder') {
-            return 1;
+            return 0.5;
           }
-          const radius = (d.radius || 1);
-          if (d.selected) {
-            return radius + 5;
-          }
-          return radius;
+          return 1.0 * (d.radius || 1.0);
         })
         .strength((d) => {
           if (d.type === 'edge') {
@@ -36,8 +32,13 @@ const ForceGraph = () => {
         }))
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => 2)
-        .iterations(1))
+        .distance((d) => {
+          if (d.type === 'rudder') {
+            return 10;
+          }
+          return (d.source.radius || 1) * (d.target.radius || 1);
+        })
+        .iterations(3))
       .force('centering', d3force3d.forceCenter());
 
   function update(vertices, edges) {
