@@ -15,6 +15,7 @@ const ForceGraph = () => {
       .force('charge', forceGPU()
         .distanceMax(50)
         .radius((d) => {
+          return 0.0;
           if (d.type === 'edge') {
             return 2.0;
           } if (d.type === 'rudder') {
@@ -24,20 +25,15 @@ const ForceGraph = () => {
         })
         .strength((d) => {
           if (d.type === 'edge') {
-            return -0.25;
-          } if (d.type === 'rudder') {
             return -0.5;
+          } if (d.type === 'rudder') {
+            return -1.0;
           }
-          return -1.0;
+          return -3.0;
         }))
       .force('links', d3force3d.forceLink()
         .id((d) => d.id)
-        .distance((d) => {
-          if (d.type === 'rudder') {
-            return 10;
-          }
-          return (d.source.radius || 1) * (d.target.radius || 1);
-        })
+        .distance((d) => (d.source.radius || 1) + (d.target.radius || 1))
         .iterations(3))
       .force('centering', d3force3d.forceCenter());
 

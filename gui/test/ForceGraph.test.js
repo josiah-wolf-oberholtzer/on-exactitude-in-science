@@ -42,7 +42,7 @@ const { expect } = chai,
   ), {}),
   filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys));
 
-describe('Scene Graph', () => {
+describe('Force Graph', () => {
   describe('Initially', () => {
     const graph = ForceGraph();
 

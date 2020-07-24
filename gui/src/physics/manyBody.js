@@ -35,19 +35,23 @@ const forceGPU = () => {
         deltaZ = thatZ - thisZ,
         distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ,
         cumRadius = thatRadius + thisRadius;
-      if (i != this.thread.x) {
+      if (i !== this.thread.x) {
         if (distance < cumRadius * cumRadius) {
           const otherDistance = (cumRadius - Math.sqrt(distance)) / (Math.sqrt(distance) * 1.0);
-          weight = this.constants.alpha * otherDistance * (thisRadius * thisRadius) / ((thisRadius * thisRadius) + thatRadius);
+          weight = (
+            this.constants.alpha * otherDistance
+            * ((thisRadius * thisRadius) / ((thisRadius * thisRadius) + thatRadius))
+          );
           vx -= deltaX * weight;
           vy -= deltaY * weight;
           vz -= deltaZ * weight;
         }
         if (distance < this.constants.distanceMax2) {
+          let otherDistance = distance;
           if (distance < this.constants.distanceMin2) {
-            distance = Math.sqrt(this.constants.distanceMin2 * distance);
+            otherDistance = Math.sqrt(this.constants.distanceMin2 * distance);
           }
-          weight = (thatStrength * this.constants.alpha) / distance;
+          weight = (thatStrength * this.constants.alpha) / otherDistance;
           vx += deltaX * weight;
           vy += deltaY * weight;
           vz += deltaZ * weight;
@@ -69,8 +73,8 @@ const forceGPU = () => {
 
   function force(_) {
     if (!nodes.length) { return; }
+    positions = collectPositions();
     const n = nodes.length,
-      positions = collectPositions(),
       velocities = (
         kernel.setConstants({
           alpha: _,
@@ -96,8 +100,9 @@ const forceGPU = () => {
         loopMaxIterations: n,
         output: [n],
       };
-    strengths = new Array(nodes.length);
     positions = new Array(nodes.length);
+    radii = new Array(nodes.length);
+    strengths = new Array(nodes.length);
     for (let i = 0; i < n; i++) {
       radii[nodes[i].index] = +radius(nodes[i], i, nodes);
       strengths[nodes[i].index] = +strength(nodes[i], i, nodes);
