@@ -6,7 +6,7 @@ import forceGPU from './manyBody';
 const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
   buildVertexAndEdgeMaps = (newVertices, newEdges) => {
     const newVertexMap = new Map(newVertices.map((vertex) => {
-        const extra = { 
+        const extra = {
           position: new Vector3(),
           radius: Math.sqrt(vertex.child_count + 1),
           rudderPosition: new Vector3(),
@@ -14,8 +14,8 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         return [vertex.id, { ...vertex, ...extra }];
       })),
       newEdgeMap = new Map(newEdges.map((edge) => {
-        const extra = { 
-          sourcePosition: new Vector3(), 
+        const extra = {
+          sourcePosition: new Vector3(),
           targetPosition: new Vector3(),
         };
         if (edgeRequiresBezier(edge)) {

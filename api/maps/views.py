@@ -4,7 +4,7 @@ import aiohttp.web
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P, Scope
 
-from maps.gremlin import textContainsFuzzy
+from maps.gremlin import textFuzzy, textContainsFuzzy
 
 routes = aiohttp.web.RouteTableDef()
 
@@ -215,10 +215,15 @@ async def get_search(request):
         raise aiohttp.web.HTTPBadRequest(reason="Query too short")
     limit = validate_limit(request)
     session = await request.app["goblin"].session()
-    has = ["name", textContainsFuzzy(query)]
+    has_contains_fuzzy = ["name", textContainsFuzzy(query + " ") ]
+    has_fuzzy = ["name", textFuzzy(query + " ")]
     if vertex_label:
-        has.insert(0, vertex_label)
-    traversal = project_vertex(session.g.V().has(*has).limit(limit))
+        has_contains_fuzzy.insert(0, vertex_label)
+        has_fuzzy.insert(0, vertex_label)
+    traversal = project_vertex(session.g.V().or_(
+        __.has(*has_contains_fuzzy),
+        __.has(*has_fuzzy),
+    ).limit(limit))
     result = await traversal.toList()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])

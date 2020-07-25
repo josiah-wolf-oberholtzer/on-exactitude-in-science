@@ -33,3 +33,5 @@ rules:
   - var: always
     let: always
     const: always
+  sort-imports:
+  - error

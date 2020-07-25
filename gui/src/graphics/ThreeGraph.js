@@ -205,15 +205,6 @@ const ThreeGraph = (opts) => {
     graphObject.remove(envelope.line);
   }
 
-  function onTicked(data) {
-    data.vertices.entrances.forEach(onVertexEnter);
-    data.vertices.exits.forEach(onVertexExit);
-    data.vertices.updates.forEach(onVertexUpdate);
-    data.edges.entrances.forEach(onEdgeEnter);
-    data.edges.exits.forEach(onEdgeExit);
-    data.edges.updates.forEach(onEdgeUpdate);
-  }
-
   function init() {
     forceGraph.on('vertexEnter', onVertexEnter);
     forceGraph.on('vertexUpdate', onVertexUpdate);
@@ -221,7 +212,6 @@ const ThreeGraph = (opts) => {
     forceGraph.on('edgeEnter', onEdgeEnter);
     forceGraph.on('edgeUpdate', onEdgeUpdate);
     forceGraph.on('edgeExit', onEdgeExit);
-    // forceGraph.on('ticked', onTicked);
     sceneManager.scene.add(graphObject);
     sceneManager.on('render', forceGraph.tick);
   }
