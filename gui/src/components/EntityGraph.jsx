@@ -1,5 +1,5 @@
 import React from "react";
-import { ForceGraph } from '../physics/ForceGraph';
+import ForceGraph from '../physics/NewForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
@@ -25,7 +25,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-class Graph extends React.Component {
+class EntityGraph extends React.Component {
 
   static defaultProps = {
     center: null,
@@ -101,7 +101,4 @@ class Graph extends React.Component {
   }
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Graph);
+export default connect(mapStateToProps, mapDispatchToProps)(EntityGraph);

@@ -113,6 +113,7 @@ const ThreeGraph = (opts) => {
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
       textA = textLoader.loadMesh(vertex.name),
       textB = textA.clone(false),
+      radius = vertex.radius || 1,
       envelope = {
         entity,
         entityMaterial,
@@ -127,8 +128,8 @@ const ThreeGraph = (opts) => {
     entity.castShadow = true;
     ring.receiveShadow = true;
     ring.castShadow = true;
-    textA.position.set(0, 0, vertex.radius + textA.geometry.parameters.width / 2);
-    textB.position.set(0, 0, vertex.radius + textB.geometry.parameters.width / 2);
+    textA.position.set(0, 0, radius + textA.geometry.parameters.width / 2);
+    textB.position.set(0, 0, radius + textB.geometry.parameters.width / 2);
     textA.rotation.set(0, Math.PI * 0.5, 0);
     textB.rotation.set(0, Math.PI * 1.5, 0);
     group.envelope = envelope;
@@ -138,10 +139,10 @@ const ThreeGraph = (opts) => {
     }
     group.add(textA);
     group.add(textB);
-    entity.scale.setScalar(vertex.radius);
-    ring.scale.setScalar(vertex.radius);
-    group.position.set(vertex.x, vertex.y, vertex.z);
-    group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    entity.scale.setScalar(radius);
+    ring.scale.setScalar(radius);
+    group.position.copy(vertex.position);
+    group.lookAt(vertex.rudderPosition);
     controls.objects().push(entity);
     envelopes.set(vertex.id, envelope);
     graphObject.add(group);
@@ -150,8 +151,8 @@ const ThreeGraph = (opts) => {
   function onVertexUpdate(vertex) {
     const envelope = envelopes.get(vertex.id),
       { group } = envelope;
-    group.position.set(vertex.x, vertex.y, vertex.z);
-    group.lookAt(vertex.rudder.x, vertex.rudder.y, vertex.rudder.z);
+    group.position.copy(vertex.position);
+    group.lookAt(vertex.rudderPosition);
   }
 
   function onVertexExit(vertex) {
@@ -160,30 +161,43 @@ const ThreeGraph = (opts) => {
   }
 
   function onEdgeEnter(edge) {
-    const curve = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(edge.source.x, edge.source.y, edge.source.z),
-        new THREE.Vector3(edge.x, edge.y, edge.z),
-        new THREE.Vector3(edge.target.x, edge.target.y, edge.target.z),
-      ),
-      points = curve.getPoints(50),
-      geometry = new THREE.BufferGeometry().setFromPoints(points),
+    const source = edge.sourcePosition,
+      target = edge.targetPosition,
       lineColor = edge.label === 'alias_of' ? 0xcc9933 : 0x3399cc,
       lineMaterial = new THREE.LineBasicMaterial({ color: lineColor }),
+      points = [],
+      geometry = new THREE.BufferGeometry(),
       line = new THREE.Line(geometry, lineMaterial),
       envelope = {
-        curve, geometry, line, edge,
+        geometry, line, edge,
       };
+    if (edge.controlPosition) {
+      const control = edge.controlPosition,
+        curve = new THREE.QuadraticBezierCurve3(source, control, target);
+      points.push(...curve.getPoints(25));
+    } else {
+      points.push(source);
+      points.push(target);
+    }
+    geometry.setFromPoints(points);
     envelopes.set(edge.id, envelope);
     graphObject.add(line);
   }
 
   function onEdgeUpdate(edge) {
     const envelope = envelopes.get(edge.id),
-      { curve } = envelope;
-    curve.v0.set(edge.source.x, edge.source.y, edge.source.z);
-    curve.v1.set(edge.x, edge.y, edge.z);
-    curve.v2.set(edge.target.x, edge.target.y, edge.target.z);
-    envelope.geometry.setFromPoints(curve.getPoints(10));
+      source = edge.sourcePosition,
+      target = edge.targetPosition,
+      points = [];
+    if (edge.controlPosition) {
+      const control = edge.controlPosition,
+        curve = new THREE.QuadraticBezierCurve3(source, control, target);
+      points.push(...curve.getPoints(25));
+    } else {
+      points.push(source);
+      points.push(target);
+    }
+    envelope.geometry.setFromPoints(points);
   }
 
   function onEdgeExit(edge) {
@@ -201,15 +215,13 @@ const ThreeGraph = (opts) => {
   }
 
   function init() {
-    /*
     forceGraph.on('vertexEnter', onVertexEnter);
     forceGraph.on('vertexUpdate', onVertexUpdate);
     forceGraph.on('vertexExit', onVertexExit);
     forceGraph.on('edgeEnter', onEdgeEnter);
     forceGraph.on('edgeUpdate', onEdgeUpdate);
     forceGraph.on('edgeExit', onEdgeExit);
-    */
-    forceGraph.on('ticked', onTicked);
+    // forceGraph.on('ticked', onTicked);
     sceneManager.scene.add(graphObject);
     sceneManager.on('render', forceGraph.tick);
   }

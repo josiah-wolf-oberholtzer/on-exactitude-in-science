@@ -41,7 +41,7 @@ const mapDispatchToProps = dispatch => ({
   refocusCamera: () => dispatch(refocusCamera()),
 });
 
-const Dial = (props) => {
+const EntityDial = (props) => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
@@ -104,8 +104,4 @@ const Dial = (props) => {
   )
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Dial);
-
+export default connect(mapStateToProps, mapDispatchToProps)(EntityDial);

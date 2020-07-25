@@ -6,15 +6,22 @@ import forceGPU from './manyBody';
 const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
   buildVertexAndEdgeMaps = (newVertices, newEdges) => {
     const newVertexMap = new Map(newVertices.map((vertex) => {
-        const positions = { position: new Vector3(), rudderPosition: new Vector3() };
-        return [vertex.id, { ...vertex, ...positions }];
+        const extra = { 
+          position: new Vector3(),
+          radius: Math.sqrt(vertex.child_count + 1),
+          rudderPosition: new Vector3(),
+        };
+        return [vertex.id, { ...vertex, ...extra }];
       })),
       newEdgeMap = new Map(newEdges.map((edge) => {
-        const positions = { sourcePosition: new Vector3(), targetPosition: new Vector3() };
+        const extra = { 
+          sourcePosition: new Vector3(), 
+          targetPosition: new Vector3(),
+        };
         if (edgeRequiresBezier(edge)) {
-          positions.controlPosition = new Vector3();
+          extra.controlPosition = new Vector3();
         }
-        return [edge.id, { ...edge, ...positions }];
+        return [edge.id, { ...edge, ...extra }];
       }));
     return { newVertexMap, newEdgeMap };
   },
@@ -188,7 +195,7 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         };
         if (simulation.alpha() >= simulation.alphaMin()) {
           simulation.tick();
-          // updateVertexAndEdgePositions(vertexMap, edgeMap, nodeMap);
+          updateVertexAndEdgePositions(vertexMap, edgeMap, nodeMap);
           dispatchEvents(result);
         }
       },
