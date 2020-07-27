@@ -1,10 +1,7 @@
-import { dispatch } from 'd3-dispatch';
 import {
-  Plane,
-  Raycaster,
-  Vector2,
-  Vector3,
+  Plane, Raycaster, Vector2, Vector3,
 } from 'three';
+import { dispatch } from 'd3-dispatch';
 
 const DragControls = (objects, _camera, canvas) => {
   const plane = new Plane(),
@@ -173,6 +170,8 @@ const DragControls = (objects, _camera, canvas) => {
 
   return {
     activate,
+    add(object) { objects.push(object); },
+    remove(object) { objects.splice(objects.indexOf(object), 1); },
     deactivate,
     dispose,
     enabled(_) { return arguments.length > 0 ? enabled = _ : enabled; },

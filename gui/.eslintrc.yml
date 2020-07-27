@@ -32,6 +32,6 @@ rules:
   - warn
   - var: always
     let: always
-    const: always
+    const: consecutive
   sort-imports:
   - error

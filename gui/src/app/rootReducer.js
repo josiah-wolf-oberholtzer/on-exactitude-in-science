@@ -1,7 +1,7 @@
-import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
-import graphReducer from '../slices/graphSlice';
+import { connectRouter } from 'connected-react-router';
 import cameraReducer from '../slices/cameraSlice';
+import graphReducer from '../slices/graphSlice';
 
 const createRootReducer = (history) => combineReducers({
   camera: cameraReducer,

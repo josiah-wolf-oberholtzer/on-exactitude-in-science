@@ -17,7 +17,7 @@ const urlBase = 'http://localhost:9090',
     return response;
   },
   search = async (query, label) => {
-    const labels = ["artist", "company", "master", "release", "track"],
+    const labels = ['artist', 'company', 'master', 'release', 'track'],
       url = labels.includes(label) ? `${urlBase}/search/${label}` : `${urlBase}/search`,
       response = axios.get(url, { params: { q: query } });
     return response;

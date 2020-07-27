@@ -2,7 +2,7 @@ import random
 
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Cardinality, P, Scope
+from gremlin_python.process.traversal import Cardinality, Operator, P, Scope
 
 from maps.gremlin import textFuzzy, textContainsFuzzy
 
@@ -56,7 +56,13 @@ def project_edge(traversal):
 
 def project_vertex(traversal):
     return (
-        traversal.project("id", "label", "values", "edge_count", "child_count",)
+        traversal.project(
+            "id",
+            "label",
+            "values",
+            "total_edge_count",
+            "child_count",
+        )
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
@@ -114,10 +120,11 @@ async def get_locality(request):
     #    return aiohttp.web.json_response(cached)
 
     session = await request.app["goblin"].session()
+    traversal = session.g
     if vertex_label:
-        traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+        traversal = traversal.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
     else:
-        traversal = session.g.V(vertex_id)
+        traversal = traversal.V(vertex_id)
     traversal = traversal.union(
         project_vertex(__.identity()),
         project_edge(
@@ -144,6 +151,7 @@ async def get_locality(request):
     edges = {}
     vertices = {}
     root_vertex = cleanup_vertex(result[0], request.app["goblin"])
+    root_vertex["is_center"] = True
     vertices[root_vertex["id"]] = root_vertex
     for i, entry in enumerate(result[1:]):
         source, edge, target = entry["source"], entry["edge"], entry["target"]
@@ -154,6 +162,13 @@ async def get_locality(request):
         edge = cleanup_edge(edge)
         edge.update(source=source["id"], target=target["id"])
         edges[edge["id"]] = edge
+
+    for entry in result[1:]:
+        source, target = entry["source"], entry["target"]
+        vertices[source["id"]].setdefault("edge_count", 0)
+        vertices[source["id"]]["edge_count"] += 1
+        vertices[target["id"]].setdefault("edge_count", 0)
+        vertices[target["id"]]["edge_count"] += 1
 
     traversal = (
         session.g.V()
@@ -180,6 +195,7 @@ async def get_locality(request):
             "vertices": [vertex for _, vertex in sorted(vertices.items())],
         }
     }
+
     # await cache.set(cache_key, data)
     return aiohttp.web.json_response(data)
 

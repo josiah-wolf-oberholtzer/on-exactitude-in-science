@@ -1,5 +1,5 @@
-import { replace } from 'connected-react-router';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { replace } from 'connected-react-router';
 import * as graphAPI from '../api/graphAPI';
 
 const fetchByEntity = createAsyncThunk(

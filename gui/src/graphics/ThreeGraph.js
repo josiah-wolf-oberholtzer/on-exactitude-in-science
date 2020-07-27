@@ -10,7 +10,6 @@ const ThreeGraph = (opts) => {
     cylinderGeometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 32),
     sphereGeometry = new THREE.SphereGeometry(0.75, 32, 32),
     tetrahedronGeometry = new THREE.TetrahedronGeometry(1.5),
-    ringGeometry = new THREE.RingGeometry(1.5, 2, 32),
     labelToGeo = {
       artist: tetrahedronGeometry,
       company: cubeGeometry,
@@ -105,15 +104,20 @@ const ThreeGraph = (opts) => {
   });
 
   function onVertexEnter(vertex) {
-    const group = new THREE.Group(),
+    const radius = vertex.radius || 1,
+      group = new THREE.Group(),
       entityMaterial = new THREE.MeshPhongMaterial({ color: 0xeec808, side: THREE.DoubleSide }),
+      ringGeometry = new THREE.RingGeometry(
+        radius + 1.5,
+        radius + 1.5 + ((vertex.child_count || 1) * 0.25),
+        32,
+      ),
       ringMaterial = new THREE.MeshPhongMaterial({ color: 0x08ccc8, side: THREE.DoubleSide }),
       entityGeometry = labelToGeo[vertex.label],
       entity = new THREE.Mesh(entityGeometry, entityMaterial),
       ring = new THREE.Mesh(ringGeometry, ringMaterial),
       textA = textLoader.loadMesh(vertex.name),
       textB = textA.clone(false),
-      radius = vertex.radius || 1,
       envelope = {
         entity,
         entityMaterial,
@@ -140,7 +144,6 @@ const ThreeGraph = (opts) => {
     group.add(textA);
     group.add(textB);
     entity.scale.setScalar(radius);
-    ring.scale.setScalar(radius);
     group.position.copy(vertex.position);
     group.lookAt(vertex.rudderPosition);
     controls.objects().push(entity);
