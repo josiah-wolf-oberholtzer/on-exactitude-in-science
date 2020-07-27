@@ -170,8 +170,8 @@ const DragControls = (objects, _camera, canvas) => {
 
   return {
     activate,
-    add(object) { objects.push(object); },
-    remove(object) { objects.splice(objects.indexOf(object), 1); },
+    add(_) { objects.push(_); },
+    remove(_) { objects.splice(objects.indexOf(_), 1); },
     deactivate,
     dispose,
     enabled(_) { return arguments.length > 0 ? enabled = _ : enabled; },

@@ -143,6 +143,7 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         .alphaDecay(0.001)
         .velocityDecay(0.4)
         .force('charge', forceGPU()
+        // .force('charge', d3force3d.forceManyBody()
           .distanceMax(50)
           .radius((d) => {
             if (d.type === 'edge') {
@@ -165,21 +166,12 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
           .distance((d) => (d.source.radius || 1) + (d.target.radius || 1))
           .iterations(3))
         .force('centering', d3force3d.forceCenter()),
-      dispatcher = dispatch('vertexEnter', 'vertexExit', 'vertexUpdate', 'edgeEnter', 'edgeExit', 'edgeUpdate'),
+      dispatcher = dispatch('vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick', 'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick'),
       edgeMap = new Map(),
       linkMap = new Map(),
       nodeMap = new Map(),
       vertexMap = new Map(),
       simulation = initSimulation(),
-      dispatchEvents = (result) => {
-        (result.vertices.entrances || []).forEach((vertex) => { dispatcher.call('vertexEnter', vertex, vertex); });
-        (result.vertices.exits || []).forEach((vertex) => { dispatcher.call('vertexExit', vertex, vertex); });
-        (result.vertices.updates || []).forEach((vertex) => { dispatcher.call('vertexUpdate', vertex, vertex); });
-        (result.edges.entrances || []).forEach((edge) => { dispatcher.call('edgeEnter', edge, edge); });
-        (result.edges.exits || []).forEach((edge) => { dispatcher.call('edgeExit', edge, edge); });
-        (result.edges.updates || []).forEach((edge) => { dispatcher.call('edgeUpdate', edge, edge); });
-        return result;
-      },
       pin = (nodeID, x, y, z) => {
         const node = nodeMap.get(nodeID);
         if (node) {
@@ -189,14 +181,11 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         }
       },
       tick = () => {
-        const result = {
-          vertices: { updates: Array.from(vertexMap.values()) },
-          edges: { updates: Array.from(edgeMap.values()) },
-        };
         if (simulation.alpha() >= simulation.alphaMin()) {
           simulation.tick();
           updateVertexAndEdgePositions(vertexMap, edgeMap, nodeMap);
-          dispatchEvents(result);
+          vertexMap.forEach((vertex) => { dispatcher.call('vertexTick', vertex, vertex); });
+          edgeMap.forEach((edge) => { dispatcher.call('edgeTick', edge, edge); });
         }
       },
       unpin = (nodeID) => {
@@ -214,7 +203,12 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         updateSimulation(simulation, nodeMap, linkMap);
         const result = updateOldVertexAndEdgeMaps(newVertexMap, vertexMap, newEdgeMap, edgeMap);
         updateVertexAndEdgePositions(vertexMap, edgeMap, nodeMap);
-        dispatchEvents(result);
+        result.vertices.entrances.forEach((vertex) => { dispatcher.call('vertexEnter', vertex, vertex); });
+        result.vertices.exits.forEach((vertex) => { dispatcher.call('vertexExit', vertex, vertex); });
+        result.vertices.updates.forEach((vertex) => { dispatcher.call('vertexUpdate', vertex, vertex); });
+        result.edges.entrances.forEach((edge) => { dispatcher.call('edgeEnter', edge, edge); });
+        result.edges.exits.forEach((edge) => { dispatcher.call('edgeExit', edge, edge); });
+        result.edges.updates.forEach((edge) => { dispatcher.call('edgeUpdate', edge, edge); });
       };
     return {
       edgeMap: () => edgeMap,

@@ -22,12 +22,12 @@ const ThreeVertex = () => {
       new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide }),
     ),
     childRingMesh = new THREE.Mesh(
-      new THREE.RingGeometry(),
-      new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide }),
+      new THREE.RingBufferGeometry(),
+      new THREE.MeshPhongMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
     ),
     edgeRingMesh = new THREE.Mesh(
-      new THREE.RingGeometry(),
-      new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide }),
+      new THREE.RingBufferGeometry(),
+      new THREE.MeshPhongMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
     ),
     pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
 
@@ -52,9 +52,9 @@ const ThreeVertex = () => {
     const baseRadius = newData.radius,
       edgeRingVisible = newData.edge_count < newData.total_edge_count,
       edgeRingInnerRadius = baseRadius + 0.5,
-      edgeRingOuterRadius = edgeRingInnerRadius + (0.25 * +edgeRingVisible),
+      edgeRingOuterRadius = edgeRingInnerRadius + (0.1 * +edgeRingVisible),
       childRingInnerRadius = edgeRingOuterRadius + 0.25,
-      childRingOuterRadius = childRingInnerRadius + (Math.sqrt(newData.child_count || 1) * 0.25),
+      childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) * 0.25),
       childRingVisible = newData.child_count > 0;
     return {
       baseRadius,
@@ -68,29 +68,32 @@ const ThreeVertex = () => {
   }
 
   function enter(newData, newScene, newControls, textLoader) {
+    controls = newControls;
+    scene = newScene;
     scene.add(group);
     controls.add(coreMesh);
     textA = textLoader.loadMesh(newData.name);
     textB = textA.clone(false);
     textA.rotation.set(0, Math.PI * 0.5, 0);
     textB.rotation.set(0, Math.PI * 1.5, 0);
+    group.add(textA);
+    group.add(textB);
     update(newData);
-    controls = newControls;
-    scene = newScene;
+    tick(newData);
   }
 
   function update(newData) {
     const newRadii = calculateRadii(newData);
+    const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
 
     if (data.label !== newData.label) {
       coreMesh.geometry = calculateCoreGeometry(newData.label);
     }
 
-    if (radii.baseRadius !== newRadii.baseRadius) {
-      const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
-      textA.position.set(0, 0, textPositionZ);
-      textB.position.set(0, 0, textPositionZ);
-    }
+    coreMesh.scale.setScalar(newRadii.baseRadius);
+
+    textA.position.set(0, 0, textPositionZ);
+    textB.position.set(0, 0, textPositionZ);
 
     if (!radii.childRingVisible && newRadii.childRingVisible) {
       group.add(childRingMesh);
@@ -98,14 +101,11 @@ const ThreeVertex = () => {
       group.remove(childRingMesh);
     }
 
-    if ((radii.childRingInnerRadius !== newRadii.childRingInnerRadius)
-      || (radii.childRingOuterRadius !== newRadii.childRingOuterRadius)) {
-      childRingMesh.geometry = new THREE.RingGeometry(
-        newRadii.childRingInnerRadius,
-        newRadii.childRingOuterRadius,
-        32,
-      );
-    }
+    childRingMesh.geometry = new THREE.RingBufferGeometry(
+      newRadii.childRingInnerRadius,
+      newRadii.childRingOuterRadius,
+      32,
+    );
 
     if (!radii.edgeRingVisible && newRadii.edgeRingVisible) {
       group.add(edgeRingMesh);
@@ -113,25 +113,20 @@ const ThreeVertex = () => {
       group.remove(edgeRingMesh);
     }
 
-    if ((radii.edgeRingInnerRadius !== newRadii.edgeRingInnerRadius)
-      || (radii.edgeRingOuterRadius !== newRadii.edgeRingOuterRadius)) {
-      edgeRingMesh.geometry = new THREE.RingGeometry(
-        newRadii.edgeRingInnerRadius,
-        newRadii.edgeRingOuterRadius,
-        32,
-      );
-    }
-
-    group.position.copy(newData.position);
-    group.lookAt(newData.rudderPosition);
+    edgeRingMesh.geometry = new THREE.RingBufferGeometry(
+      newRadii.edgeRingInnerRadius,
+      newRadii.edgeRingOuterRadius,
+      32,
+    );
 
     radii = newRadii;
-    Object.assign(data, newData);
   }
 
   function exit() {
     scene.remove(group);
     controls.remove(coreMesh);
+    group.remove(textA);
+    group.remove(textB);
     scene = null;
     data = {};
     controls = null;
@@ -145,15 +140,23 @@ const ThreeVertex = () => {
     group.remove(pointLight);
   }
 
-  function tick() { }
+  function tick(newData) {
+    group.position.copy(newData.position);
+    group.lookAt(newData.rudderPosition);
+    edgeRingMesh.rotation.y += 0.1;
+    Object.assign(data, newData);
+  }
 
   const closure = {
     deselect,
     enter,
     exit,
+    mouseout: () => {},
+    mouseover: () => {},
     select,
     tick,
     update,
+    data: () => data,
   };
 
   function init() {
@@ -165,8 +168,6 @@ const ThreeVertex = () => {
     edgeRingMesh.receiveShadow = true;
     group.envelope = closure;
     group.add(coreMesh);
-    group.add(textA);
-    group.add(textB);
   }
 
   init();
