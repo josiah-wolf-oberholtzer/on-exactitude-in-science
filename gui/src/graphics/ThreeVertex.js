@@ -19,15 +19,15 @@ const ThreeVertex = () => {
   const group = new THREE.Group(),
     coreMesh = new THREE.Mesh(
       new THREE.BufferGeometry(),
-      new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide }),
+      new THREE.MeshLambertMaterial({ color: 0xffffff }),
     ),
     childRingMesh = new THREE.Mesh(
       new THREE.RingBufferGeometry(),
-      new THREE.MeshPhongMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
+      new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
     ),
     edgeRingMesh = new THREE.Mesh(
       new THREE.RingBufferGeometry(),
-      new THREE.MeshPhongMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
+      new THREE.MeshLambertMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
     ),
     pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
 
@@ -87,6 +87,7 @@ const ThreeVertex = () => {
     const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
 
     if (data.label !== newData.label) {
+      coreMesh.geometry.dispose();
       coreMesh.geometry = calculateCoreGeometry(newData.label);
     }
 
@@ -101,6 +102,7 @@ const ThreeVertex = () => {
       group.remove(childRingMesh);
     }
 
+    childRingMesh.geometry.dispose();
     childRingMesh.geometry = new THREE.RingBufferGeometry(
       newRadii.childRingInnerRadius,
       newRadii.childRingOuterRadius,
@@ -113,6 +115,7 @@ const ThreeVertex = () => {
       group.remove(edgeRingMesh);
     }
 
+    edgeRingMesh.geometry.dispose();
     edgeRingMesh.geometry = new THREE.RingBufferGeometry(
       newRadii.edgeRingInnerRadius,
       newRadii.edgeRingOuterRadius,

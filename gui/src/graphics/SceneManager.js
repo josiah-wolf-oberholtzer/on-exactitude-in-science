@@ -6,7 +6,11 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { dispatch } from 'd3-dispatch';
 
 const SceneManager = (container) => {
-  const renderer = new THREE.WebGLRenderer({ antialias: true }),
+  const renderer = new THREE.WebGLRenderer({
+      alpha: false,
+      antialias: true,
+      stencil: false,
+    }),
     composer = new EffectComposer(renderer),
     canvas = renderer.domElement,
     scene = new THREE.Scene(),

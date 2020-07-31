@@ -1,7 +1,7 @@
 import * as d3force3d from 'd3-force-3d';
 import { Vector3 } from 'three';
 import { dispatch } from 'd3-dispatch';
-import forceGPU from './manyBody';
+import forceManyBodyGPU from './forceManyBodyGPU';
 
 const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
   buildVertexAndEdgeMaps = (newVertices, newEdges) => {
@@ -140,11 +140,14 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         .stop()
         .alpha(1)
         .numDimensions(3)
-        .alphaDecay(0.001)
-        .velocityDecay(0.4)
-        .force('charge', forceGPU()
-        // .force('charge', d3force3d.forceManyBody()
-          .distanceMax(50)
+        .alphaDecay(0.01)
+        .velocityDecay(0.5)
+        // .force('charge', forceManyBodyGPU()
+        .force('charge', d3force3d.forceManyBody()
+          .distanceMax(250)
+          .distanceMin(10)
+          // .theta(0.5)
+          /*
           .radius((d) => {
             if (d.type === 'edge') {
               return 2.0;
@@ -153,6 +156,7 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
             }
             return 1.0 * (d.radius || 1.0);
           })
+          */
           .strength((d) => {
             if (d.type === 'edge') {
               return -0.5;
@@ -165,6 +169,15 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
           .id((d) => d.id)
           .distance((d) => (d.source.radius || 1) + (d.target.radius || 1))
           .iterations(3))
+        .force('x', d3force3d.forceX().strength((d) => {
+          return d.type === "rudder" ? 0.0 : 0.01
+        }))
+        .force('y', d3force3d.forceY().strength((d) => {
+          return d.type === "rudder" ? 0.0 : 0.01
+        }))
+        .force('z', d3force3d.forceZ().strength((d) => {
+          return d.type === "rudder" ? 0.0 : 0.01
+        }))
         .force('centering', d3force3d.forceCenter()),
       dispatcher = dispatch('vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick', 'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick'),
       edgeMap = new Map(),
