@@ -2,7 +2,8 @@ DATASET_YEAR ?= 2020
 DATASET_MONTH ?= 06
 DATASET_DAY ?= 01
 DATASET_TIMESTAMP := ${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}
-LIMIT ?= 100000
+LIMIT ?= 10000
+WORKERS ?= 8
 
 fetch-dataset:
 	mkdir -p data/
@@ -20,7 +21,7 @@ wait-for-janusgraph:
 	docker-compose run --rm janusgraph-healthcheck
 
 load-data: wait-for-janusgraph
-	docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers 8
+	time docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers ${WORKERS}
 
 load-schema: wait-for-janusgraph
 	docker-compose run --rm api python3 -m maps schema load
