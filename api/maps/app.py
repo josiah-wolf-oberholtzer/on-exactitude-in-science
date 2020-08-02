@@ -1,4 +1,3 @@
-import re
 import traceback
 
 import aiohttp.web
@@ -18,7 +17,7 @@ async def error_middleware(app, handler):
                 {"status": exception.status, "reason": exception.reason},
                 status=exception.status,
             )
-        except Exception as exception:
+        except Exception:
             return aiohttp.web.json_response(
                 {
                     "status": 400,
@@ -35,17 +34,17 @@ def init_app(aliases=None):
     aliases = aliases or {"g": "g"}
     app = aiohttp.web.Application(
         middlewares=[
-            cors_middleware(allow_all=True, origins=["http://localhost:8080",]),
+            cors_middleware(allow_all=True, origins=["http://localhost:8080"]),
             error_middleware,
         ]
     )
     app.router.add_routes(routes)
     goblin_manager = GoblinManager(aliases=aliases)
     app.on_startup.extend(
-        [goblin_manager.on_startup, Cache.on_startup,]
+        [goblin_manager.on_startup, Cache.on_startup]
     )
     app.on_cleanup.extend(
-        [goblin_manager.on_cleanup, Cache.on_cleanup,]
+        [goblin_manager.on_cleanup, Cache.on_cleanup]
     )
     return app
 

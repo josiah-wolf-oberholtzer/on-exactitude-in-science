@@ -3,6 +3,7 @@ import dataclasses
 import datetime
 import logging
 import random
+import time
 from pathlib import Path
 
 from aiogremlin.exception import GremlinServerError
@@ -173,6 +174,7 @@ async def save_vertex(xml_entity, session, cache):
                 event = cache[kind][xml_entity.entity_id] = asyncio.Event()
             goblin_entity = getattr(entities, kind)()
             setattr(goblin_entity, f"{kind.lower()}_id", xml_entity.entity_id)
+            goblin_entity.last_modified = time.time()
             goblin_entity.random = random.random()
             for key, value in dataclasses.asdict(xml_entity).items():
                 # if isinstance(value, list):

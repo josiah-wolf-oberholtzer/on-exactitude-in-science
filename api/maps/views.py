@@ -2,9 +2,9 @@ import random
 
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Cardinality, Operator, P, Scope
+from gremlin_python.process.traversal import Cardinality, P, Scope
 
-from maps.gremlin import textFuzzy, textContainsFuzzy
+from maps.gremlin import textContainsFuzzy, textFuzzy
 
 routes = aiohttp.web.RouteTableDef()
 
@@ -56,13 +56,7 @@ def project_edge(traversal):
 
 def project_vertex(traversal):
     return (
-        traversal.project(
-            "id",
-            "label",
-            "values",
-            "total_edge_count",
-            "child_count",
-        )
+        traversal.project("id", "label", "values", "total_edge_count", "child_count",)
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
@@ -219,7 +213,7 @@ async def get_random(request):
         raise aiohttp.web.HTTPBadRequest()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
-    return aiohttp.web.json_response({"result": result[0],})
+    return aiohttp.web.json_response({"result": result[0]})
 
 
 @routes.get("/search")
@@ -231,20 +225,19 @@ async def get_search(request):
         raise aiohttp.web.HTTPBadRequest(reason="Query too short")
     limit = validate_limit(request)
     session = await request.app["goblin"].session()
-    has_contains_fuzzy = ["name", textContainsFuzzy(query + " ") ]
+    has_contains_fuzzy = ["name", textContainsFuzzy(query + " ")]
     has_fuzzy = ["name", textFuzzy(query + " ")]
     if vertex_label:
         has_contains_fuzzy.insert(0, vertex_label)
         has_fuzzy.insert(0, vertex_label)
-    traversal = project_vertex(session.g.V().or_(
-        __.has(*has_contains_fuzzy),
-        __.has(*has_fuzzy),
-    ).limit(limit))
+    traversal = project_vertex(
+        session.g.V().or_(__.has(*has_contains_fuzzy), __.has(*has_fuzzy),).limit(limit)
+    )
     result = await traversal.toList()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
     return aiohttp.web.json_response(
-        {"limit": limit, "query": query, "result": result,}
+        {"limit": limit, "query": query, "result": result}
     )
 
 
@@ -266,7 +259,7 @@ async def get_vertex(request):
     if not result:
         raise aiohttp.web.HTTPNotFound()
     return aiohttp.web.json_response(
-        {"result": cleanup_vertex(result, request.app["goblin"]),}
+        {"result": cleanup_vertex(result, request.app["goblin"])}
     )
 
 

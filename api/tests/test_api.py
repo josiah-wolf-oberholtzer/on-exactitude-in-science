@@ -47,7 +47,10 @@ async def test_search(api_client, testdata):
     assert response.status == 200
     json = await response.json()
     for entry in json["result"]:
+        assert isinstance(entry["id"], int)
+        assert isinstance(entry["last_modified"], float)
         entry["id"] = ...
+        entry["last_modified"] = ...
     json["result"].sort(key=lambda x: (x["label"], x["eid"]))
     assert json == {
         "limit": 10,
@@ -55,20 +58,22 @@ async def test_search(api_client, testdata):
         "result": [
             {
                 "child_count": 0,
-                "edge_count": 9,
                 "eid": 8,
                 "id": ...,
                 "label": "artist",
+                "last_modified": ...,
                 "name": "Mood II Swing",
+                "total_edge_count": 9,
             },
             {
                 "child_count": 0,
-                "edge_count": 3,
                 "eid": "3-3",
                 "id": ...,
                 "label": "track",
+                "last_modified": ...,
                 "name": "When The Funk Hits The Fan (Mood II Swing When The Dub Hits The Fan)",
                 "position": "3",
+                "total_edge_count": 3,
             },
         ],
     }
@@ -81,7 +86,10 @@ async def test_search_by_label(api_client, testdata):
     assert response.status == 200
     json = await response.json()
     for entry in json["result"]:
+        assert isinstance(entry["id"], int)
+        assert isinstance(entry["last_modified"], float)
         entry["id"] = ...
+        entry["last_modified"] = ...
     json["result"].sort(key=lambda x: x["eid"])
     assert json == {
         "limit": 10,
@@ -89,27 +97,30 @@ async def test_search_by_label(api_client, testdata):
         "result": [
             {
                 "child_count": 0,
-                "edge_count": 0,
                 "eid": 3,
                 "id": ...,
                 "label": "company",
+                "last_modified": ...,
                 "name": "Seasons Recordings",
+                "total_edge_count": 0,
             },
             {
                 "child_count": 0,
-                "edge_count": 0,
                 "eid": 66542,
                 "id": ...,
                 "label": "company",
+                "last_modified": ...,
                 "name": "Seasons Limited",
+                "total_edge_count": 0,
             },
             {
                 "child_count": 0,
-                "edge_count": 0,
                 "eid": 297127,
                 "id": ...,
                 "label": "company",
+                "last_modified": ...,
                 "name": "Seasons Classics",
+                "total_edge_count": 0,
             },
         ],
     }
@@ -120,20 +131,22 @@ async def test_vertex_by_goblin_id(api_client, testdata):
     response = await api_client.get("/vertex/release/1")
     json = await response.json()
     id = json["result"]["id"]
+    last_modified = json["result"]["last_modified"]
     response = await api_client.get(f"/vertex/{id}")
     assert await response.json() == {
         "result": {
             "child_count": 0,
             "country": "Sweden",
-            "edge_count": 12,
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
             "id": id,
             "is_main_release": True,
             "label": "release",
+            "last_modified": last_modified,
             "name": "Stockholm",
             "styles": ["Deep House"],
+            "total_edge_count": 12,
             "year": 1999,
         },
     }
@@ -144,20 +157,22 @@ async def test_vertex_by_label(api_client, testdata):
     response = await api_client.get("/vertex/release/1")
     assert response.status == 200
     json = await response.json()
-    json["result"]["id"] = ...
+    id = json["result"]["id"]
+    last_modified = json["result"]["last_modified"]
     assert json == {
         "result": {
             "child_count": 0,
             "country": "Sweden",
-            "edge_count": 12,
             "eid": 1,
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
-            "id": ...,
+            "id": id,
             "is_main_release": True,
             "label": "release",
+            "last_modified": last_modified,
             "name": "Stockholm",
             "styles": ["Deep House"],
+            "total_edge_count": 12,
             "year": 1999,
         },
     }
