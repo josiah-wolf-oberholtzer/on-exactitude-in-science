@@ -34,6 +34,14 @@ services:
     ports:
     - 9042:9042
     - 9160:9160
+  scylla-a:
+    image: scylladb/scylla
+  scylla-b:
+    image: scylladb/scylla
+    command: --seeds=scylla-a
+  scylla-c:
+    image: scylladb/scylla
+    command: --seeds=scylla-a
   elasticsearch:
     environment:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -48,7 +56,9 @@ services:
     - 9200:9200
   janusgraph:
     depends_on:
-    - cassandra
+    - scylla-a
+    - scylla-b
+    - scylla-c
     - elasticsearch
     image: janusgraph/janusgraph:0.5
     ports:
