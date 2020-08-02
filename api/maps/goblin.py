@@ -120,6 +120,7 @@ def format_schema(goblin_app, graph_name="graph"):
     for label, _ in sorted(goblin_app.vertices.items()):
         lines.append(
             f"mgmt.buildIndex('{graph_name}_by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
+            # f"mgmt.buildIndex('{graph_name}_by_{label}_id', Vertex.class).addKey({label}_id).unique().buildCompositeIndex()"
         )
     lines.extend(
         [
