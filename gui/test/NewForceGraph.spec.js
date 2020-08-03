@@ -58,17 +58,21 @@ const { expect } = chai,
     const eventMap = new Map([
       ['vertexEnter', []],
       ['vertexUpdate', []],
+      ['vertexTick', []],
       ['vertexExit', []],
       ['edgeEnter', []],
       ['edgeUpdate', []],
+      ['edgeTick', []],
       ['edgeExit', []],
     ]);
     graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
     graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
     graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
+    graph.on('vertexTick', (vertex) => eventMap.get('vertexTick').push(vertex.id));
     graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
     graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
     graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
+    graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
     return eventMap;
   },
   clearEventMap = (eventMap) => {
@@ -233,9 +237,11 @@ describe('NewForceGraph', () => {
       expect(Array.from(eventMap.entries())).to.deep.equal([
         ['vertexEnter', ['vertex-1', 'vertex-2']],
         ['vertexUpdate', []],
+        ['vertexTick', []],
         ['vertexExit', []],
         ['edgeEnter', ['edge-aaa']],
         ['edgeUpdate', []],
+        ['edgeTick', []],
         ['edgeExit', []],
       ]);
     });
@@ -387,9 +393,11 @@ describe('NewForceGraph', () => {
       expect(Array.from(eventMap.entries())).to.deep.equal([
         ['vertexEnter', ['vertex-3']],
         ['vertexUpdate', ['vertex-2']],
+        ['vertexTick', []],
         ['vertexExit', ['vertex-1']],
         ['edgeEnter', ['edge-bbb']],
         ['edgeUpdate', []],
+        ['edgeTick', []],
         ['edgeExit', ['edge-aaa']],
       ]);
     });
@@ -528,9 +536,11 @@ describe('NewForceGraph', () => {
       expect(Array.from(eventMap.entries())).to.deep.equal([
         ['vertexEnter', ['vertex-1', 'vertex-4']],
         ['vertexUpdate', []],
+        ['vertexTick', []],
         ['vertexExit', ['vertex-2', 'vertex-3']],
         ['edgeEnter', ['edge-ccc']],
         ['edgeUpdate', []],
+        ['edgeTick', []],
         ['edgeExit', ['edge-bbb']],
       ]);
     });
@@ -546,10 +556,12 @@ describe('NewForceGraph', () => {
     it('will have dispatched mutation events', () => {
       expect(Array.from(eventMap.entries())).to.deep.equal([
         ['vertexEnter', []],
-        ['vertexUpdate', ['vertex-1', 'vertex-2', 'vertex-3', 'vertex-4']],
+        ['vertexUpdate', []],
+        ['vertexTick', ['vertex-1', 'vertex-2', 'vertex-3', 'vertex-4']],
         ['vertexExit', []],
         ['edgeEnter', []],
-        ['edgeUpdate', ['edge-aaa', 'edge-bbb', 'edge-ccc']],
+        ['edgeUpdate', []],
+        ['edgeTick', ['edge-aaa', 'edge-bbb', 'edge-ccc']],
         ['edgeExit', []],
       ]);
     });
@@ -566,10 +578,12 @@ describe('NewForceGraph', () => {
     it('will have dispatched mutation events', () => {
       expect(Array.from(eventMap.entries())).to.deep.equal([
         ['vertexEnter', []],
-        ['vertexUpdate', ['vertex-1', 'vertex-2', 'vertex-3', 'vertex-4']],
+        ['vertexUpdate', []],
+        ['vertexTick', ['vertex-1', 'vertex-2', 'vertex-3', 'vertex-4']],
         ['vertexExit', []],
         ['edgeEnter', []],
-        ['edgeUpdate', ['edge-aaa', 'edge-bbb', 'edge-ccc']],
+        ['edgeUpdate', []],
+        ['edgeTick', ['edge-aaa', 'edge-bbb', 'edge-ccc']],
         ['edgeExit', []],
       ]);
     });
