@@ -5,6 +5,7 @@ errors = E123,E203,E265,E266,E501,W503
 origin := $(shell git config --get remote.origin.url)
 formatPaths = ${project}/ tests/
 testPaths = ${project}/ tests/
+imageName = josiahwolfoberholtzer/on-exactitude-in-science-api
 
 black-check:
 	black --target-version py36 --check --diff ${formatPaths}
@@ -50,3 +51,10 @@ pytest:
 reformat: isort black-reformat
 
 test: black-check flake8 mypy pytest
+
+build:
+	docker build -t ${imageName}:latest .
+
+push: build
+	docker login -u josiahwolfoberholtzer
+	docker push ${imageName}:latest

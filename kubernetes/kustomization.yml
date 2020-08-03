@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: on-exactitude-in-science
+resources:
+- api-deployment.yml
+- api-service.yml
+- elasticsearch-service.yml
+- elasticsearch-statefulset.yml
+- ingress.yml
+- janusgraph-deployment.yml
+- janusgraph-service.yml
+- namespace.yml
+- scylla-configmap.yml
+- scylla-service.yml
+- scylla-statefulset.yml

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: janusgraph
+  labels:
+    app: janusgraph
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: janusgraph
+  template:
+    metadata:
+      labels:
+        app: janusgraph
+    spec:
+      containers:
+      - name: janusgraph
+        env:
+        - name: JANUS_PROPS_TEMPLATE
+          value: cql-es
+        - name: gremlinserver.channelizer
+          value: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
+        - name: janusgraph.index.search.hostname
+          value: elasticsearch
+        - name: janusgraph.query.force-index
+          value: "true"
+        - name: janusgraph.schema.default
+          value: none
+        - name: janusgraph.storage.hostname
+          value: scylla
+        image: janusgraph/janusgraph:0.5.2
+        livenessProbe:
+          httpGet:
+            path: /?gremlin=100-1
+            port: 8182
+          initialDelaySeconds: 5
+          periodSeconds: 30
+        ports:
+        - containerPort: 8182
