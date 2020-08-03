@@ -5,6 +5,7 @@ metadata:
     app: api
   name: api
 spec:
+  clusterIP: None
   ports:
   - port: 8080
   selector:
