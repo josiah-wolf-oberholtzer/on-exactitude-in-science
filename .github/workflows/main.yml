@@ -29,10 +29,20 @@ jobs:
   gui:
     name: GUI tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gui
     steps:
     - uses: actions/checkout@v2
-    - name: Build GUI container
-      run : docker-compose build gui
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    - name: Install JS packages
+      run: yarn install
+    - name: Lint JS
+      run: yarn lint
+    - name: Test JSi
+      run: yarn test
   push:
     name: Push Docker images
     runs-on: ubuntu-latest
