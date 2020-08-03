@@ -9,14 +9,12 @@ on:
     - master
 
 jobs:
-  build:
+  api:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Build API container
       run: docker-compose build api
-    - name: Build GUI container
-      run : docker-compose build gui
     - name: Pull Docker images
       run: docker-compose pull
     - name: Bring containers online
@@ -27,3 +25,9 @@ jobs:
       run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
     - name: Run API tests
       run: docker-compose run --rm api make test
+  gui:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build GUI container
+      run : docker-compose build gui
