@@ -40,12 +40,8 @@ def init_app(aliases=None):
     )
     app.router.add_routes(routes)
     goblin_manager = GoblinManager(aliases=aliases)
-    app.on_startup.extend(
-        [goblin_manager.on_startup, Cache.on_startup]
-    )
-    app.on_cleanup.extend(
-        [goblin_manager.on_cleanup, Cache.on_cleanup]
-    )
+    app.on_startup.extend([goblin_manager.on_startup, Cache.on_startup])
+    app.on_cleanup.extend([goblin_manager.on_cleanup, Cache.on_cleanup])
     return app
 
 

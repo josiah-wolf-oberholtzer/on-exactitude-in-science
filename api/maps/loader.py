@@ -63,7 +63,9 @@ async def consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
         i, xml_entity = iterator_output
         procedure = procedures[type(xml_entity)]
         vid = await procedure(xml_entity, session)
-        await session.g.V(vid).bothE().has("last_modified", P.lt(timestamp)).drop().toList()
+        await session.g.V(vid).bothE().has(
+            "last_modified", P.lt(timestamp)
+        ).drop().toList()
         if not i % 100:
             logger.info(
                 f"[{consumer_id}] {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}, vid: {vid}]"
@@ -87,9 +89,7 @@ async def load_artist(xml_artist, session):
 async def load_company(xml_company, session):
     company_vid = await save_vertex(xml_company, session)
     if xml_company.parent_company:
-        parent_company_vid = await save_vertex(
-            xml_company.parent_company, session
-        )
+        parent_company_vid = await save_vertex(xml_company.parent_company, session)
         await save_edge(session, entities.SubsidiaryOf, company_vid, parent_company_vid)
     for xml_subsidiary in xml_company.subsidiaries:
         await save_vertex(xml_subsidiary, session)
@@ -157,14 +157,15 @@ async def save_vertex(xml_entity, session):
             label = kind.lower()
             entity_key = f"{label}_id"
             traversal = (
-                session.g.V().has(label, entity_key, xml_entity.entity_id)
-                .fold().coalesce(
+                session.g.V()
+                .has(label, entity_key, xml_entity.entity_id)
+                .fold()
+                .coalesce(
                     __.unfold(),
-                    __.addV(label)
-                    .property(entity_key, xml_entity.entity_id)
+                    __.addV(label).property(entity_key, xml_entity.entity_id),
                 )
-                .property('last_modified', time.time())
-                .property('random', random.random())
+                .property("last_modified", time.time())
+                .property("random", random.random())
             )
             for key, value in dataclasses.asdict(xml_entity).items():
                 if value is None or key == entity_key:
