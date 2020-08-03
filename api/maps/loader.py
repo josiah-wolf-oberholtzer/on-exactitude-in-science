@@ -168,7 +168,11 @@ async def save_vertex(xml_entity, session):
                 .property("random", random.random())
             )
             for key, value in dataclasses.asdict(xml_entity).items():
-                if value is None or key == entity_key or not hasattr(goblin_entity, key):
+                if (
+                    value is None
+                    or key == entity_key
+                    or not hasattr(goblin_entity, key)
+                ):
                     continue
                 if isinstance(value, (set, list)):
                     for subvalue in value:
