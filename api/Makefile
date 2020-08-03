@@ -6,6 +6,7 @@ origin := $(shell git config --get remote.origin.url)
 formatPaths = ${project}/ tests/
 testPaths = ${project}/ tests/
 imageName = josiahwolfoberholtzer/on-exactitude-in-science-api
+gitCommit = git rev-parse HEAD
 
 black-check:
 	black --target-version py36 --check --diff ${formatPaths}
@@ -54,7 +55,9 @@ test: black-check flake8 mypy pytest
 
 build:
 	docker build -t ${imageName}:latest .
+	docker build -t ${imageName}:${gitCommit} .
 
 push: build
 	docker login -u josiahwolfoberholtzer
 	docker push ${imageName}:latest
+	docker push ${imageName}:${gitCommit}

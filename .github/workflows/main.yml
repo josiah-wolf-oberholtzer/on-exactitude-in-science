@@ -10,6 +10,7 @@ on:
 
 jobs:
   api:
+    name: API tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -26,8 +27,21 @@ jobs:
     - name: Run API tests
       run: docker-compose run --rm api make test
   gui:
+    name: GUI tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Build GUI container
       run : docker-compose build gui
+  push:
+    name: Push Docker images
+    runs-on: ubuntu-latest
+    needs:
+    - api
+    - gui
+    steps:
+    - uses: actions/checkout@v2
+    - name: Push API image
+      run: make -C api push
+    - name: Push GUI image
+      run: make -C gui push
