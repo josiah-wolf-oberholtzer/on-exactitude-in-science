@@ -39,8 +39,6 @@ jobs:
         node-version: '12'
     - name: Install JS packages
       run: yarn install
-    # - name: Lint JS
-    #   run: yarn lint
     - name: Test JSi
       run: yarn test
   push:
@@ -52,6 +50,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Push API image
-      run: make -C api push
+      uses: docker/build-push-action@v1
+      with:
+        username: josiahwolfoberholtzer
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: josiahwolfoberholtzer/on-exactitude-in-science-api
+        tags: latest
+        tag_with_sha: true
+        path: api
     - name: Push GUI image
-      run: make -C gui push
+      uses: docker/build-push-action@v1
+      with:
+        username: josiahwolfoberholtzer
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: josiahwolfoberholtzer/on-exactitude-in-science-gui
+        tags: latest
+        tag_with_sha: true
+        path: gui
