@@ -15,5 +15,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: docker build
       run: |
-        docker-compose pull
-        docker-compose build
+        docker-compose build api
+        docker-compose build gui
