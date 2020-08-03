@@ -19,3 +19,11 @@ jobs:
       run : docker-compose build gui
     - name: Pull Docker images
       run: docker-compose pull
+    - name: Bring containers online
+      run: docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
+    - name: Wait for JanusGraph
+      run: docker-compose run --rm janusgraph-healthcheck
+    - name: Load schema
+      run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
+    - name: Run API tests
+      run: docker-compose run --rm api make test
