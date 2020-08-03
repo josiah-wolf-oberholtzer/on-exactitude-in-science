@@ -8,7 +8,7 @@ from pathlib import Path
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import P
+from gremlin_python.process.traversal import Cardinality, P
 
 from maps import entities, goblin, xml
 
@@ -168,10 +168,13 @@ async def save_vertex(xml_entity, session):
                 .property("random", random.random())
             )
             for key, value in dataclasses.asdict(xml_entity).items():
-                if value is None or key == entity_key:
+                if value is None or key == entity_key or not hasattr(goblin_entity, key):
                     continue
-                if hasattr(goblin_entity, key):
-                    traversal = traversal.property(key, value)
+                if isinstance(value, (set, list)):
+                    for subvalue in value:
+                        traversal = traversal.property(Cardinality.set_, key, subvalue)
+                else:
+                    traversal = traversal.property(Cardinality.single, key, value)
             return await traversal.id().next()
         except GremlinServerError as e:
             logger.error(f"Backing off: {e!s}")
