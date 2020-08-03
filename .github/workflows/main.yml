@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: docker build
-      run: |
-        docker-compose build api
-        docker-compose build gui
+    - name: Build API container
+      run: docker-compose build api
+    - name: Build GUI container
+      run : docker-compose build gui
+    - name: Pull Docker images
+      run: docker-compose pull
