@@ -39,8 +39,8 @@ jobs:
         node-version: '12'
     - name: Install JS packages
       run: yarn install
-    - name: Lint JS
-      run: yarn lint
+    # - name: Lint JS
+    #   run: yarn lint
     - name: Test JSi
       run: yarn test
   push:

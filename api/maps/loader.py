@@ -8,7 +8,7 @@ from pathlib import Path
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Binding, P
+from gremlin_python.process.traversal import P
 
 from maps import entities, goblin, xml
 
