@@ -27,7 +27,7 @@ async def drop():
 async def load(goblin_app, path, consumer_count=1, limit=None):
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
-    start_time = time.time() 
+    start_time = time.time()
     iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
     tasks = [
         vertex_consumer(goblin_app, iterator, consumer_id=i, timestamp=start_time)
