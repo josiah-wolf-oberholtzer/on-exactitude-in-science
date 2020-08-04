@@ -236,9 +236,7 @@ async def get_search(request):
     result = await traversal.toList()
     for entry in result:
         cleanup_vertex(entry, request.app["goblin"])
-    return aiohttp.web.json_response(
-        {"limit": limit, "query": query, "result": result}
-    )
+    return aiohttp.web.json_response({"limit": limit, "query": query, "result": result})
 
 
 @routes.get("/vertex/{vertex_id}")
