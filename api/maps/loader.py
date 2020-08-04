@@ -85,7 +85,6 @@ async def edge_consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
             continue
         procedure = procedures[type(xml_entity)]
         await procedure(xml_entity, session)
-        """
         label = type(xml_entity).__name__.lower()
         await (
             session.g.V()
@@ -95,7 +94,6 @@ async def edge_consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
             .drop()
             .toList()
         )
-        """
         if not i % 100:
             logger.info(
                 f"[{consumer_id}] E {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}]"
