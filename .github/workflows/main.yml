@@ -74,3 +74,10 @@ jobs:
     - images
     steps:
     - uses: actions/checkout@v2
+    - name: Set up kubectl
+      uses: matootie/dokube@v1.3.2
+      with:
+        personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
+        clusterName: on-exactitude-in-science
+    - name: Get nodes
+      run: kubectl get nodes
