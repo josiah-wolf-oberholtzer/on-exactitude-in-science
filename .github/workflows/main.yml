@@ -79,5 +79,11 @@ jobs:
       with:
         personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
         clusterName: on-exactitude-in-science
-    - name: Get nodes
-      run: kubectl get nodes
+    - uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "3.8.1"
+    - name: Debug
+      run: |
+        kubectl version
+        kustomize version
+        kubectl get nodes
