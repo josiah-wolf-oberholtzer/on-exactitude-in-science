@@ -4,6 +4,7 @@ import datetime
 import logging
 import random
 import time
+import traceback
 from pathlib import Path
 
 from aiogremlin.exception import GremlinServerError
@@ -17,23 +18,29 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
-async def load(goblin_app, path, consumer_count=1, limit=None):
-    logger.info("Loading data ...")
-    start_time = datetime.datetime.now()
-    iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
-    now = time.time()
-    tasks = [
-        consumer(goblin_app, iterator, consumer_id=i, timestamp=now)
-        for i in range(consumer_count)
-    ]
-    await asyncio.gather(*tasks)
-    logger.info("Loaded data in {}".format(datetime.datetime.now() - start_time))
-
-
 async def drop():
     async with goblin.GoblinManager() as goblin_app:
         session = await goblin_app.session()
         await session.g.V().drop().toList()
+
+
+async def load(goblin_app, path, consumer_count=1, limit=None):
+    logger.info("Loading data ...")
+    start_date = datetime.datetime.now()
+    start_time = time.time() 
+    iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
+    tasks = [
+        vertex_consumer(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        for i in range(consumer_count)
+    ]
+    await asyncio.gather(*tasks)
+    iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
+    tasks = [
+        edge_consumer(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        for i in range(consumer_count)
+    ]
+    await asyncio.gather(*tasks)
+    logger.info("Loaded data in {}".format(datetime.datetime.now() - start_date))
 
 
 def producer(path: Path, consumer_count=1, limit=None):
@@ -51,154 +58,218 @@ def producer(path: Path, consumer_count=1, limit=None):
         yield None
 
 
-async def consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
+async def vertex_consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
+    session = await goblin_app.session()
+    while (iterator_output := next(iterator)) is not None:
+        i, xml_entity = iterator_output
+        await upsert_vertex(xml_entity, session)
+        if isinstance(xml_entity, xml.Release):
+            for xml_track in xml_entity.tracks:
+                await upsert_vertex(xml_track, session)
+        if not i % 100:
+            logger.info(
+                f"[{consumer_id}] V {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}]"
+            )
+
+
+async def edge_consumer(goblin_app, iterator, consumer_id=1, timestamp=0.0):
     procedures = {
-        xml.Artist: load_artist,
-        xml.Company: load_company,
-        xml.Master: load_master,
-        xml.Release: load_release,
+        xml.Artist: load_artist_edges,
+        xml.Company: load_company_edges,
+        xml.Release: load_release_edges,
     }
     session = await goblin_app.session()
     while (iterator_output := next(iterator)) is not None:
         i, xml_entity = iterator_output
+        if type(xml_entity) not in procedures:
+            continue
         procedure = procedures[type(xml_entity)]
-        vid = await procedure(xml_entity, session)
-        await session.g.V(vid).bothE().has(
-            "last_modified", P.lt(timestamp)
-        ).drop().toList()
+        await procedure(xml_entity, session)
+        """
+        label = type(xml_entity).__name__.lower()
+        await (
+            session.g.V()
+            .has(label, f"{label}_id", xml_entity.entity_id)
+            .bothE()
+            .has("last_modified", P.lt(timestamp))
+            .drop()
+            .toList()
+        )
+        """
         if not i % 100:
             logger.info(
-                f"[{consumer_id}] {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}, vid: {vid}]"
+                f"[{consumer_id}] E {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}]"
             )
 
 
-async def load_artist(xml_artist, session):
-    artist_vid = await save_vertex(xml_artist, session)
+async def load_artist_edges(xml_artist, session):
     for xml_alias in xml_artist.aliases:
-        alias_vid = await save_vertex(xml_alias, session)
-        if xml_artist.entity_id < xml_alias.entity_id:
-            await save_edge(session, entities.AliasOf, artist_vid, alias_vid)
-    for xml_group in xml_artist.groups:
-        group_vid = await save_vertex(xml_group, session)
-        await save_edge(session, entities.MemberOf, artist_vid, group_vid)
+        # alias but only from low to high id
+        if xml_artist.entity_id > xml_alias.entity_id:
+            continue
+        await upsert_edge(
+            session,
+            entities.AliasOf.__label__,
+            entities.Artist.__label__,
+            xml_artist.entity_id,
+            entities.Artist.__label__,
+            xml_alias.entity_id,
+        )
     for xml_member in xml_artist.members:
-        await save_vertex(xml_member, session)
-    return artist_vid
+        await upsert_edge(
+            session,
+            entities.MemberOf.__label__,
+            entities.Artist.__label__,
+            xml_member.entity_id,
+            entities.Artist.__label__,
+            xml_artist.entity_id,
+        )
 
 
-async def load_company(xml_company, session):
-    company_vid = await save_vertex(xml_company, session)
-    if xml_company.parent_company:
-        parent_company_vid = await save_vertex(xml_company.parent_company, session)
-        await save_edge(session, entities.SubsidiaryOf, company_vid, parent_company_vid)
+async def load_company_edges(xml_company, session):
     for xml_subsidiary in xml_company.subsidiaries:
-        await save_vertex(xml_subsidiary, session)
-    return company_vid
+        await upsert_edge(
+            session,
+            entities.SubsidiaryOf.__label__,
+            entities.Company.__label__,
+            xml_subsidiary.entity_id,
+            entities.Company.__label__,
+            xml_company.entity_id,
+        )
 
 
-async def load_master(xml_master, session):
-    return await save_vertex(xml_master, session)
-
-
-async def load_release(xml_release, session):
-    release_vid = await save_vertex(xml_release, session)
+async def load_release_edges(xml_release, session):
     for xml_artist in xml_release.artists:
-        artist_vid = await save_vertex(xml_artist, session)
-        await save_edge(session, entities.Released, artist_vid, release_vid)
+        await upsert_edge(
+            session,
+            entities.Released.__label__,
+            entities.Artist.__label__,
+            xml_artist.entity_id,
+            entities.Release.__label__,
+            xml_release.entity_id,
+        )
     for xml_extra_artist in xml_release.extra_artists:
-        extra_artist_vid = await save_vertex(xml_extra_artist, session)
         for role in xml_extra_artist.roles:
-            await save_edge(
+            await upsert_edge(
                 session,
-                entities.CreditedWith,
-                extra_artist_vid,
-                release_vid,
+                entities.CreditedWith.__label__,
+                entities.Artist.__label__,
+                xml_extra_artist.entity_id,
+                entities.Release.__label__,
+                xml_release.entity_id,
                 role=role.name,
             )
     for xml_company in xml_release.companies:
-        company_vid = await save_vertex(xml_company, session)
         for role in xml_company.roles:
-            await save_edge(
-                session, entities.CreditedWith, company_vid, release_vid, role=role.name
+            await upsert_edge(
+                session,
+                entities.CreditedWith.__label__,
+                entities.Company.__label__,
+                xml_company.entity_id,
+                entities.Release.__label__,
+                xml_release.entity_id,
+                role=role.name,
             )
     for xml_label in xml_release.labels:
-        label_vid = await save_vertex(xml_label, session)
-        await save_edge(session, entities.ReleasedOn, release_vid, label_vid)
+        await upsert_edge(
+            session,
+            entities.ReleasedOn.__label__,
+            entities.Release.__label__,
+            xml_release.entity_id,
+            entities.Company.__label__,
+            xml_label.entity_id,
+        )
     for xml_track in xml_release.tracks:
-        track_vid = await save_vertex(xml_track, session)
-        await save_edge(session, entities.Includes, release_vid, track_vid)
+        await upsert_edge(
+            session,
+            entities.Includes.__label__,
+            entities.Release.__label__,
+            xml_release.entity_id,
+            entities.Track.__label__,
+            xml_track.entity_id,
+        )
         for xml_artist in xml_track.artists:
-            artist_vid = await save_vertex(xml_artist, session)
-            await save_edge(session, entities.Released, artist_vid, track_vid)
+            await upsert_edge(
+                session,
+                entities.Released.__label__,
+                entities.Artist.__label__,
+                xml_artist.entity_id,
+                entities.Track.__label__,
+                xml_track.entity_id,
+            )
         for xml_extra_artist in xml_track.extra_artists:
-            extra_artist_vid = await save_vertex(xml_extra_artist, session)
             for role in xml_extra_artist.roles:
-                await save_edge(
+                await upsert_edge(
                     session,
-                    entities.CreditedWith,
-                    extra_artist_vid,
-                    track_vid,
+                    entities.CreditedWith.__label__,
+                    entities.Artist.__label__,
+                    xml_extra_artist.entity_id,
+                    entities.Track.__label__,
+                    xml_track.entity_id,
                     role=role.name,
                 )
     if xml_release.master_id:
-        master = xml.Master(
-            entity_id=xml_release.master_id, main_release_id=0, name=xml_release.name
+        await upsert_edge(
+            session,
+            entities.SubreleaseOf.__label__,
+            entities.Release.__label__,
+            xml_release.entity_id,
+            entities.Master.__label__,
+            xml_release.master_id,
         )
-        master_vid = await save_vertex(master, session)
-        await save_edge(session, entities.SubreleaseOf, release_vid, master_vid)
-    return release_vid
 
 
-async def save_vertex(xml_entity, session):
+async def upsert_vertex(xml_entity, session):
+    kind = type(xml_entity).__name__
+    goblin_entity = getattr(entities, kind)()
+    label = kind.lower()
+    entity_key = f"{label}_id"
+    traversal = (
+        session.g.V()
+        .has(label, entity_key, xml_entity.entity_id)
+        .fold()
+        .coalesce(
+            __.unfold(), __.addV(label).property(entity_key, xml_entity.entity_id),
+        )
+        .property("last_modified", time.time())
+        .property("random", random.random())
+    )
+    for key, value in dataclasses.asdict(xml_entity).items():
+        if value is None or key == entity_key or not hasattr(goblin_entity, key):
+            continue
+        if isinstance(value, (set, list)):
+            for subvalue in value:
+                traversal = traversal.property(Cardinality.set_, key, subvalue)
+        else:
+            traversal = traversal.property(Cardinality.single, key, value)
+    traversal = traversal.id()
     for attempt in range(10):
         try:
-            kind = type(xml_entity).__name__
-            goblin_entity = getattr(entities, kind)()
-            label = kind.lower()
-            entity_key = f"{label}_id"
-            traversal = (
-                session.g.V()
-                .has(label, entity_key, xml_entity.entity_id)
-                .fold()
-                .coalesce(
-                    __.unfold(),
-                    __.addV(label).property(entity_key, xml_entity.entity_id),
-                )
-                .property("last_modified", time.time())
-                .property("random", random.random())
-            )
-            for key, value in dataclasses.asdict(xml_entity).items():
-                if (
-                    value is None
-                    or key == entity_key
-                    or not hasattr(goblin_entity, key)
-                ):
-                    continue
-                if isinstance(value, (set, list)):
-                    for subvalue in value:
-                        traversal = traversal.property(Cardinality.set_, key, subvalue)
-                else:
-                    traversal = traversal.property(Cardinality.single, key, value)
-            return await traversal.id().next()
+            return await traversal.next()
         except GremlinServerError as e:
-            logger.error(f"Backing off: {e!s}")
+            logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
 
 
-async def save_edge(session, edge_class, from_id, to_id, **kwargs):
+async def upsert_edge(
+    session, edge_label, from_label, from_id, to_label, to_id, **kwargs
+):
+    traversal = (
+        session.g.V()
+        .has(from_label, f"{from_label}_id", from_id)
+        .addE(edge_label)
+        .to(__.V().has(to_label, f"{to_label}_id", to_id))
+        .property("last_modified", time.time())
+    )
+    for key, value in kwargs.items():
+        traversal = traversal.property(key, value)
     for attempt in range(10):
         try:
-            traversal = (
-                session.g.V(from_id)
-                .addE(edge_class.__label__)
-                .to(__.V(to_id))
-                .property("last_modified", time.time())
-            )
-            for key, value in kwargs.items():
-                traversal = traversal.property(key, value)
-            return await traversal.id().next()
+            await traversal.fold().toList()
         except GremlinServerError as e:
-            logger.error(f"Backing off: {e!s}")
+            if "The provided traverser does not map to a value" in str(e):
+                return
+            logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
 
 

@@ -29,7 +29,7 @@ async def session(goblin_app):
 @pytest.fixture
 async def testdata(goblin_app):
     path = Path(__file__).parent / "tests"
-    await loader.load(goblin_app, path, consumer_count=8)
+    await loader.load(goblin_app, path, consumer_count=8, limit=200)
     yield
 
 
