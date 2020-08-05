@@ -12,8 +12,6 @@ resources:
 - gui-service.yml
 - janusgraph-deployment.yml
 - janusgraph-service.yml
-- loader-configmap.yml
-- loader-job.yml
 - namespace.yml
 - scylla-configmap.yml
 - scylla-service.yml
