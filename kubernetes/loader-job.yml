@@ -8,14 +8,16 @@ spec:
       containers:
       - name: loader
         image: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
-        command: /run.sh
+        command:
+        - /load.sh
         volumeMounts:
-        - name: loader-data
-          mountPath: /run.sh
-          subPath: run.sh
+        - mountPath: /load.sh
+          name: loader-data
+          subPath: load.sh
       restartPolicy: Never
       volumes:
       - name: loader-data
         configMap:
+          defaultMode: 0777
           name: loader
-  backoffLimit: 4
+  backoffLimit: 0
