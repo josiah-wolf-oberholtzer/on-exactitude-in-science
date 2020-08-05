@@ -199,7 +199,6 @@ async def get_locality(request):
 async def get_random(request):
     vertex_label = validate_vertex_label(request)
     session = await request.app["goblin"].session()
-    predicates = [P.lte, P.gte]
     for i in range(10):
         has = ["random", P.gte(random.random())]
         if vertex_label:
