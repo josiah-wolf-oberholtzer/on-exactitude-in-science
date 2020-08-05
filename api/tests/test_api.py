@@ -24,8 +24,7 @@ async def test_random(api_client, testdata):
         response = await api_client.get("/random")
         assert response.status == 200
         results.append(await response.json())
-    assert len(set([result["result"]["label"] for result in results])) > 1
-    assert len(set([result["result"]["eid"] for result in results])) > 1
+    assert len(set([result["result"]["id"] for result in results])) > 1
 
 
 @pytest.mark.asyncio
@@ -37,7 +36,7 @@ async def test_random_by_label(api_client, testdata):
             assert response.status == 200
             results.append(await response.json())
         assert all(result["result"]["label"] == label for result in results)
-        assert len(set([result["result"]["eid"] for result in results])) > 1
+        assert len(set([result["result"]["id"] for result in results])) > 1
 
 
 @pytest.mark.asyncio
