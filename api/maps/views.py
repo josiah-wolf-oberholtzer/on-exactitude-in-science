@@ -2,7 +2,7 @@ import random
 
 import aiohttp.web
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Cardinality, P, Scope
+from gremlin_python.process.traversal import Cardinality, Order, P, Scope
 
 from maps.gremlin import textContainsFuzzy, textFuzzy
 
@@ -201,11 +201,12 @@ async def get_random(request):
     session = await request.app["goblin"].session()
     predicates = [P.lte, P.gte]
     for i in range(10):
-        random.shuffle(predicates)
-        has = ["random", predicates[0]((2 ** 32) * random.random())]
+        has = ["random", P.gte(random.random())]
         if vertex_label:
             has.insert(0, vertex_label)
-        traversal = project_vertex(session.g.V().has(*has).limit(100).sample(1))
+        traversal = project_vertex(
+            session.g.V().has(*has).order().by("random", Order.asc).limit(1)
+        )
         result = await traversal.toList()
         if len(result):
             break
