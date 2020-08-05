@@ -199,13 +199,13 @@ async def get_locality(request):
 async def get_random(request):
     vertex_label = validate_vertex_label(request)
     session = await request.app["goblin"].session()
-    predicates = [P.lt, P.lte, P.gt, P.gte]
+    predicates = [P.lte, P.gte]
     for i in range(10):
         random.shuffle(predicates)
-        has = ["random", predicates[0](random.random())]
+        has = ["random", predicates[0]((2 ** 32) * random.random())]
         if vertex_label:
             has.insert(0, vertex_label)
-        traversal = project_vertex(session.g.V().has(*has).limit(20).sample(1))
+        traversal = project_vertex(session.g.V().has(*has).limit(1000).sample(1))
         result = await traversal.toList()
         if len(result):
             break

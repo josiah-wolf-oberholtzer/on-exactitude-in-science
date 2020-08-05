@@ -230,7 +230,7 @@ async def upsert_vertex(xml_entity, session):
             __.unfold(), __.addV(label).property(entity_key, xml_entity.entity_id),
         )
         .property("last_modified", time.time())
-        .property("random", random.random())
+        .property("random", (2 ** 32) * random.random())
     )
     for key, value in dataclasses.asdict(xml_entity).items():
         if value is None or key == entity_key or not hasattr(goblin_entity, key):
