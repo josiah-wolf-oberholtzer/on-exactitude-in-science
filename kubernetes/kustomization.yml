@@ -5,13 +5,15 @@ resources:
 - api-deployment.yml
 - api-ingress.yml
 - api-service.yml
+- elasticsearch-service.yml
+- elasticsearch-statefulset.yml
 - gui-deployment.yml
 - gui-ingress.yml
 - gui-service.yml
-- elasticsearch-service.yml
-- elasticsearch-statefulset.yml
 - janusgraph-deployment.yml
 - janusgraph-service.yml
+- loader-configmap.yml
+- loader-job.yml
 - namespace.yml
 - scylla-configmap.yml
 - scylla-service.yml
