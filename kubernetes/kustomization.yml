@@ -5,6 +5,9 @@ resources:
 - api-deployment.yml
 - api-ingress.yml
 - api-service.yml
+- gui-deployment.yml
+- gui-ingress.yml
+- gui-service.yml
 - elasticsearch-service.yml
 - elasticsearch-statefulset.yml
 - janusgraph-deployment.yml
