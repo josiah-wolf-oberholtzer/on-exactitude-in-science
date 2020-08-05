@@ -6,31 +6,10 @@ on:
   pull_request:
     branches:
     - master
+env:
+  API_IMAGE: josiahwolfoberholtzer/on-exactitude-in-science-api
+  GUI_IMAGE: josiahwolfoberholtzer/on-exactitude-in-science-gui
 jobs:
-  kubernetes:
-    name: Update cluster
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set IMAGE_TAG
-      run: echo "::set-env name=IMAGE_TAG::sha-$(git rev-parse --short ${{ github.sha }})"
-    - name: Print env
-      run: printenv | sort
-    - name: Set up kubectl
-      uses: matootie/dokube@v1.3.2
-      with:
-        personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
-        clusterName: on-exactitude-in-science
-    - uses: imranismail/setup-kustomize@v1
-      with:
-        kustomize-version: "3.8.1"
-    - name: Debug
-      env:
-        SHORTSHATEST: ${{ steps.vars.outputs.sha_short }}
-      run: |
-        kubectl version
-        kustomize version
-        kubectl get nodes
   api:
     name: API tests
     runs-on: ubuntu-latest
@@ -90,3 +69,30 @@ jobs:
         tags: latest
         tag_with_sha: true
         path: gui
+  kubernetes:
+    name: Update cluster
+    if: github.ref == 'refs/heads/master'
+    needs:
+    - images
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set IMAGE_TAG
+      run: echo "::set-env name=IMAGE_TAG::sha-$(git rev-parse --short ${{ github.sha }})"
+    - name: Set up kubectl
+      uses: matootie/dokube@v1.3.2
+      with:
+        personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
+        clusterName: on-exactitude-in-science
+    - uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "3.8.1"
+    - name: Set image tags
+      working-directory: ./kubernetes
+      run: |
+        kustomize edit set image ${API_IMAGE}=${API_IMAGE}:${IMAGE_TAG}
+        kustomize edit set image ${GUI_IMAGE}=${GUI_IMAGE}:${IMAGE_TAG}
+    - name: Debug
+      run: kustomize build ./kubernetes
+    - name: Apply
+      run: kustomize build ./kubernetes | kubectl apply -f -

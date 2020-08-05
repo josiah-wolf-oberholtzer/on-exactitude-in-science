@@ -13,3 +13,10 @@ resources:
 - scylla-configmap.yml
 - scylla-service.yml
 - scylla-statefulset.yml
+images:
+- name: josiahwolfoberholtzer/on-exactitude-in-science-api
+  newName: josiahwolfoberholtzeron-exactitude-in-science-api
+  newTag: latest
+- name: josiahwolfoberholtzer/on-exactitude-in-science-gui
+  newName: josiahwolfoberholtzeron-exactitude-in-science-gui
+  newTag: latest
