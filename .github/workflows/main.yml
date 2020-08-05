@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set IMAGE_TAG
-      run: echo "::set-env name=IMAGE_TAG::sha-${git rev-parse --short ${{ github.sha }})"
+      run: echo "::set-env name=IMAGE_TAG::sha-$(git rev-parse --short ${{ github.sha }})"
     - name: Print env
       run: printenv | sort
     - name: Set up kubectl
