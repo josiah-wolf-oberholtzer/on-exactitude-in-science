@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loader
+data:
+  run.sh: |
+    DATASET_YEAR = 2020
+    DATASET_MONTH = 06
+    DATASET_DAY = 01
+    DATASET_TIMESTAMP = ${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}
+    PATH = /data
+    mkdir -p ${PATH}
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_artists.xml.gz > ${PATH}/discogs_${DATASET_TIMESTAMP}_artists.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_labels.xml.gz > ${PATH}/discogs_${DATASET_TIMESTAMP}_labels.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_masters.xml.gz > ${PATH}/discogs_${DATASET_TIMESTAMP}_masters.xml.gz
+	curl --fail http://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_releases.xml.gz > ${PATH}/discogs_${DATASET_TIMESTAMP}_releases.xml.gz
+    python3 -m maps data load --path /data --workers 8

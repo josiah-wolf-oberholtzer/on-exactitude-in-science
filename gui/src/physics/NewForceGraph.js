@@ -169,15 +169,9 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
           .id((d) => d.id)
           .distance((d) => (d.source.radius || 1) + (d.target.radius || 1))
           .iterations(3))
-        .force('x', d3force3d.forceX().strength((d) => {
-          return d.type === "rudder" ? 0.0 : 0.01
-        }))
-        .force('y', d3force3d.forceY().strength((d) => {
-          return d.type === "rudder" ? 0.0 : 0.01
-        }))
-        .force('z', d3force3d.forceZ().strength((d) => {
-          return d.type === "rudder" ? 0.0 : 0.01
-        }))
+        .force('x', d3force3d.forceX().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
+        .force('y', d3force3d.forceY().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
+        .force('z', d3force3d.forceZ().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
         .force('centering', d3force3d.forceCenter()),
       dispatcher = dispatch('vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick', 'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick'),
       edgeMap = new Map(),

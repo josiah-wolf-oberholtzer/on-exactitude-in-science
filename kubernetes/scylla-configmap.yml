@@ -1,4 +1,7 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scylla
 data:
   ready-probe.sh: |
     #!/bin/bash
@@ -13,6 +16,3 @@ data:
       fi
       exit 1;
     fi
-kind: ConfigMap
-metadata:
-  name: scylla

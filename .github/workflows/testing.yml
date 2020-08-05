@@ -1,0 +1,41 @@
+name: Testing
+on:
+  pull_request:
+    branches:
+    - master
+jobs:
+  api:
+    name: Run API tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build API container
+      run: docker-compose build api
+    - name: Pull Docker images
+      run: docker-compose pull
+    - name: Bring containers online
+      run: docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
+    - name: Wait for JanusGraph
+      run: docker-compose run --rm janusgraph-healthcheck
+    - name: Load schema
+      run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
+    - name: Run API tests
+      run: docker-compose run --rm api make test
+    - name: Dump Docker logs
+      if: ${{ always() }}
+      run: docker-compose logs
+  gui:
+    name: Run GUI tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gui
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    - name: Install JS packages
+      run: yarn install
+    - name: Test JSi
+      run: yarn test

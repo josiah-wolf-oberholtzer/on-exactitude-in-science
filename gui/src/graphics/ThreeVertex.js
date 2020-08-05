@@ -83,8 +83,8 @@ const ThreeVertex = () => {
   }
 
   function update(newData) {
-    const newRadii = calculateRadii(newData);
-    const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
+    const newRadii = calculateRadii(newData),
+      textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
 
     if (data.label !== newData.label) {
       coreMesh.geometry.dispose();

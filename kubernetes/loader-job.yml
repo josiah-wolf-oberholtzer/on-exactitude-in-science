@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: loader
+spec:
+  template:
+    spec:
+      containers:
+      - name: loader
+        image: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+        command: /run.sh
+        volumeMounts:
+        - name: loader-data
+          mountPath: /run.sh
+          subPath: run.sh
+      restartPolicy: Never
+      volumes:
+      - name: loader-data
+        configMap:
+          name: loader
+  backoffLimit: 4
