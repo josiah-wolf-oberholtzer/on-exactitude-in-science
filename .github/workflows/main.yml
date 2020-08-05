@@ -27,6 +27,9 @@ jobs:
       run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
     - name: Run API tests
       run: docker-compose run --rm api make test
+    - name: Dump Docker logs
+      if: ${{ always() }}
+      run: docker-compose logs
   gui:
     name: GUI tests
     runs-on: ubuntu-latest
