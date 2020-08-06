@@ -7,11 +7,7 @@ data:
     #!/bin/sh
     set -x
     DATASET_PATH="/data"
-    DATASET_YEAR="2020"
-    DATASET_MONTH="07"
-    DATASET_DAY="03"
     DATASET_TIMESTAMP="${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}"
-    LIMIT="500000"
     mkdir -p ${DATASET_PATH}
     apk add wget
     for label in artists labels masters releases; do
@@ -19,4 +15,8 @@ data:
         -O ${DATASET_PATH}/discogs_${DATASET_TIMESTAMP}_${label}.xml.gz \
         https://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_${label}.xml.gz;
     done;
-    python3 -m maps data load --limit ${LIMIT} --path ${DATASET_PATH} --workers 8
+    if [ -z "${LIMIT}" ]; then
+      python3 -m maps data load --path ${DATASET_PATH} --workers 8
+    else 
+      python3 -m maps data load --limit ${LIMIT} --path ${DATASET_PATH} --workers 8
+    fi
