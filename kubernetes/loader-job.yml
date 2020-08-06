@@ -8,6 +8,13 @@ spec:
       containers:
       - name: loader
         image: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+        env:
+        - name: DATASET_YEAR
+          value: "2020"
+        - name: DATASET_MONTH
+          value: "05"
+        - name: DATASET_DAY
+          value: "01"
         command:
         - /load.sh
         volumeMounts:

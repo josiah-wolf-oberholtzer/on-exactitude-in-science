@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const urlBase = (process.env.NODE_ENV === 'production') ? 'http://api.on-exactitude-in.science' : 'http://localhost:9090',
+const urlBase = (process.env.NODE_ENV === 'production') ? 'https://api.on-exactitude-in.science' : 'http://localhost:9090',
   fetchLocalityByEntity = async (label, id) => {
     const url = `${urlBase}/locality/${label}/${id}`,
       response = await axios.get(url);

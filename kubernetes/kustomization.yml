@@ -3,13 +3,12 @@ kind: Kustomization
 namespace: on-exactitude-in-science
 resources:
 - api-deployment.yml
-- api-ingress.yml
 - api-service.yml
 - elasticsearch-service.yml
 - elasticsearch-statefulset.yml
 - gui-deployment.yml
-- gui-ingress.yml
 - gui-service.yml
+- ingress.yml
 - janusgraph-deployment.yml
 - janusgraph-service.yml
 - namespace.yml

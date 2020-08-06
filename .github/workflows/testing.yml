@@ -22,7 +22,7 @@ jobs:
     - name: Run API tests
       run: docker-compose run --rm api make test
     - name: Dump Docker logs
-      if: ${{ always() }}
+      if: ${{ failure() }}
       run: docker-compose logs
   gui:
     name: Run GUI tests
