@@ -35,12 +35,12 @@ services:
     - 9042:9042
     - 9160:9160
   scylla-a:
-    image: scylladb/scylla
+    image: scylladb/scylla:4.1.3
   scylla-b:
-    image: scylladb/scylla
+    image: scylladb/scylla:4.1.3
     command: --seeds=scylla-a
   scylla-c:
-    image: scylladb/scylla
+    image: scylladb/scylla:4.1.3
     command: --seeds=scylla-a
   elasticsearch:
     environment:
@@ -51,7 +51,8 @@ services:
       cluster.name: docker-cluster
       xpack.security.enabled: "false"
       discovery.zen.minimum_master_nodes: 1
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+    #image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+    image: elasticsearch:7.6.2
     ports:
     - 9200:9200
   janusgraph:
@@ -60,7 +61,7 @@ services:
     - scylla-b
     - scylla-c
     - elasticsearch
-    image: janusgraph/janusgraph:0.5
+    image: janusgraph/janusgraph:0.5.2
     ports:
     - 8182:8182
     volumes:
