@@ -11,7 +11,7 @@ const ga = GoogleAnalytics(),
     category: 'interaction', action: 'selected', label: action.payload.label, value: action.payload.eid,
   })),
   deselectEvent = trackEvent((action) => ({
-    category: 'interaction', action: 'deselected'
+    category: 'interaction', action: 'deselected',
   })),
   eventsMap = {
     [LOCATION_CHANGE]: pageView,
