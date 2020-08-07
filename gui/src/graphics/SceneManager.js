@@ -62,8 +62,9 @@ const SceneManager = (container) => {
   }
 
   function render() {
-    renderer.clear();
-    composer.render();
+    renderer.render(scene, camera);
+    // renderer.clear();
+    // composer.render();
   }
 
   function animate() {
