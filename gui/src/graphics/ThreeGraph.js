@@ -29,11 +29,14 @@ const ThreeGraph = (opts) => {
 
   controls.on('deselect', (event) => {
     console.log('deselect', event);
-    const { envelope } = event.object.parent,
+    const { replaced } = event,
+      { envelope } = event.object.parent,
       vertex = envelope.data();
     envelope.deselect();
     forceGraph.unpin(vertex.id);
-    dispatcher.call('deselect', vertex, vertex);
+    if (!replaced) {
+      dispatcher.call('deselect', vertex, vertex);
+    }
   });
 
   controls.on('dragstart', (event) => {

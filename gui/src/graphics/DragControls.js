@@ -67,14 +67,14 @@ const DragControls = (objects, _camera, canvas) => {
       canvas.style.cursor = 'move';
       if (dragged !== selected) {
         if (selected) {
-          dispatcher.call('deselect', null, { event, object: selected });
+          dispatcher.call('deselect', null, { event, object: selected, replaced: true });
         }
         selected = dragged;
         dispatcher.call('select', null, { event, object: selected });
       }
       dispatcher.call('dragstart', null, { event, object: dragged });
     } else if (selected) {
-      dispatcher.call('deselect', null, { event, object: selected });
+      dispatcher.call('deselect', null, { event, object: selected, replaced: false });
       selected = null;
     }
   }
@@ -120,14 +120,14 @@ const DragControls = (objects, _camera, canvas) => {
       canvas.style.cursor = 'move';
       if (dragged !== selected) {
         if (selected) {
-          dispatcher.call('deselect', null, { event, object: selected });
+          dispatcher.call('deselect', null, { event, object: selected, replaced: true });
         }
         selected = dragged;
         dispatcher.call('select', null, { event, object: selected });
       }
       dispatcher.call('dragstart', null, { event, object: dragged });
     } else if (selected) {
-      dispatcher.call('deselect', null, { event, object: selected });
+      dispatcher.call('deselect', null, { event, object: selected, replaced: false });
       selected = null;
     }
   }
