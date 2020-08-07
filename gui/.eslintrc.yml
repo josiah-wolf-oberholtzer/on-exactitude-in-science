@@ -33,5 +33,3 @@ rules:
   - var: always
     let: always
     const: consecutive
-  sort-imports:
-  - error

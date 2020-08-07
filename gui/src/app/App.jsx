@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => {
 const App = (props) => {
   const classes = useStyles();
   return (
-    <ConnectedRouter history={history}>
+    <ConnectedRouter history={history} noInitialPop>
       <Switch>
         <Route exact path="/:label(artist|company|master|release|track)/:id" component={Fetcher} />
         <Route exact path="/random" component={Fetcher} />

@@ -1,7 +1,6 @@
 import * as d3force3d from 'd3-force-3d';
 import { Vector3 } from 'three';
 import { dispatch } from 'd3-dispatch';
-import forceManyBodyGPU from './forceManyBodyGPU';
 
 const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
   buildVertexAndEdgeMaps = (newVertices, newEdges) => {
