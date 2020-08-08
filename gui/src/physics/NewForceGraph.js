@@ -1,6 +1,8 @@
 import * as d3force3d from 'd3-force-3d';
 import { Vector3 } from 'three';
 import { dispatch } from 'd3-dispatch';
+import forceManyBodyGPU from './forceManyBodyGPU';
+import forceManyBodyNaive from './forceManyBodyNaive';
 
 const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
   buildVertexAndEdgeMaps = (newVertices, newEdges) => {
@@ -142,20 +144,10 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
         .alphaDecay(0.01)
         .velocityDecay(0.5)
         // .force('charge', forceManyBodyGPU()
-        .force('charge', d3force3d.forceManyBody()
+        // .force('charge', d3force3d.forceManyBody()
+        .force('charge', forceManyBodyNaive()
           .distanceMax(250)
-          .distanceMin(10)
-          // .theta(0.5)
-          /*
-          .radius((d) => {
-            if (d.type === 'edge') {
-              return 2.0;
-            } if (d.type === 'rudder') {
-              return 0.5;
-            }
-            return 1.0 * (d.radius || 1.0);
-          })
-          */
+          .distanceMin(1)
           .strength((d) => {
             if (d.type === 'edge') {
               return -0.5;
@@ -168,9 +160,9 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
           .id((d) => d.id)
           .distance((d) => (d.source.radius || 1) + (d.target.radius || 1))
           .iterations(3))
-        .force('x', d3force3d.forceX().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
-        .force('y', d3force3d.forceY().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
-        .force('z', d3force3d.forceZ().strength((d) => (d.type === 'rudder' ? 0.0 : 0.01)))
+        .force('x', d3force3d.forceX().strength((d) => (d.type === 'rudder' ? 0.0 : 0.1)))
+        .force('y', d3force3d.forceY().strength((d) => (d.type === 'rudder' ? 0.0 : 0.1)))
+        .force('z', d3force3d.forceZ().strength((d) => (d.type === 'rudder' ? 0.0 : 0.1)))
         .force('centering', d3force3d.forceCenter()),
       dispatcher = dispatch('vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick', 'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick'),
       edgeMap = new Map(),
