@@ -79,7 +79,6 @@ const ThreeVertex = () => {
     group.add(textA);
     group.add(textB);
     update(newData);
-    tick(newData);
   }
 
   function update(newData) {
@@ -123,6 +122,8 @@ const ThreeVertex = () => {
     );
 
     radii = newRadii;
+
+    tick(newData);
   }
 
   function exit() {
@@ -162,18 +163,14 @@ const ThreeVertex = () => {
     data: () => data,
   };
 
-  function init() {
-    childRingMesh.castShadow = true;
-    childRingMesh.receiveShadow = true;
-    coreMesh.castShadow = true;
-    coreMesh.receiveShadow = true;
-    edgeRingMesh.castShadow = true;
-    edgeRingMesh.receiveShadow = true;
-    group.envelope = closure;
-    group.add(coreMesh);
-  }
-
-  init();
+  childRingMesh.castShadow = true;
+  childRingMesh.receiveShadow = true;
+  coreMesh.castShadow = true;
+  coreMesh.receiveShadow = true;
+  edgeRingMesh.castShadow = true;
+  edgeRingMesh.receiveShadow = true;
+  group.envelope = closure;
+  group.add(coreMesh);
 
   return closure;
 };
