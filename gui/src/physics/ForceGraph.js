@@ -1,8 +1,8 @@
 import * as d3force3d from 'd3-force-3d';
 import { Vector3 } from 'three';
 import { dispatch } from 'd3-dispatch';
-// import forceManyBodyGPU from './forceManyBodyGPU';
 import forceManyBodyNaive from './forceManyBodyNaive';
+// import forceManyBodyGPU from './forceManyBodyGPU';
 
 class ForceGraph {
   constructor() {
@@ -54,12 +54,6 @@ class ForceGraph {
     );
     ForceGraph.updateVertexAndEdgePositions(this.vertexMap, this.edgeMap, this.nodeMap);
     this.dispatcher.call('graphRebuild', result, result);
-    result.vertices.entrances.forEach((vertex) => { this.dispatcher.call('vertexEnter', vertex, vertex); });
-    result.vertices.exits.forEach((vertex) => { this.dispatcher.call('vertexExit', vertex, vertex); });
-    result.vertices.updates.forEach((vertex) => { this.dispatcher.call('vertexUpdate', vertex, vertex); });
-    result.edges.entrances.forEach((edge) => { this.dispatcher.call('edgeEnter', edge, edge); });
-    result.edges.exits.forEach((edge) => { this.dispatcher.call('edgeExit', edge, edge); });
-    result.edges.updates.forEach((edge) => { this.dispatcher.call('edgeUpdate', edge, edge); });
   }
 
   tick() {
@@ -71,8 +65,6 @@ class ForceGraph {
         edges: Array.from(this.edgeMap.values()),
       };
       this.dispatcher.call('graphTick', result, result);
-      this.vertexMap.forEach((vertex) => { this.dispatcher.call('vertexTick', vertex, vertex); });
-      this.edgeMap.forEach((edge) => { this.dispatcher.call('edgeTick', edge, edge); });
     }
   }
 

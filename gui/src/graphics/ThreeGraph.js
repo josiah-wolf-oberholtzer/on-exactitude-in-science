@@ -95,10 +95,12 @@ const ThreeGraph = (opts) => {
     threeVertex.update(vertex);
   }
 
-  function onVertexTick(vertex) {
+  function onVertexGraphTick(vertex) {
     const threeVertex = envelopes.get(vertex.id);
     threeVertex.tick(vertex);
   }
+
+  function onVertexFrameTick() { }
 
   function onVertexExit(vertex) {
     const threeVertex = envelopes.get(vertex.id);
@@ -116,25 +118,36 @@ const ThreeGraph = (opts) => {
     threeEdge.update(edge);
   }
 
-  function onEdgeTick(edge) {
+  function onEdgeGraphTick(edge) {
     const threeEdge = envelopes.get(edge.id);
     threeEdge.tick(edge);
   }
+
+  function onEdgeFrameTick() { }
 
   function onEdgeExit(edge) {
     const threeEdge = envelopes.get(edge.id);
     threeEdge.exit();
   }
 
+  function onGraphRebuild(data) {
+    console.log("onGraphRebuild", data);
+    data.vertices.entrances.forEach(onVertexEnter);
+    data.vertices.updates.forEach(onVertexUpdate);
+    data.vertices.exits.forEach(onVertexExit);
+    data.edges.entrances.forEach(onEdgeEnter);
+    data.edges.updates.forEach(onEdgeUpdate);
+    data.edges.exits.forEach(onEdgeExit);
+  }
+
+  function onGraphTick(data) {
+    data.vertices.forEach(onVertexGraphTick);
+    data.edges.forEach(onEdgeGraphTick);
+  }
+
   function init() {
-    forceGraph.on('vertexEnter', onVertexEnter);
-    forceGraph.on('vertexUpdate', onVertexUpdate);
-    forceGraph.on('vertexTick', onVertexTick);
-    forceGraph.on('vertexExit', onVertexExit);
-    forceGraph.on('edgeEnter', onEdgeEnter);
-    forceGraph.on('edgeUpdate', onEdgeUpdate);
-    forceGraph.on('edgeExit', onEdgeExit);
-    forceGraph.on('edgeTick', onEdgeTick);
+    forceGraph.on('graphRebuild', onGraphRebuild);
+    forceGraph.on('graphTick', onGraphTick);
     sceneManager.scene.add(graphObject);
     sceneManager.on('render', () => { forceGraph.tick(); });
   }
