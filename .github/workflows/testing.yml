@@ -5,10 +5,9 @@ on:
     - master
 jobs:
   api:
-    name: Run API tests
+    name: API
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+    steps: - uses: actions/checkout@v2
     - name: Build API container
       run: docker-compose build api
     - name: Pull Docker images
@@ -25,7 +24,7 @@ jobs:
       if: ${{ failure() }}
       run: docker-compose logs
   gui:
-    name: Run GUI tests
+    name: GUI
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,7 +34,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '12'
-    - name: Install JS packages
+    - name: Install
       run: yarn install
-    - name: Test JSi
+    - name: Lint
+      run: yarn lint
+    - name: Test
       run: yarn test
