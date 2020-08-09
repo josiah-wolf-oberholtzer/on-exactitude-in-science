@@ -50,10 +50,7 @@ class EntityGraph extends React.Component {
   componentDidMount(prevProps) {
     this.forceGraph = new ForceGraph();
     this.sceneManager = SceneManager(this.mount);
-    this.threeGraph = new GraphManager({
-        forceGraph: this.forceGraph,
-        sceneManager: this.sceneManager,
-    });
+    this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.push(vertex.label, vertex.eid);
     });

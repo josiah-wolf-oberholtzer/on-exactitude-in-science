@@ -1,17 +1,15 @@
 import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
-import { TextLoader } from './TextLoader';
 import Edge from './Edge';
+import TextLoader from './TextLoader';
 import Vertex from './Vertex';
 
-
 class GraphManager {
-
-  constructor(opts) {
-    this.forceGraph = opts.forceGraph;
-    this.sceneManager = opts.sceneManager;
-    this.textLoader = TextLoader();
+  constructor(forceGraph, sceneManager) {
+    this.forceGraph = forceGraph;
+    this.sceneManager = sceneManager;
+    this.textLoader = new TextLoader();
     this.graphObject = new THREE.Object3D();
     this.controls = new DragControls([], this.sceneManager.camera, this.sceneManager.canvas);
     this.envelopes = new Map();
@@ -145,7 +143,6 @@ class GraphManager {
   onVertexGraphTick(data) { this.envelopes.get(data.id).graphTick(data); }
 
   onVertexExit(data) { this.envelopes.get(data.id).exit(); }
-
-};
+}
 
 export default GraphManager;
