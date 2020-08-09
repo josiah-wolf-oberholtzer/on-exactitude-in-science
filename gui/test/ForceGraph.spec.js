@@ -1,87 +1,87 @@
 import chai from 'chai';
 import { Vector3 } from 'three';
-import NewForceGraph from '../src/physics/NewForceGraph';
+import ForceGraph from '../src/physics/ForceGraph';
 
-const { expect } = chai,
-  vertices = [
-    {
-      id: 'vertex-1',
-      label: 'artist',
-      name: 'Foo',
-      eid: 111,
-    },
-    {
-      id: 'vertex-2',
-      label: 'release',
-      name: 'Bar',
-      eid: 222,
-    },
-    {
-      id: 'vertex-3',
-      label: 'company',
-      name: 'Baz',
-      eid: 333,
-    },
-    {
-      id: 'vertex-4',
-      label: 'artist',
-      name: 'Quux',
-      eid: 444,
-    },
-  ],
-  edges = [
-    {
-      id: 'edge-aaa',
-      label: 'credited_with',
-      source: 'vertex-1',
-      target: 'vertex-2',
-      role: 'Artwork By',
-    },
-    {
-      id: 'edge-bbb',
-      label: 'released_on',
-      source: 'vertex-2',
-      target: 'vertex-3',
-    },
-    {
-      id: 'edge-ccc',
-      label: 'alias_of',
-      source: 'vertex-1',
-      target: 'vertex-4',
-    },
-  ],
-  filterObj = (obj, keys) => keys.reduce((newObj, key) => (
-    obj[key] !== undefined ? { ...newObj, [key]: obj[key] } : newObj
-  ), {}),
-  filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys)),
-  setupEventMap = (graph) => {
-    const eventMap = new Map([
-      ['vertexEnter', []],
-      ['vertexUpdate', []],
-      ['vertexTick', []],
-      ['vertexExit', []],
-      ['edgeEnter', []],
-      ['edgeUpdate', []],
-      ['edgeTick', []],
-      ['edgeExit', []],
-    ]);
-    graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
-    graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
-    graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
-    graph.on('vertexTick', (vertex) => eventMap.get('vertexTick').push(vertex.id));
-    graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
-    graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
-    graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
-    graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
-    return eventMap;
+const { expect } = chai;
+const vertices = [
+  {
+    id: 'vertex-1',
+    label: 'artist',
+    name: 'Foo',
+    eid: 111,
   },
-  clearEventMap = (eventMap) => {
-    eventMap.forEach((value) => { value.length = 0; });
-  };
+  {
+    id: 'vertex-2',
+    label: 'release',
+    name: 'Bar',
+    eid: 222,
+  },
+  {
+    id: 'vertex-3',
+    label: 'company',
+    name: 'Baz',
+    eid: 333,
+  },
+  {
+    id: 'vertex-4',
+    label: 'artist',
+    name: 'Quux',
+    eid: 444,
+  },
+];
+const edges = [
+  {
+    id: 'edge-aaa',
+    label: 'credited_with',
+    source: 'vertex-1',
+    target: 'vertex-2',
+    role: 'Artwork By',
+  },
+  {
+    id: 'edge-bbb',
+    label: 'released_on',
+    source: 'vertex-2',
+    target: 'vertex-3',
+  },
+  {
+    id: 'edge-ccc',
+    label: 'alias_of',
+    source: 'vertex-1',
+    target: 'vertex-4',
+  },
+];
+const filterObj = (obj, keys) => keys.reduce((newObj, key) => (
+  obj[key] !== undefined ? { ...newObj, [key]: obj[key] } : newObj
+), {});
+const filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys));
+const setupEventMap = (graph) => {
+  const eventMap = new Map([
+    ['vertexEnter', []],
+    ['vertexUpdate', []],
+    ['vertexTick', []],
+    ['vertexExit', []],
+    ['edgeEnter', []],
+    ['edgeUpdate', []],
+    ['edgeTick', []],
+    ['edgeExit', []],
+  ]);
+  graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
+  graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
+  graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
+  graph.on('vertexTick', (vertex) => eventMap.get('vertexTick').push(vertex.id));
+  graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
+  graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
+  graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
+  graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
+  return eventMap;
+};
+const clearEventMap = (eventMap) => {
+  eventMap.forEach((value) => { value.length = 0; });
+};
 
-describe('NewForceGraph', () => {
+describe('ForceGraph', () => {
   describe('Initially', () => {
-    const graph = NewForceGraph();
+    const graph = ForceGraph();
 
     it('will have empty maps', () => {
       expect(graph.edgeMap().size).to.equal(0);
@@ -92,8 +92,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After one update', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
 
     it('will have these nodes', () => {
@@ -248,8 +248,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After two updates', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     clearEventMap(eventMap);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
@@ -404,8 +404,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After three updates', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
     clearEventMap(eventMap);
@@ -547,8 +547,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After one tick', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     clearEventMap(eventMap);
     graph.tick();
@@ -568,8 +568,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After two ticks', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     graph.tick();
     clearEventMap(eventMap);
