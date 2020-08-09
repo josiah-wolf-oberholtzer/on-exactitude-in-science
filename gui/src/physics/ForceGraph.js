@@ -7,8 +7,6 @@ import forceManyBodyNaive from './forceManyBodyNaive';
 class ForceGraph {
   constructor() {
     this.dispatcher = dispatch(
-      'vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick',
-      'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick',
       'graphRebuild', 'graphTick',
     );
     this.edgeMap = new Map();
@@ -45,16 +43,15 @@ class ForceGraph {
   }
 
   on(name, _) {
-    if (arguments.length > 1) { 
-      this.dispatcher.on(name, _)
+    if (arguments.length > 1) {
+      this.dispatcher.on(name, _);
       return this;
-    } else {
-      return this.dispatcher.on(name);
     }
+    return this.dispatcher.on(name);
   }
 
   pin(nodeID, x, y, z) {
-    console.log("pin", nodeID, x, y, z);
+    console.log('pin', nodeID, x, y, z);
     const node = this.nodeMap.get(nodeID);
     if (node) {
       node.fx = x;
@@ -90,7 +87,7 @@ class ForceGraph {
   }
 
   unpin(nodeID) {
-    console.log("unpin", nodeID);
+    console.log('unpin', nodeID);
     const node = this.nodeMap.get(nodeID);
     if (node) {
       node.fx = null;

@@ -70,14 +70,18 @@ const setupEventMap = (graph) => {
     ['edgeTick', []],
     ['edgeExit', []],
   ]);
-  graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
-  graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
-  graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
-  graph.on('vertexTick', (vertex) => eventMap.get('vertexTick').push(vertex.id));
-  graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
-  graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
-  graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
-  graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
+  graph.on('graphRebuild', (data) => {
+    eventMap.get('vertexEnter').push(...data.vertices.entrances.map((x) => x.id));
+    eventMap.get('vertexUpdate').push(...data.vertices.updates.map((x) => x.id));
+    eventMap.get('vertexExit').push(...data.vertices.exits.map((x) => x.id));
+    eventMap.get('edgeEnter').push(...data.edges.entrances.map((x) => x.id));
+    eventMap.get('edgeUpdate').push(...data.edges.updates.map((x) => x.id));
+    eventMap.get('edgeExit').push(...data.edges.exits.map((x) => x.id));
+  });
+  graph.on('graphTick', (data) => {
+    eventMap.get('vertexTick').push(...data.vertices.map((x) => x.id));
+    eventMap.get('edgeTick').push(...data.edges.map((x) => x.id));
+  });
   return eventMap;
 };
 
