@@ -26,7 +26,7 @@ class GraphManager {
     this.controls.on('select', this.onSelect.bind(this));
     this.forceGraph.on('graphRebuild', this.onGraphRebuild.bind(this));
     this.forceGraph.on('graphTick', this.onGraphTick.bind(this));
-    this.sceneManager.on('render', this.onRender.bind(this));
+    this.sceneManager.on('beforeRender', this.onBeforeRender.bind(this));
   }
 
   on(name, _) { return arguments.length > 1 ? this.dispatcher.on(name, _) : this.dispatcher.on(name); }
@@ -117,7 +117,7 @@ class GraphManager {
     envelope.mouseover();
   }
 
-  onRender() {
+  onBeforeRender() {
     this.forceGraph.tick();
     this.envelopes.forEach(this.onFrameTick.bind(this));
   }

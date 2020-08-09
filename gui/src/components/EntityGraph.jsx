@@ -1,7 +1,7 @@
 import React from "react";
 import ForceGraph from '../physics/ForceGraph';
 import GraphManager from '../graphics/GraphManager';
-import { SceneManager } from '../graphics/SceneManager';
+import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
 import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
@@ -49,7 +49,7 @@ class EntityGraph extends React.Component {
 
   componentDidMount(prevProps) {
     this.forceGraph = new ForceGraph();
-    this.sceneManager = SceneManager(this.mount);
+    this.sceneManager = new SceneManager(this.mount);
     this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.push(vertex.label, vertex.eid);
