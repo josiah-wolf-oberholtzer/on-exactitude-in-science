@@ -7,7 +7,8 @@ jobs:
   api:
     name: API
     runs-on: ubuntu-latest
-    steps: - uses: actions/checkout@v2
+    steps:
+    - uses: actions/checkout@v2
     - name: Build API container
       run: docker-compose build api
     - name: Pull Docker images
