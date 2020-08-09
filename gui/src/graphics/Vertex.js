@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-class ThreeVertex {
+class Vertex {
   constructor() {
     this.controls = null;
     this.data = {};
@@ -91,11 +91,11 @@ class ThreeVertex {
   }
 
   update(newData) {
-    const newRadii = ThreeVertex.calculateRadii(newData);
+    const newRadii = Vertex.calculateRadii(newData);
     const textPositionZ = newRadii.baseRadius + this.textA.geometry.parameters.width / 2;
     if (this.data.label !== newData.label) {
       this.coreMesh.geometry.dispose();
-      this.coreMesh.geometry = ThreeVertex.calculateCoreGeometry(newData.label);
+      this.coreMesh.geometry = Vertex.calculateCoreGeometry(newData.label);
     }
     this.coreMesh.scale.setScalar(newRadii.baseRadius);
     this.textA.position.set(0, 0, textPositionZ);
@@ -156,4 +156,4 @@ class ThreeVertex {
   mouseover() {}
 }
 
-export default ThreeVertex;
+export default Vertex;

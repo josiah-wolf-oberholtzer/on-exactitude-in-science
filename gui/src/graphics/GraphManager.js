@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
 import Edge from './Edge';
-import ThreeVertex from './ThreeVertex';
+import Vertex from './Vertex';
 
 const GraphManager = (opts) => {
   const { forceGraph, sceneManager, textLoader } = opts;
@@ -85,7 +85,7 @@ const GraphManager = (opts) => {
   });
 
   function onVertexEnter(vertex) {
-    const threeVertex = new ThreeVertex();
+    const threeVertex = new Vertex();
     threeVertex.enter(vertex, graphObject, controls, textLoader);
     envelopes.set(vertex.id, threeVertex);
   }
