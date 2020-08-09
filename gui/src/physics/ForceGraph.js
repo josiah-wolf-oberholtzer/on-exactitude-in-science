@@ -136,7 +136,7 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
       nodeToVector3(rudder, vertex.rudderPosition);
     });
   },
-  NewForceGraph = () => {
+  ForceGraph = () => {
     const initSimulation = () => d3force3d.forceSimulation()
         .stop()
         .alpha(1)
@@ -223,4 +223,4 @@ const edgeRequiresBezier = (edge) => edge.label !== 'alias_of',
     };
   };
 
-export default NewForceGraph;
+export default ForceGraph;

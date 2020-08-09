@@ -1,5 +1,5 @@
 import React from "react";
-import ForceGraph from '../physics/NewForceGraph';
+import ForceGraph from '../physics/ForceGraph';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
 import { ThreeGraph } from '../graphics/ThreeGraph';
