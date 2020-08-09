@@ -3,182 +3,209 @@ import {
 } from 'three';
 import { dispatch } from 'd3-dispatch';
 
-const DragControls = (objects, _camera, canvas) => {
-  const plane = new Plane(),
-    raycaster = new Raycaster(),
-    mouse = new Vector2(),
-    intersection = new Vector3(),
-    worldPosition = new Vector3(),
-    intersections = [],
-    dispatcher = dispatch(
-      'drag', 'dragstart', 'dragend', 'mouseover', 'mouseout',
-      'select', 'deselect',
+class DragControls {
+  constructor(objects, camera, canvas) {
+    this.camera = camera;
+    this.canvas = canvas;
+    this.dispatcher = dispatch(
+      'drag', 'dragstart', 'dragend', 'mouseover', 'mouseout', 'select', 'deselect',
     );
+    this.dragged = null;
+    this.enabled = true;
+    this.hovered = null;
+    this.intersection = new Vector3();
+    this.intersections = [];
+    this.mouse = new Vector2();
+    this.objects = objects || [];
+    this.plane = new Plane();
+    this.raycaster = new Raycaster();
+    this.selected = null;
+    this.transformGroup = false;
+    this.worldPosition = new Vector3();
+    this.activate();
+  }
 
-  let enabled = true,
-    transformGroup = false,
-    dragged = null,
-    selected = null,
-    hovered = null;
+  activate() {
+    this.canvas.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+    this.canvas.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+    this.canvas.addEventListener('mouseup', this.onDocumentMouseCancel.bind(this), false);
+    this.canvas.addEventListener('mouseleave', this.onDocumentMouseCancel.bind(this), false);
+    this.canvas.addEventListener('touchmove', this.onDocumentTouchMove.bind(this), false);
+    this.canvas.addEventListener('touchstart', this.onDocumentTouchStart.bind(this), false);
+    this.canvas.addEventListener('touchend', this.onDocumentTouchEnd.bind(this), false);
+  }
 
-  function onDocumentMouseMove(event) {
+  add(_) {
+    this.objects.push(_);
+  }
+
+  deactivate() {
+    this.canvas.removeEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+    this.canvas.removeEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+    this.canvas.removeEventListener('mouseup', this.onDocumentMouseCancel.bind(this), false);
+    this.canvas.removeEventListener('mouseleave', this.onDocumentMouseCancel.bind(this), false);
+    this.canvas.removeEventListener('touchmove', this.onDocumentTouchMove.bind(this), false);
+    this.canvas.removeEventListener('touchstart', this.onDocumentTouchStart.bind(this), false);
+    this.canvas.removeEventListener('touchend', this.onDocumentTouchEnd.bind(this), false);
+    this.canvas.style.cursor = '';
+  }
+
+  dispose() {
+    this.deactivate();
+  }
+
+  enabled(_) {
+    if (arguments.length > 0) {
+      this.enabled = _;
+      return this;
+    }
+    return this.enabled;
+  }
+
+  on(name, _) {
+    if (arguments.length > 1) {
+      this.dispatcher.on(name, _);
+      return this;
+    }
+    return this.dispatcher.on(name);
+  }
+
+  onDocumentMouseCancel(event) {
     event.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(mouse, _camera);
-    if (dragged && enabled) {
-      raycaster.ray.intersectPlane(plane, intersection);
-      dispatcher.call('drag', null, { event, object: dragged, position: intersection });
+    if (this.dragged) {
+      this.dispatcher.call('dragend', null, { event, object: this.dragged });
+      this.dragged = null;
+    }
+    this.canvas.style.cursor = this.hovered ? 'pointer' : 'auto';
+  }
+
+  onDocumentMouseDown(event) {
+    event.preventDefault();
+    this.intersections.length = 0;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.intersectObjects(this.objects, true, this.intersections);
+    if (this.intersections.length > 0) {
+      this.dragged = (this.transformGroup === true) ? this.objects[0] : this.intersections[0].object;
+      this.raycaster.ray.intersectPlane(this.plane, this.intersection);
+      this.canvas.style.cursor = 'move';
+      if (this.dragged !== this.selected) {
+        if (this.selected) {
+          this.dispatcher.call('deselect', null, { event, object: this.selected, replaced: true });
+        }
+        this.selected = this.dragged;
+        this.dispatcher.call('select', null, { event, object: this.selected });
+      }
+      this.dispatcher.call('dragstart', null, { event, object: this.dragged });
+    } else if (this.selected) {
+      this.dispatcher.call('deselect', null, { event, object: this.selected, replaced: false });
+      this.selected = null;
+    }
+  }
+
+  onDocumentMouseMove(event) {
+    event.preventDefault();
+    const rect = this.canvas.getBoundingClientRect();
+    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    if (this.dragged && this.enabled) {
+      this.raycaster.ray.intersectPlane(this.plane, this.intersection);
+      this.dispatcher.call(
+        'drag', null, { event, object: this.dragged, position: this.intersection },
+      );
       return;
     }
-    intersections.length = 0;
-    raycaster.setFromCamera(mouse, _camera);
-    raycaster.intersectObjects(objects, true, intersections);
-    if (intersections.length > 0) {
-      const { object } = intersections[0];
-      plane.setFromNormalAndCoplanarPoint(
-        _camera.getWorldDirection(plane.normal),
-        worldPosition.setFromMatrixPosition(object.matrixWorld),
+    this.intersections.length = 0;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.intersectObjects(this.objects, true, this.intersections);
+    if (this.intersections.length > 0) {
+      const { object } = this.intersections[0];
+      this.plane.setFromNormalAndCoplanarPoint(
+        this.camera.getWorldDirection(this.plane.normal),
+        this.worldPosition.setFromMatrixPosition(object.matrixWorld),
       );
-      if (hovered !== object) {
-        if (hovered !== null) {
-          dispatcher.call('mouseout', null, { event, object: hovered });
+      if (this.hovered !== object) {
+        if (this.hovered !== null) {
+          this.dispatcher.call('mouseout', null, { event, object: this.hovered });
         }
-        dispatcher.call('mouseover', null, { event, object });
-        canvas.style.cursor = 'pointer';
-        hovered = object;
+        this.dispatcher.call('mouseover', null, { event, object });
+        this.canvas.style.cursor = 'pointer';
+        this.hovered = object;
       }
-    } else if (hovered !== null) {
-      dispatcher.call('mouseout', null, { event, object: hovered });
-      canvas.style.cursor = 'auto';
-      hovered = null;
+    } else if (this.hovered !== null) {
+      this.dispatcher.call('mouseout', null, { event, object: this.hovered });
+      this.canvas.style.cursor = 'auto';
+      this.hovered = null;
     }
   }
 
-  function onDocumentMouseDown(event) {
+  onDocumentTouchEnd(event) {
     event.preventDefault();
-    intersections.length = 0;
-    raycaster.setFromCamera(mouse, _camera);
-    raycaster.intersectObjects(objects, true, intersections);
-    if (intersections.length > 0) {
-      dragged = (transformGroup === true) ? objects[0] : intersections[0].object;
-      raycaster.ray.intersectPlane(plane, intersection);
-      canvas.style.cursor = 'move';
-      if (dragged !== selected) {
-        if (selected) {
-          dispatcher.call('deselect', null, { event, object: selected, replaced: true });
-        }
-        selected = dragged;
-        dispatcher.call('select', null, { event, object: selected });
-      }
-      dispatcher.call('dragstart', null, { event, object: dragged });
-    } else if (selected) {
-      dispatcher.call('deselect', null, { event, object: selected, replaced: false });
-      selected = null;
+    if (this.dragged) {
+      this.dispatcher.call('dragend', null, { event, object: this.dragged });
+      this.dragged = null;
+    }
+    this.canvas.style.cursor = 'auto';
+  }
+
+  onDocumentTouchMove(event) {
+    event.preventDefault();
+    const rect = this.canvas.getBoundingClientRect();
+    const touch = event.changedTouches[0];
+    this.mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    if (this.dragged && this.enabled) {
+      this.raycaster.ray.intersectPlane(this.plane, this.intersection);
+      this.dispatcher.call('drag', null, { event, object: this.dragged, position: this.intersection });
     }
   }
 
-  function onDocumentMouseCancel(event) {
+  onDocumentTouchStart(event) {
     event.preventDefault();
-    if (dragged) {
-      dispatcher.call('dragend', null, { event, object: dragged });
-      dragged = null;
-    }
-    canvas.style.cursor = hovered ? 'pointer' : 'auto';
-  }
-
-  function onDocumentTouchMove(event) {
-    event.preventDefault();
-    const rect = canvas.getBoundingClientRect(),
-      touch = event.changedTouches[0];
-    mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(mouse, _camera);
-    if (dragged && enabled) {
-      raycaster.ray.intersectPlane(plane, intersection);
-      dispatcher.call('drag', null, { event, object: dragged, position: intersection });
-    }
-  }
-
-  function onDocumentTouchStart(event) {
-    event.preventDefault();
-    const rect = canvas.getBoundingClientRect(),
-      touch = event.changedTouches[0];
-    mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-    intersections.length = 0;
-    raycaster.setFromCamera(mouse, _camera);
-    raycaster.intersectObjects(objects, true, intersections);
-    if (intersections.length > 0) {
-      dragged = (transformGroup === true) ? objects[0] : intersections[0].object;
-      plane.setFromNormalAndCoplanarPoint(
-        _camera.getWorldDirection(plane.normal),
-        worldPosition.setFromMatrixPosition(dragged.matrixWorld),
+    const rect = this.canvas.getBoundingClientRect();
+    const touch = event.changedTouches[0];
+    this.mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    this.mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+    this.intersections.length = 0;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.intersectObjects(this.objects, true, this.intersections);
+    if (this.intersections.length > 0) {
+      this.dragged = (this.transformGroup === true) ? this.objects[0] : this.intersections[0].object;
+      this.plane.setFromNormalAndCoplanarPoint(
+        this.camera.getWorldDirection(this.plane.normal),
+        this.worldPosition.setFromMatrixPosition(this.dragged.matrixWorld),
       );
-      raycaster.ray.intersectPlane(plane, intersection);
-      canvas.style.cursor = 'move';
-      if (dragged !== selected) {
-        if (selected) {
-          dispatcher.call('deselect', null, { event, object: selected, replaced: true });
+      this.raycaster.ray.intersectPlane(this.plane, this.intersection);
+      this.canvas.style.cursor = 'move';
+      if (this.dragged !== this.selected) {
+        if (this.selected) {
+          this.dispatcher.call('deselect', null, { event, object: this.selected, replaced: true });
         }
-        selected = dragged;
-        dispatcher.call('select', null, { event, object: selected });
+        this.selected = this.dragged;
+        this.dispatcher.call('select', null, { event, object: this.selected });
       }
-      dispatcher.call('dragstart', null, { event, object: dragged });
-    } else if (selected) {
-      dispatcher.call('deselect', null, { event, object: selected, replaced: false });
-      selected = null;
+      this.dispatcher.call('dragstart', null, { event, object: this.dragged });
+    } else if (this.selected) {
+      this.dispatcher.call('deselect', null, { event, object: this.selected, replaced: false });
+      this.selected = null;
     }
   }
 
-  function onDocumentTouchEnd(event) {
-    event.preventDefault();
-    if (dragged) {
-      dispatcher.call('dragend', null, { event, object: dragged });
-      dragged = null;
+  remove(_) {
+    const index = this.objects.indexOf(_);
+    if (index > -1) {
+      this.objects.splice(index, 1);
     }
-    canvas.style.cursor = 'auto';
   }
 
-  function activate() {
-    canvas.addEventListener('mousemove', onDocumentMouseMove, false);
-    canvas.addEventListener('mousedown', onDocumentMouseDown, false);
-    canvas.addEventListener('mouseup', onDocumentMouseCancel, false);
-    canvas.addEventListener('mouseleave', onDocumentMouseCancel, false);
-    canvas.addEventListener('touchmove', onDocumentTouchMove, false);
-    canvas.addEventListener('touchstart', onDocumentTouchStart, false);
-    canvas.addEventListener('touchend', onDocumentTouchEnd, false);
+  transformGroup(_) {
+    if (arguments.length > 0) {
+      this.transformGroup = _;
+      return this;
+    }
+    return this.transformGroup;
   }
+}
 
-  function deactivate() {
-    canvas.removeEventListener('mousemove', onDocumentMouseMove, false);
-    canvas.removeEventListener('mousedown', onDocumentMouseDown, false);
-    canvas.removeEventListener('mouseup', onDocumentMouseCancel, false);
-    canvas.removeEventListener('mouseleave', onDocumentMouseCancel, false);
-    canvas.removeEventListener('touchmove', onDocumentTouchMove, false);
-    canvas.removeEventListener('touchstart', onDocumentTouchStart, false);
-    canvas.removeEventListener('touchend', onDocumentTouchEnd, false);
-    canvas.style.cursor = '';
-  }
-
-  function dispose() {
-    deactivate();
-  }
-
-  activate();
-
-  return {
-    activate,
-    add(_) { objects.push(_); },
-    remove(_) { objects.splice(objects.indexOf(_), 1); },
-    deactivate,
-    dispose,
-    enabled(_) { return arguments.length > 0 ? enabled = _ : enabled; },
-    objects: () => objects,
-    on(name, _) { return arguments.length > 1 ? dispatcher.on(name, _) : dispatcher.on(name); },
-    transformGroup(_) { return arguments.length > 0 ? transformGroup = _ : transformGroup; },
-  };
-};
-
-export { DragControls };
+export default DragControls;

@@ -8,7 +8,7 @@ env:
   GUI_IMAGE: josiahwolfoberholtzer/on-exactitude-in-science-gui
 jobs:
   images:
-    name: Build and push Docker images
+    name: Update Images
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
         tag_with_sha: true
         path: gui
   kubernetes:
-    name: Update cluster
+    name: Update Kubernetes
     needs:
     - images
     runs-on: ubuntu-latest

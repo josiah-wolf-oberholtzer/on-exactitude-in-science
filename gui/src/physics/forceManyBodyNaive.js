@@ -17,10 +17,10 @@ const forceManyBodyNaive = () => {
     if (!nodes.length) { return; }
     const n = nodes.length;
     for (let i = 0; i < n; i++) {
-      const thisNode = nodes[i],
-        thisX = thisNode.x,
-        thisY = thisNode.y,
-        thisZ = thisNode.z;
+      const thisNode = nodes[i];
+      const thisX = thisNode.x;
+      const thisY = thisNode.y;
+      const thisZ = thisNode.z;
       let vx = 0.0,
         vy = 0.0,
         vz = 0.0;
@@ -28,11 +28,11 @@ const forceManyBodyNaive = () => {
         if (i === j) {
           continue;
         }
-        const thatNode = nodes[j],
-          thatX = thatNode.x,
-          thatY = thatNode.y,
-          thatZ = thatNode.z,
-          thatStrength = strengths[j];
+        const thatNode = nodes[j];
+        const thatX = thatNode.x;
+        const thatY = thatNode.y;
+        const thatZ = thatNode.z;
+        const thatStrength = strengths[j];
         let deltaX = thatX - thisX,
           deltaY = thatY - thisY,
           deltaZ = thatZ - thisZ,

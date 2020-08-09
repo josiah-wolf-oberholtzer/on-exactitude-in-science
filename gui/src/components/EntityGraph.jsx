@@ -1,8 +1,7 @@
 import React from "react";
-import ForceGraph from '../physics/NewForceGraph';
-import { SceneManager } from '../graphics/SceneManager';
-import { TextLoader } from '../graphics/TextLoader';
-import { ThreeGraph } from '../graphics/ThreeGraph';
+import ForceGraph from '../physics/ForceGraph';
+import GraphManager from '../graphics/GraphManager';
+import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
 import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
@@ -35,12 +34,7 @@ class EntityGraph extends React.Component {
 
   updateCamera(prevProps, nextProps) {
     if (prevProps.cameraNonce != nextProps.cameraNonce) {
-      this.sceneManager.camera.position.set(0, 0, 100);
-      this.sceneManager.camera.rotation.set(0, 0, 0);
-      this.sceneManager.controls.target.set(0, 0, 0);
-      this.sceneManager.controls.enableDamping = false;
-      this.sceneManager.controls.update();
-      this.sceneManager.controls.enableDamping = true;
+      this.sceneManager.resetCamera();
     }
   }
 
@@ -54,16 +48,10 @@ class EntityGraph extends React.Component {
   }
 
   componentDidMount(prevProps) {
-    this.textLoader = TextLoader();
-    this.forceGraph = ForceGraph();
-    this.sceneManager = SceneManager(this.mount);
-    this.threeGraph = ThreeGraph({
-        forceGraph: this.forceGraph,
-        sceneManager: this.sceneManager,
-        textLoader: this.textLoader,
-    });
+    this.forceGraph = new ForceGraph();
+    this.sceneManager = new SceneManager(this.mount);
+    this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
     this.threeGraph.on("doubleclick", (vertex) => {
-      //this.props.fetchByEntity(vertex.label, vertex.eid);
       this.props.push(vertex.label, vertex.eid);
     });
     this.threeGraph.on("select", (vertex) => {
@@ -72,7 +60,6 @@ class EntityGraph extends React.Component {
     this.threeGraph.on("deselect", (vertex) => {
       this.props.deselectEntity();
     });
-    this.sceneManager.scene.add(this.threeGraph.object);
     this.updateGraph({}, this.props);
     this.start();
   }
@@ -87,12 +74,10 @@ class EntityGraph extends React.Component {
   }
 
   start() {
-    // this.forceGraph.start();
     this.sceneManager.start();
   }
 
   stop() {
-    // this.forceGraph.stop();
     this.sceneManager.stop();
   }
 

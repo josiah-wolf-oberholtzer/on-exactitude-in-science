@@ -1,119 +1,78 @@
 import * as THREE from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { dispatch } from 'd3-dispatch';
 
-const SceneManager = (container) => {
-  const renderer = new THREE.WebGLRenderer({
-      alpha: false,
-      antialias: true,
-      stencil: false,
-    }),
-    composer = new EffectComposer(renderer),
-    canvas = renderer.domElement,
-    scene = new THREE.Scene(),
-    camera = new THREE.PerspectiveCamera(
-      45, window.innerWidth / window.innerHeight, 1, 5000,
-    ),
-    // interaction = new Interaction(renderer, scene, camera, { autoPreventDefault: true }),
-    renderPass = new RenderPass(scene, camera),
-    bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85,
-    ),
-    controls = new OrbitControls(camera, canvas),
-    event = dispatch('render'),
-    hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
-
-  let frameId;
-
-  function initShaders() {
-    renderer.autoClear = false;
-    renderer.toneMapping = THREE.ReinhardToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    bloomPass.threshold = 0.0;
-    bloomPass.strength = 1.0;
-    bloomPass.radius = 0.25;
-    composer.addPass(renderPass);
-    composer.addPass(bloomPass);
+class SceneManager {
+  constructor(container) {
+    // allocation
+    this.container = container;
+    this.renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, stencil: false });
+    this.canvas = this.renderer.domElement;
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
+    this.dispatcher = dispatch('beforeRender');
+    // settings
+    this.frameId = null;
+    this.camera.position.z = 100;
+    this.controls.dampingFactory = 0.01;
+    this.controls.enableDamping = true;
+    this.hemisphereLight.position.set(0, 1000, 0);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ReinhardToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    this.scene.background = new THREE.Color(0x000000);
+    this.scene.fog = new THREE.Fog(0x000000, 50, 200);
+    // structure
+    this.container.appendChild(this.canvas);
+    this.scene.add(this.hemisphereLight);
+    this.update();
+    window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
 
-  function initShadows() {
-    // pointLight.position.set(1, 1, 1);
-    // pointLight.castShadow = true;
-    hemisphereLight.position.set(0, 1000, 0);
-    // scene.add(pointLight);
-    scene.add(hemisphereLight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  animate() {
+    this.dispatcher.call('beforeRender');
+    this.update();
+    this.render();
+    this.frameId = requestAnimationFrame(this.animate.bind(this));
   }
 
-  function init() {
-    initShaders();
-    initShadows();
-    camera.position.z = 100;
-    controls.enableDamping = true;
-    controls.dampingFactory = 0.01;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    scene.background = new THREE.Color(0x000000);
-    scene.fog = new THREE.Fog(0x000000, 50, 200);
-    container.appendChild(canvas);
-  }
-
-  function render() {
-    renderer.render(scene, camera);
-    // renderer.clear();
-    // composer.render();
-  }
-
-  function animate() {
-    event.call('render', {}, {});
-    // controls.update();
-    update();
-    render();
-    frameId = requestAnimationFrame(animate);
-  }
-
-  function start() {
-    if (!frameId) {
-      requestAnimationFrame(animate);
+  on(name, _) {
+    if (arguments.length > 1) {
+      return this.dispatcher.on(name, _);
     }
+    return this.dispatcher.on(name);
   }
 
-  function stop() {
-    if (frameId) {
-      cancelAnimationFrame(frameId);
-    }
+  onWindowResize() { this.update(); }
+
+  render() {
+    this.renderer.render(this.scene, this.camera);
   }
 
-  function update() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth * 2, window.innerHeight * 2);
-    controls.update();
+  resetCamera() {
+    this.camera.position.set(0, 0, 100);
+    this.camera.rotation.set(0, 0, 0);
+    this.controls.target.set(0, 0, 0);
+    this.controls.enableDamping = false;
+    this.controls.update();
+    this.controls.enableDamping = true;
   }
 
-  function onWindowResize() {
-    update();
+  start() { if (!this.frameId) { requestAnimationFrame(this.animate.bind(this)); } }
+
+  stop() { if (this.frameId) { cancelAnimationFrame(this.frameId); } }
+
+  update() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.controls.update();
   }
+}
 
-  window.addEventListener('resize', onWindowResize, false);
-
-  init();
-  update();
-
-  return {
-    camera,
-    canvas,
-    controls,
-    on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
-    scene,
-    start,
-    stop,
-  };
-};
-
-export { SceneManager };
+export default SceneManager;

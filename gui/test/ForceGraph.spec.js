@@ -1,104 +1,114 @@
 import chai from 'chai';
 import { Vector3 } from 'three';
-import NewForceGraph from '../src/physics/NewForceGraph';
+import ForceGraph from '../src/physics/ForceGraph';
 
-const { expect } = chai,
-  vertices = [
-    {
-      id: 'vertex-1',
-      label: 'artist',
-      name: 'Foo',
-      eid: 111,
-    },
-    {
-      id: 'vertex-2',
-      label: 'release',
-      name: 'Bar',
-      eid: 222,
-    },
-    {
-      id: 'vertex-3',
-      label: 'company',
-      name: 'Baz',
-      eid: 333,
-    },
-    {
-      id: 'vertex-4',
-      label: 'artist',
-      name: 'Quux',
-      eid: 444,
-    },
-  ],
-  edges = [
-    {
-      id: 'edge-aaa',
-      label: 'credited_with',
-      source: 'vertex-1',
-      target: 'vertex-2',
-      role: 'Artwork By',
-    },
-    {
-      id: 'edge-bbb',
-      label: 'released_on',
-      source: 'vertex-2',
-      target: 'vertex-3',
-    },
-    {
-      id: 'edge-ccc',
-      label: 'alias_of',
-      source: 'vertex-1',
-      target: 'vertex-4',
-    },
-  ],
-  filterObj = (obj, keys) => keys.reduce((newObj, key) => (
-    obj[key] !== undefined ? { ...newObj, [key]: obj[key] } : newObj
-  ), {}),
-  filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys)),
-  setupEventMap = (graph) => {
-    const eventMap = new Map([
-      ['vertexEnter', []],
-      ['vertexUpdate', []],
-      ['vertexTick', []],
-      ['vertexExit', []],
-      ['edgeEnter', []],
-      ['edgeUpdate', []],
-      ['edgeTick', []],
-      ['edgeExit', []],
-    ]);
-    graph.on('vertexEnter', (vertex) => eventMap.get('vertexEnter').push(vertex.id));
-    graph.on('vertexUpdate', (vertex) => eventMap.get('vertexUpdate').push(vertex.id));
-    graph.on('vertexExit', (vertex) => eventMap.get('vertexExit').push(vertex.id));
-    graph.on('vertexTick', (vertex) => eventMap.get('vertexTick').push(vertex.id));
-    graph.on('edgeEnter', (edge) => eventMap.get('edgeEnter').push(edge.id));
-    graph.on('edgeUpdate', (edge) => eventMap.get('edgeUpdate').push(edge.id));
-    graph.on('edgeExit', (edge) => eventMap.get('edgeExit').push(edge.id));
-    graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
-    return eventMap;
+const { expect } = chai;
+
+const vertices = [
+  {
+    id: 'vertex-1',
+    label: 'artist',
+    name: 'Foo',
+    eid: 111,
   },
-  clearEventMap = (eventMap) => {
-    eventMap.forEach((value) => { value.length = 0; });
-  };
+  {
+    id: 'vertex-2',
+    label: 'release',
+    name: 'Bar',
+    eid: 222,
+  },
+  {
+    id: 'vertex-3',
+    label: 'company',
+    name: 'Baz',
+    eid: 333,
+  },
+  {
+    id: 'vertex-4',
+    label: 'artist',
+    name: 'Quux',
+    eid: 444,
+  },
+];
 
-describe('NewForceGraph', () => {
+const edges = [
+  {
+    id: 'edge-aaa',
+    label: 'credited_with',
+    source: 'vertex-1',
+    target: 'vertex-2',
+    role: 'Artwork By',
+  },
+  {
+    id: 'edge-bbb',
+    label: 'released_on',
+    source: 'vertex-2',
+    target: 'vertex-3',
+  },
+  {
+    id: 'edge-ccc',
+    label: 'alias_of',
+    source: 'vertex-1',
+    target: 'vertex-4',
+  },
+];
+
+const filterObj = (obj, keys) => keys.reduce((newObj, key) => (
+  obj[key] !== undefined ? { ...newObj, [key]: obj[key] } : newObj
+), {});
+
+const filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys));
+
+const setupEventMap = (graph) => {
+  const eventMap = new Map([
+    ['vertexEnter', []],
+    ['vertexUpdate', []],
+    ['vertexTick', []],
+    ['vertexExit', []],
+    ['edgeEnter', []],
+    ['edgeUpdate', []],
+    ['edgeTick', []],
+    ['edgeExit', []],
+  ]);
+  graph.on('graphRebuild', (data) => {
+    eventMap.get('vertexEnter').push(...data.vertices.entrances.map((x) => x.id));
+    eventMap.get('vertexUpdate').push(...data.vertices.updates.map((x) => x.id));
+    eventMap.get('vertexExit').push(...data.vertices.exits.map((x) => x.id));
+    eventMap.get('edgeEnter').push(...data.edges.entrances.map((x) => x.id));
+    eventMap.get('edgeUpdate').push(...data.edges.updates.map((x) => x.id));
+    eventMap.get('edgeExit').push(...data.edges.exits.map((x) => x.id));
+  });
+  graph.on('graphTick', (data) => {
+    eventMap.get('vertexTick').push(...data.vertices.map((x) => x.id));
+    eventMap.get('edgeTick').push(...data.edges.map((x) => x.id));
+  });
+  return eventMap;
+};
+
+const clearEventMap = (eventMap) => {
+  eventMap.forEach((value) => { value.length = 0; });
+};
+
+describe('ForceGraph', () => {
   describe('Initially', () => {
-    const graph = NewForceGraph();
+    const graph = new ForceGraph();
 
     it('will have empty maps', () => {
-      expect(graph.edgeMap().size).to.equal(0);
-      expect(graph.linkMap().size).to.equal(0);
-      expect(graph.nodeMap().size).to.equal(0);
-      expect(graph.vertexMap().size).to.equal(0);
+      expect(graph.edgeMap.size).to.equal(0);
+      expect(graph.linkMap.size).to.equal(0);
+      expect(graph.nodeMap.size).to.equal(0);
+      expect(graph.vertexMap.size).to.equal(0);
     });
   });
 
   describe('After one update', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = new ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -155,7 +165,7 @@ describe('NewForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-1-rudder',
         'vertex-2-rudder',
         'vertex-1-to-edge-aaa',
@@ -165,7 +175,7 @@ describe('NewForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -206,7 +216,7 @@ describe('NewForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -248,15 +258,15 @@ describe('NewForceGraph', () => {
   });
 
   describe('After two updates', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = new ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     clearEventMap(eventMap);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -312,7 +322,7 @@ describe('NewForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-2-rudder',
         'vertex-3-rudder',
         'vertex-2-to-edge-bbb',
@@ -322,7 +332,7 @@ describe('NewForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -363,7 +373,7 @@ describe('NewForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -404,8 +414,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After three updates', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = new ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
     clearEventMap(eventMap);
@@ -413,7 +423,7 @@ describe('NewForceGraph', () => {
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -461,7 +471,7 @@ describe('NewForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-1-rudder',
         'vertex-4-rudder',
         'edge-ccc',
@@ -470,7 +480,7 @@ describe('NewForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -511,7 +521,7 @@ describe('NewForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -547,8 +557,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After one tick', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = new ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     clearEventMap(eventMap);
     graph.tick();
@@ -568,8 +578,8 @@ describe('NewForceGraph', () => {
   });
 
   describe('After two ticks', () => {
-    const graph = NewForceGraph(),
-      eventMap = setupEventMap(graph);
+    const graph = new ForceGraph();
+    const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     graph.tick();
     clearEventMap(eventMap);
