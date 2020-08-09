@@ -19,7 +19,7 @@ class Edge {
     this.group.envelope = this;
   }
 
-  enter(newData, newScene, newControls, textLoader) {
+  enter(newData, newScene, newControls) {
     this.controls = newControls;
     this.scene = newScene;
     this.scene.add(this.group);

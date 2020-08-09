@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
-import { DragControls } from './DragControls';
+import DragControls from './DragControls';
 import Edge from './Edge';
 import TextLoader from './TextLoader';
 import Vertex from './Vertex';

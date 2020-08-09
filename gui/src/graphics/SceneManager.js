@@ -30,7 +30,7 @@ class SceneManager {
     this.container.appendChild(this.canvas);
     this.scene.add(this.hemisphereLight);
     this.update();
-    window.addEventListener('resize', this.onWindowResize, false);
+    window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
 
   animate() {

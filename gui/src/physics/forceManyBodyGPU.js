@@ -61,39 +61,6 @@ const forceGPU = () => {
     return [vx, vy, vz];
   }
 
-  function kernel3dNoRadii(positionsArray, radiiArray, strengthsArray) {
-    const thisX = positionsArray[this.thread.x][0];
-    const thisY = positionsArray[this.thread.x][1];
-    const thisZ = positionsArray[this.thread.x][2];
-    let vx = 0.0,
-      vy = 0.0,
-      vz = 0.0,
-      weight = 0.0;
-    for (let i = 0; i < this.constants.size; i++) {
-      const thatX = positionsArray[i][0];
-      const thatY = positionsArray[i][1];
-      const thatZ = positionsArray[i][2];
-      const thatStrength = strengthsArray[i];
-      const deltaX = thatX - thisX;
-      const deltaY = thatY - thisY;
-      const deltaZ = thatZ - thisZ;
-      const distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-      if (i !== this.thread.x) {
-        if (distance < this.constants.distanceMax2) {
-          let otherDistance = distance;
-          if (distance < this.constants.distanceMin2) {
-            otherDistance = Math.sqrt(this.constants.distanceMin2 * distance);
-          }
-          weight = (thatStrength * this.constants.alpha) / otherDistance;
-          vx += deltaX * weight;
-          vy += deltaY * weight;
-          vz += deltaZ * weight;
-        }
-      }
-    }
-    return [vx, vy, vz];
-  }
-
   function collectPositions() {
     const n = nodes.length;
     for (let i = 0; i < n; i++) {
