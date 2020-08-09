@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const ThreeEdge = () => {
   let controls,
     data = {},
