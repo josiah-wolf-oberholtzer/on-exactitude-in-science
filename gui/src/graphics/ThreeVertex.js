@@ -16,20 +16,20 @@ const ThreeVertex = () => {
       childRingOuterRadius: 2.25,
     };
 
-  const group = new THREE.Group(),
-    coreMesh = new THREE.Mesh(
-      new THREE.BufferGeometry(),
-      new THREE.MeshLambertMaterial({ color: 0xffffff }),
-    ),
-    childRingMesh = new THREE.Mesh(
-      new THREE.RingBufferGeometry(),
-      new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
-    ),
-    edgeRingMesh = new THREE.Mesh(
-      new THREE.RingBufferGeometry(),
-      new THREE.MeshLambertMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
-    ),
-    pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
+  const group = new THREE.Group();
+  const coreMesh = new THREE.Mesh(
+    new THREE.BufferGeometry(),
+    new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  );
+  const childRingMesh = new THREE.Mesh(
+    new THREE.RingBufferGeometry(),
+    new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
+  );
+  const edgeRingMesh = new THREE.Mesh(
+    new THREE.RingBufferGeometry(),
+    new THREE.MeshLambertMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
+  );
+  const pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
 
   function calculateCoreGeometry(label) {
     switch (label) {
@@ -49,13 +49,13 @@ const ThreeVertex = () => {
   }
 
   function calculateRadii(newData) {
-    const baseRadius = newData.radius,
-      edgeRingVisible = newData.edge_count < newData.total_edge_count,
-      edgeRingInnerRadius = baseRadius + 0.5,
-      edgeRingOuterRadius = edgeRingInnerRadius + (0.1 * +edgeRingVisible),
-      childRingInnerRadius = edgeRingOuterRadius + 0.25,
-      childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) * 0.25),
-      childRingVisible = newData.child_count > 0;
+    const baseRadius = newData.radius;
+    const edgeRingVisible = newData.edge_count < newData.total_edge_count;
+    const edgeRingInnerRadius = baseRadius + 0.5;
+    const edgeRingOuterRadius = edgeRingInnerRadius + (0.1 * +edgeRingVisible);
+    const childRingInnerRadius = edgeRingOuterRadius + 0.25;
+    const childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) * 0.25);
+    const childRingVisible = newData.child_count > 0;
     return {
       baseRadius,
       childRingInnerRadius,
@@ -82,8 +82,8 @@ const ThreeVertex = () => {
   }
 
   function update(newData) {
-    const newRadii = calculateRadii(newData),
-      textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
+    const newRadii = calculateRadii(newData);
+    const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
 
     if (data.label !== newData.label) {
       coreMesh.geometry.dispose();

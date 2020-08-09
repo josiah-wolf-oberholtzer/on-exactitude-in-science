@@ -4,19 +4,19 @@ import { dispatch } from 'd3-dispatch';
 
 const SceneManager = (container) => {
   const renderer = new THREE.WebGLRenderer({
-      alpha: false,
-      antialias: true,
-      stencil: false,
-    }),
-    canvas = renderer.domElement,
-    scene = new THREE.Scene(),
-    camera = new THREE.PerspectiveCamera(
-      45, window.innerWidth / window.innerHeight, 1, 5000,
-    ),
+    alpha: false,
+    antialias: true,
+    stencil: false,
+  });
+  const canvas = renderer.domElement;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(
+    45, window.innerWidth / window.innerHeight, 1, 5000,
+  );
     // interaction = new Interaction(renderer, scene, camera, { autoPreventDefault: true }),
-    controls = new OrbitControls(camera, canvas),
-    event = dispatch('render'),
-    hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
+  const controls = new OrbitControls(camera, canvas);
+  const event = dispatch('render');
+  const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
 
   let frameId;
 

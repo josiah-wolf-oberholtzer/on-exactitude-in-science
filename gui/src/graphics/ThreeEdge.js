@@ -6,15 +6,15 @@ const ThreeEdge = () => {
     scene;
 
   const curve = new THREE.QuadraticBezierCurve3(
-      new THREE.Vector3(),
-      new THREE.Vector3(),
-      new THREE.Vector3(),
-    ),
-    group = new THREE.Group(),
-    lineMesh = new THREE.Line(
-      new THREE.BufferGeometry(),
-      new THREE.LineBasicMaterial({ color: 0xffffff }),
-    );
+    new THREE.Vector3(),
+    new THREE.Vector3(),
+    new THREE.Vector3(),
+  );
+  const group = new THREE.Group();
+  const lineMesh = new THREE.Line(
+    new THREE.BufferGeometry(),
+    new THREE.LineBasicMaterial({ color: 0xffffff }),
+  );
 
   function enter(newData, newScene, newControls, textLoader) {
     controls = newControls;
@@ -23,11 +23,11 @@ const ThreeEdge = () => {
     update(newData);
   }
 
-  function update(newData) { 
+  function update(newData) {
     tick(newData);
   }
 
-  function exit() { 
+  function exit() {
     scene.remove(group);
     controls.remove(lineMesh);
     scene = null;
@@ -35,7 +35,7 @@ const ThreeEdge = () => {
     controls = null;
   }
 
-  function tick(newData) { 
+  function tick(newData) {
     if (newData.controlPosition) {
       curve.v0.copy(newData.sourcePosition);
       curve.v1.copy(newData.controlPosition);

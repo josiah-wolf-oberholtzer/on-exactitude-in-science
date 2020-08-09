@@ -32,4 +32,4 @@ rules:
   - warn
   - var: always
     let: always
-    const: consecutive
+    const: never

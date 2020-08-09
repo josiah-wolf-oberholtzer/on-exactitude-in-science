@@ -5,23 +5,23 @@ import ThreeEdge from './ThreeEdge';
 import ThreeVertex from './ThreeVertex';
 
 const ThreeGraph = (opts) => {
-  const { forceGraph, sceneManager, textLoader } = opts,
-    graphObject = new THREE.Object3D(),
-    controls = new DragControls([], sceneManager.camera, sceneManager.canvas),
-    envelopes = new Map(),
-    dispatcher = dispatch(
-      'deselect',
-      'doubleclick',
-      'select',
-    );
+  const { forceGraph, sceneManager, textLoader } = opts;
+  const graphObject = new THREE.Object3D();
+  const controls = new DragControls([], sceneManager.camera, sceneManager.canvas);
+  const envelopes = new Map();
+  const dispatcher = dispatch(
+    'deselect',
+    'doubleclick',
+    'select',
+  );
 
   let previousClickObject = null,
     previousClickTime = Date.now();
 
   controls.on('select', (event) => {
     console.log('select', event);
-    const { envelope } = event.object.parent,
-      vertex = envelope.data();
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data();
     envelope.select();
     forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
     forceGraph.reheat();
@@ -30,9 +30,9 @@ const ThreeGraph = (opts) => {
 
   controls.on('deselect', (event) => {
     console.log('deselect', event);
-    const { replaced } = event,
-      { envelope } = event.object.parent,
-      vertex = envelope.data();
+    const { replaced } = event;
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data();
     envelope.deselect();
     forceGraph.unpin(vertex.id);
     if (!replaced) {
@@ -43,10 +43,10 @@ const ThreeGraph = (opts) => {
   controls.on('dragstart', (event) => {
     console.log('dragstart', event);
     sceneManager.controls.enabled = false;
-    const { envelope } = event.object.parent,
-      vertex = envelope.data(),
-      currentClickObject = envelope,
-      currentClickTime = Date.now();
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data();
+    const currentClickObject = envelope;
+    const currentClickTime = Date.now();
     if (
       (currentClickObject === previousClickObject)
       && ((currentClickTime - previousClickTime) < 250)
@@ -60,9 +60,9 @@ const ThreeGraph = (opts) => {
 
   controls.on('drag', (event) => {
     console.log('drag', event);
-    const { envelope } = event.object.parent,
-      vertex = envelope.data(),
-      { position } = event;
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data();
+    const { position } = event;
     forceGraph.pin(vertex.id, position.x, position.y, position.z);
     forceGraph.reheat();
   });

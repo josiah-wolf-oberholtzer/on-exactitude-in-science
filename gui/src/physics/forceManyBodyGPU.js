@@ -1,8 +1,8 @@
 import { GPU } from 'gpu.js';
 
 const forceGPU = () => {
-  const constant = (x) => () => x,
-    gpu = new GPU();
+  const constant = (x) => () => x;
+  const gpu = new GPU();
 
   let distanceMax2 = 10000000000.0,
     distanceMin2 = 1,
@@ -16,25 +16,25 @@ const forceGPU = () => {
     strengths;
 
   function kernel3d(positionsArray, radiiArray, strengthsArray) {
-    const thisX = positionsArray[this.thread.x][0],
-      thisY = positionsArray[this.thread.x][1],
-      thisZ = positionsArray[this.thread.x][2],
-      thisRadius = radiiArray[this.thread.x];
+    const thisX = positionsArray[this.thread.x][0];
+    const thisY = positionsArray[this.thread.x][1];
+    const thisZ = positionsArray[this.thread.x][2];
+    const thisRadius = radiiArray[this.thread.x];
     let vx = 0.0,
       vy = 0.0,
       vz = 0.0,
       weight = 0.0;
     for (let i = 0; i < this.constants.size; i++) {
-      const thatX = positionsArray[i][0],
-        thatY = positionsArray[i][1],
-        thatZ = positionsArray[i][2],
-        thatRadius = radiiArray[i],
-        thatStrength = strengthsArray[i],
-        deltaX = thatX - thisX,
-        deltaY = thatY - thisY,
-        deltaZ = thatZ - thisZ,
-        distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ,
-        cumRadius = thatRadius + thisRadius;
+      const thatX = positionsArray[i][0];
+      const thatY = positionsArray[i][1];
+      const thatZ = positionsArray[i][2];
+      const thatRadius = radiiArray[i];
+      const thatStrength = strengthsArray[i];
+      const deltaX = thatX - thisX;
+      const deltaY = thatY - thisY;
+      const deltaZ = thatZ - thisZ;
+      const distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+      const cumRadius = thatRadius + thisRadius;
       if (i !== this.thread.x) {
         if (distance < cumRadius * cumRadius) {
           const otherDistance = (cumRadius - Math.sqrt(distance)) / (Math.sqrt(distance) * 1.0);
@@ -62,22 +62,22 @@ const forceGPU = () => {
   }
 
   function kernel3dNoRadii(positionsArray, radiiArray, strengthsArray) {
-    const thisX = positionsArray[this.thread.x][0],
-      thisY = positionsArray[this.thread.x][1],
-      thisZ = positionsArray[this.thread.x][2];
+    const thisX = positionsArray[this.thread.x][0];
+    const thisY = positionsArray[this.thread.x][1];
+    const thisZ = positionsArray[this.thread.x][2];
     let vx = 0.0,
       vy = 0.0,
       vz = 0.0,
       weight = 0.0;
     for (let i = 0; i < this.constants.size; i++) {
-      const thatX = positionsArray[i][0],
-        thatY = positionsArray[i][1],
-        thatZ = positionsArray[i][2],
-        thatStrength = strengthsArray[i],
-        deltaX = thatX - thisX,
-        deltaY = thatY - thisY,
-        deltaZ = thatZ - thisZ,
-        distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
+      const thatX = positionsArray[i][0];
+      const thatY = positionsArray[i][1];
+      const thatZ = positionsArray[i][2];
+      const thatStrength = strengthsArray[i];
+      const deltaX = thatX - thisX;
+      const deltaY = thatY - thisY;
+      const deltaZ = thatZ - thisZ;
+      const distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
       if (i !== this.thread.x) {
         if (distance < this.constants.distanceMax2) {
           let otherDistance = distance;
@@ -107,19 +107,19 @@ const forceGPU = () => {
   function force(_) {
     if (!nodes.length) { return; }
     positions = collectPositions();
-    const n = nodes.length,
-      velocities = (
-        kernel.setConstants({
-          alpha: _,
-          distanceMax2,
-          distanceMin2,
-          size: n,
-        }),
-        kernel(positions, radii, strengths)
-      );
+    const n = nodes.length;
+    const velocities = (
+      kernel.setConstants({
+        alpha: _,
+        distanceMax2,
+        distanceMin2,
+        size: n,
+      }),
+      kernel(positions, radii, strengths)
+    );
     for (let i = 0; i < n; i++) {
-      const node = nodes[i],
-        [vx, vy, vz] = velocities[i];
+      const node = nodes[i];
+      const [vx, vy, vz] = velocities[i];
       node.vx += vx;
       if (nDim > 1) { node.vy += vy; }
       if (nDim > 2) { node.vz += vz; }
@@ -128,11 +128,11 @@ const forceGPU = () => {
 
   function initialize() {
     if (!nodes.length) { return; }
-    const n = nodes.length,
-      settings = {
-        loopMaxIterations: n,
-        output: [n],
-      };
+    const n = nodes.length;
+    const settings = {
+      loopMaxIterations: n,
+      output: [n],
+    };
     positions = new Array(nodes.length);
     radii = new Array(nodes.length);
     strengths = new Array(nodes.length);

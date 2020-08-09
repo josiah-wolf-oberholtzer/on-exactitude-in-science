@@ -4,16 +4,16 @@ import {
 import { dispatch } from 'd3-dispatch';
 
 const DragControls = (objects, _camera, canvas) => {
-  const plane = new Plane(),
-    raycaster = new Raycaster(),
-    mouse = new Vector2(),
-    intersection = new Vector3(),
-    worldPosition = new Vector3(),
-    intersections = [],
-    dispatcher = dispatch(
-      'drag', 'dragstart', 'dragend', 'mouseover', 'mouseout',
-      'select', 'deselect',
-    );
+  const plane = new Plane();
+  const raycaster = new Raycaster();
+  const mouse = new Vector2();
+  const intersection = new Vector3();
+  const worldPosition = new Vector3();
+  const intersections = [];
+  const dispatcher = dispatch(
+    'drag', 'dragstart', 'dragend', 'mouseover', 'mouseout',
+    'select', 'deselect',
+  );
 
   let enabled = true,
     transformGroup = false,
@@ -90,8 +90,8 @@ const DragControls = (objects, _camera, canvas) => {
 
   function onDocumentTouchMove(event) {
     event.preventDefault();
-    const rect = canvas.getBoundingClientRect(),
-      touch = event.changedTouches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touch = event.changedTouches[0];
     mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, _camera);
@@ -103,8 +103,8 @@ const DragControls = (objects, _camera, canvas) => {
 
   function onDocumentTouchStart(event) {
     event.preventDefault();
-    const rect = canvas.getBoundingClientRect(),
-      touch = event.changedTouches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touch = event.changedTouches[0];
     mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
     intersections.length = 0;
