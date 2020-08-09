@@ -32,7 +32,6 @@ class ThreeEdge {
 
   exit() {
     this.scene.remove(this.group);
-    this.controls.remove(this.lineMesh);
     this.scene = null;
     this.data = {};
     this.controls = null;

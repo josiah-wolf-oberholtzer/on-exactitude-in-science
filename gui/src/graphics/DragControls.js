@@ -166,12 +166,23 @@ const DragControls = (objects, _camera, canvas) => {
     deactivate();
   }
 
+  function add(_) {
+    objects.push(_);
+  }
+
+  function remove(_) {
+    const index = objects.indexOf(_);
+    if (index > -1) {
+      objects.splice(index, 1);
+    }
+  }
+
   activate();
 
   return {
     activate,
-    add(_) { objects.push(_); },
-    remove(_) { objects.splice(objects.indexOf(_), 1); },
+    add,
+    remove,
     deactivate,
     dispose,
     enabled(_) { return arguments.length > 0 ? enabled = _ : enabled; },
