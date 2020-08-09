@@ -84,54 +84,26 @@ const GraphManager = (opts) => {
     envelope.mouseout();
   });
 
-  function onVertexEnter(vertex) {
+  function onVertexEnter(data) {
     const threeVertex = new Vertex();
-    threeVertex.enter(vertex, graphObject, controls, textLoader);
-    envelopes.set(vertex.id, threeVertex);
+    threeVertex.enter(data, graphObject, controls, textLoader);
+    envelopes.set(data.id, threeVertex);
   }
+  function onVertexUpdate(data) { envelopes.get(data.id).update(data); }
+  function onVertexGraphTick(data) { envelopes.get(data.id).graphTick(data); }
+  function onVertexExit(data) { envelopes.get(data.id).exit(); }
 
-  function onVertexUpdate(vertex) {
-    const threeVertex = envelopes.get(vertex.id);
-    threeVertex.update(vertex);
-  }
-
-  function onVertexGraphTick(vertex) {
-    const threeVertex = envelopes.get(vertex.id);
-    threeVertex.tick(vertex);
-  }
-
-  function onVertexFrameTick() { }
-
-  function onVertexExit(vertex) {
-    const threeVertex = envelopes.get(vertex.id);
-    threeVertex.exit();
-  }
-
-  function onEdgeEnter(edge) {
+  function onEdgeEnter(data) {
     const threeEdge = new Edge();
-    threeEdge.enter(edge, graphObject, controls, textLoader);
-    envelopes.set(edge.id, threeEdge);
+    threeEdge.enter(data, graphObject, controls, textLoader);
+    envelopes.set(data.id, threeEdge);
   }
-
-  function onEdgeUpdate(edge) {
-    const threeEdge = envelopes.get(edge.id);
-    threeEdge.update(edge);
-  }
-
-  function onEdgeGraphTick(edge) {
-    const threeEdge = envelopes.get(edge.id);
-    threeEdge.tick(edge);
-  }
-
-  function onEdgeFrameTick() { }
-
-  function onEdgeExit(edge) {
-    const threeEdge = envelopes.get(edge.id);
-    threeEdge.exit();
-  }
+  function onEdgeUpdate(data) { envelopes.get(data.id).update(data); }
+  function onEdgeGraphTick(data) { envelopes.get(data.id).graphTick(data); }
+  function onEdgeExit(data) { envelopes.get(data.id).exit(); }
 
   function onGraphRebuild(data) {
-    console.log("onGraphRebuild", data);
+    console.log('onGraphRebuild', data);
     data.vertices.entrances.forEach(onVertexEnter);
     data.vertices.updates.forEach(onVertexUpdate);
     data.vertices.exits.forEach(onVertexExit);
@@ -149,7 +121,10 @@ const GraphManager = (opts) => {
     forceGraph.on('graphRebuild', onGraphRebuild);
     forceGraph.on('graphTick', onGraphTick);
     sceneManager.scene.add(graphObject);
-    sceneManager.on('render', () => { forceGraph.tick(); });
+    sceneManager.on('render', () => {
+      forceGraph.tick();
+      envelopes.forEach((envelope) => { envelope.frameTick(); });
+    });
   }
 
   init();

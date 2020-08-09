@@ -123,7 +123,7 @@ class Vertex {
       32,
     );
     this.radii = newRadii;
-    this.tick(newData);
+    this.graphTick(newData);
   }
 
   exit() {
@@ -144,10 +144,13 @@ class Vertex {
     this.group.remove(this.pointLight);
   }
 
-  tick(newData) {
+  frameTick() {
+    this.edgeRingMesh.rotation.y += 0.1;
+  }
+
+  graphTick(newData) {
     this.group.position.copy(newData.position);
     this.group.lookAt(newData.rudderPosition);
-    this.edgeRingMesh.rotation.y += 0.1;
     Object.assign(this.data, newData);
   }
 

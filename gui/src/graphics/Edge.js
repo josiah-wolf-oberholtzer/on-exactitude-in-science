@@ -27,7 +27,7 @@ class Edge {
   }
 
   update(newData) {
-    this.tick(newData);
+    this.graphTick(newData);
   }
 
   exit() {
@@ -37,7 +37,9 @@ class Edge {
     this.controls = null;
   }
 
-  tick(newData) {
+  frameTick() { }
+
+  graphTick(newData) {
     if (newData.controlPosition) {
       this.curve.v0.copy(newData.sourcePosition);
       this.curve.v1.copy(newData.controlPosition);
