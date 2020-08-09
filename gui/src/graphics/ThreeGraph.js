@@ -21,7 +21,7 @@ const ThreeGraph = (opts) => {
   controls.on('select', (event) => {
     console.log('select', event);
     const { envelope } = event.object.parent;
-    const vertex = envelope.data();
+    const vertex = envelope.data;
     envelope.select();
     forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
     forceGraph.reheat();
@@ -32,7 +32,7 @@ const ThreeGraph = (opts) => {
     console.log('deselect', event);
     const { replaced } = event;
     const { envelope } = event.object.parent;
-    const vertex = envelope.data();
+    const vertex = envelope.data;
     envelope.deselect();
     forceGraph.unpin(vertex.id);
     if (!replaced) {
@@ -44,7 +44,7 @@ const ThreeGraph = (opts) => {
     console.log('dragstart', event);
     sceneManager.controls.enabled = false;
     const { envelope } = event.object.parent;
-    const vertex = envelope.data();
+    const vertex = envelope.data;
     const currentClickObject = envelope;
     const currentClickTime = Date.now();
     if (
@@ -61,7 +61,7 @@ const ThreeGraph = (opts) => {
   controls.on('drag', (event) => {
     console.log('drag', event);
     const { envelope } = event.object.parent;
-    const vertex = envelope.data();
+    const vertex = envelope.data;
     const { position } = event;
     forceGraph.pin(vertex.id, position.x, position.y, position.z);
     forceGraph.reheat();
@@ -85,7 +85,7 @@ const ThreeGraph = (opts) => {
   });
 
   function onVertexEnter(vertex) {
-    const threeVertex = ThreeVertex();
+    const threeVertex = new ThreeVertex();
     threeVertex.enter(vertex, graphObject, controls, textLoader);
     envelopes.set(vertex.id, threeVertex);
   }

@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 
-const ThreeVertex = () => {
-  let controls,
-    data = {},
-    scene,
-    textA,
-    textB,
-    radii = {
+class ThreeVertex {
+  constructor() {
+    this.controls = null;
+    this.data = {};
+    this.scene = null;
+    this.textA = null;
+    this.textB = null;
+    this.radii = {
       baseRadius: 1,
       edgeRingVisible: false,
       edgeRingInnerRadius: 1.5,
@@ -15,23 +16,31 @@ const ThreeVertex = () => {
       childRingInnerRadius: 2.0,
       childRingOuterRadius: 2.25,
     };
+    this.group = new THREE.Group();
+    this.coreMesh = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshLambertMaterial({ color: 0xffffff }),
+    );
+    this.childRingMesh = new THREE.Mesh(
+      new THREE.RingBufferGeometry(),
+      new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
+    );
+    this.edgeRingMesh = new THREE.Mesh(
+      new THREE.RingBufferGeometry(),
+      new THREE.MeshLambertMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
+    );
+    this.pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
+    this.childRingMesh.castShadow = true;
+    this.childRingMesh.receiveShadow = true;
+    this.coreMesh.castShadow = true;
+    this.coreMesh.receiveShadow = true;
+    this.edgeRingMesh.castShadow = true;
+    this.edgeRingMesh.receiveShadow = true;
+    this.group.envelope = this;
+    this.group.add(this.coreMesh);
+  }
 
-  const group = new THREE.Group();
-  const coreMesh = new THREE.Mesh(
-    new THREE.BufferGeometry(),
-    new THREE.MeshLambertMaterial({ color: 0xffffff }),
-  );
-  const childRingMesh = new THREE.Mesh(
-    new THREE.RingBufferGeometry(),
-    new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
-  );
-  const edgeRingMesh = new THREE.Mesh(
-    new THREE.RingBufferGeometry(),
-    new THREE.MeshLambertMaterial({ color: 0xff9933, side: THREE.DoubleSide }),
-  );
-  const pointLight = new THREE.PointLight(0xff0000, 4, 100, 2);
-
-  function calculateCoreGeometry(label) {
+  static calculateCoreGeometry(label) {
     switch (label) {
       case 'artist':
         return new THREE.TetrahedronGeometry(1.5);
@@ -48,7 +57,7 @@ const ThreeVertex = () => {
     }
   }
 
-  function calculateRadii(newData) {
+  static calculateRadii(newData) {
     const baseRadius = newData.radius;
     const edgeRingVisible = newData.edge_count < newData.total_edge_count;
     const edgeRingInnerRadius = baseRadius + 0.5;
@@ -67,112 +76,84 @@ const ThreeVertex = () => {
     };
   }
 
-  function enter(newData, newScene, newControls, textLoader) {
-    controls = newControls;
-    scene = newScene;
-    scene.add(group);
-    controls.add(coreMesh);
-    textA = textLoader.loadMesh(newData.name);
-    textB = textA.clone(false);
-    textA.rotation.set(0, Math.PI * 0.5, 0);
-    textB.rotation.set(0, Math.PI * 1.5, 0);
-    group.add(textA);
-    group.add(textB);
-    update(newData);
+  enter(newData, newScene, newControls, textLoader) {
+    this.controls = newControls;
+    this.scene = newScene;
+    this.scene.add(this.group);
+    this.controls.add(this.coreMesh);
+    this.textA = textLoader.loadMesh(newData.name);
+    this.textB = this.textA.clone(false);
+    this.textA.rotation.set(0, Math.PI * 0.5, 0);
+    this.textB.rotation.set(0, Math.PI * 1.5, 0);
+    this.group.add(this.textA);
+    this.group.add(this.textB);
+    this.update(newData);
   }
 
-  function update(newData) {
-    const newRadii = calculateRadii(newData);
-    const textPositionZ = newRadii.baseRadius + textA.geometry.parameters.width / 2;
-
-    if (data.label !== newData.label) {
-      coreMesh.geometry.dispose();
-      coreMesh.geometry = calculateCoreGeometry(newData.label);
+  update(newData) {
+    const newRadii = ThreeVertex.calculateRadii(newData);
+    const textPositionZ = newRadii.baseRadius + this.textA.geometry.parameters.width / 2;
+    if (this.data.label !== newData.label) {
+      this.coreMesh.geometry.dispose();
+      this.coreMesh.geometry = ThreeVertex.calculateCoreGeometry(newData.label);
     }
-
-    coreMesh.scale.setScalar(newRadii.baseRadius);
-
-    textA.position.set(0, 0, textPositionZ);
-    textB.position.set(0, 0, textPositionZ);
-
-    if (!radii.childRingVisible && newRadii.childRingVisible) {
-      group.add(childRingMesh);
-    } else if (radii.childRingVisible && !newRadii.childRingVisible) {
-      group.remove(childRingMesh);
+    this.coreMesh.scale.setScalar(newRadii.baseRadius);
+    this.textA.position.set(0, 0, textPositionZ);
+    this.textB.position.set(0, 0, textPositionZ);
+    if (!this.radii.childRingVisible && newRadii.childRingVisible) {
+      this.group.add(this.childRingMesh);
+    } else if (this.radii.childRingVisible && !newRadii.childRingVisible) {
+      this.group.remove(this.childRingMesh);
     }
-
-    childRingMesh.geometry.dispose();
-    childRingMesh.geometry = new THREE.RingBufferGeometry(
+    this.childRingMesh.geometry.dispose();
+    this.childRingMesh.geometry = new THREE.RingBufferGeometry(
       newRadii.childRingInnerRadius,
       newRadii.childRingOuterRadius,
       32,
     );
-
-    if (!radii.edgeRingVisible && newRadii.edgeRingVisible) {
-      group.add(edgeRingMesh);
-    } else if (radii.edgeRingVisible && !newRadii.edgeRingVisible) {
-      group.remove(edgeRingMesh);
+    if (!this.radii.edgeRingVisible && newRadii.edgeRingVisible) {
+      this.group.add(this.edgeRingMesh);
+    } else if (this.radii.edgeRingVisible && !newRadii.edgeRingVisible) {
+      this.group.remove(this.edgeRingMesh);
     }
-
-    edgeRingMesh.geometry.dispose();
-    edgeRingMesh.geometry = new THREE.RingBufferGeometry(
+    this.edgeRingMesh.geometry.dispose();
+    this.edgeRingMesh.geometry = new THREE.RingBufferGeometry(
       newRadii.edgeRingInnerRadius,
       newRadii.edgeRingOuterRadius,
       32,
     );
-
-    radii = newRadii;
-
-    tick(newData);
+    this.radii = newRadii;
+    this.tick(newData);
   }
 
-  function exit() {
-    scene.remove(group);
-    controls.remove(coreMesh);
-    group.remove(textA);
-    group.remove(textB);
-    scene = null;
-    data = {};
-    controls = null;
+  exit() {
+    this.scene.remove(this.group);
+    this.controls.remove(this.coreMesh);
+    this.group.remove(this.textA);
+    this.group.remove(this.textB);
+    this.scene = null;
+    this.data = {};
+    this.controls = null;
   }
 
-  function select() {
-    group.add(pointLight);
+  select() {
+    this.group.add(this.pointLight);
   }
 
-  function deselect() {
-    group.remove(pointLight);
+  deselect() {
+    this.group.remove(this.pointLight);
   }
 
-  function tick(newData) {
-    group.position.copy(newData.position);
-    group.lookAt(newData.rudderPosition);
-    edgeRingMesh.rotation.y += 0.1;
-    Object.assign(data, newData);
+  tick(newData) {
+    this.group.position.copy(newData.position);
+    this.group.lookAt(newData.rudderPosition);
+    this.edgeRingMesh.rotation.y += 0.1;
+    Object.assign(this.data, newData);
   }
 
-  const closure = {
-    deselect,
-    enter,
-    exit,
-    mouseout: () => {},
-    mouseover: () => {},
-    select,
-    tick,
-    update,
-    data: () => data,
-  };
+  mouseout() {}
 
-  childRingMesh.castShadow = true;
-  childRingMesh.receiveShadow = true;
-  coreMesh.castShadow = true;
-  coreMesh.receiveShadow = true;
-  edgeRingMesh.castShadow = true;
-  edgeRingMesh.receiveShadow = true;
-  group.envelope = closure;
-  group.add(coreMesh);
-
-  return closure;
-};
+  mouseover() {}
+}
 
 export default ThreeVertex;
