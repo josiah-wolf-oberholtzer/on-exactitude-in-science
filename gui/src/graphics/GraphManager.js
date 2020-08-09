@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
-import ThreeEdge from './ThreeEdge';
+import Edge from './Edge';
 import ThreeVertex from './ThreeVertex';
 
 const GraphManager = (opts) => {
@@ -108,7 +108,7 @@ const GraphManager = (opts) => {
   }
 
   function onEdgeEnter(edge) {
-    const threeEdge = new ThreeEdge();
+    const threeEdge = new Edge();
     threeEdge.enter(edge, graphObject, controls, textLoader);
     envelopes.set(edge.id, threeEdge);
   }

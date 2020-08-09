@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-class ThreeEdge {
+class Edge {
   constructor() {
     this.controls = null;
     this.data = {};
@@ -53,4 +53,4 @@ class ThreeEdge {
   }
 }
 
-export default ThreeEdge;
+export default Edge;
