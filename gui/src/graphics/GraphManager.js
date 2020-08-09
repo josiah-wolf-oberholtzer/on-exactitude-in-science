@@ -133,8 +133,8 @@ class GraphManager {
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
     envelope.select();
-    this.forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
     this.forceGraph.reheat();
+    this.forceGraph.pin(vertex.id, vertex.position.x, vertex.position.y, vertex.position.z);
     this.dispatcher.call('select', vertex, vertex);
   }
 

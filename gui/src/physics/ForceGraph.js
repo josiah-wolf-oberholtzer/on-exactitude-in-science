@@ -44,17 +44,26 @@ class ForceGraph {
       .force('centering', d3force3d.forceCenter());
   }
 
-  update(vertices, edges) {
-    const { newVertexMap, newEdgeMap } = ForceGraph.buildVertexAndEdgeMaps(vertices, edges);
-    const { newNodeMap, newLinkMap } = ForceGraph.buildNewNodeAndLinkMaps(newVertexMap, newEdgeMap);
-    ForceGraph.updateOldNodeAndLinkMaps(newNodeMap, this.nodeMap, newLinkMap, this.linkMap);
-    ForceGraph.updateSimulation(this.simulation, this.nodeMap, this.linkMap);
-    const result = ForceGraph.updateOldVertexAndEdgeMaps(
-      newVertexMap, this.vertexMap, newEdgeMap, this.edgeMap,
-    );
-    ForceGraph.updateVertexAndEdgePositions(this.vertexMap, this.edgeMap, this.nodeMap);
-    this.dispatcher.call('graphRebuild', result, result);
+  on(name, _) {
+    if (arguments.length > 1) { 
+      this.dispatcher.on(name, _)
+      return this;
+    } else {
+      return this.dispatcher.on(name);
+    }
   }
+
+  pin(nodeID, x, y, z) {
+    console.log("pin", nodeID, x, y, z);
+    const node = this.nodeMap.get(nodeID);
+    if (node) {
+      node.fx = x;
+      node.fy = y;
+      node.fz = z;
+    }
+  }
+
+  reheat() { return this.simulation.alpha(1.0); }
 
   tick() {
     if (this.simulation.alpha() >= this.simulation.alphaMin()) {
@@ -68,30 +77,26 @@ class ForceGraph {
     }
   }
 
-  pin(nodeID, x, y, z) {
-    const node = this.nodeMap.get(nodeID);
-    if (node) {
-      node.fx = x;
-      node.fy = y;
-      node.fz = z;
-    }
+  update(vertices, edges) {
+    const { newVertexMap, newEdgeMap } = ForceGraph.buildVertexAndEdgeMaps(vertices, edges);
+    const { newNodeMap, newLinkMap } = ForceGraph.buildNewNodeAndLinkMaps(newVertexMap, newEdgeMap);
+    ForceGraph.updateOldNodeAndLinkMaps(newNodeMap, this.nodeMap, newLinkMap, this.linkMap);
+    ForceGraph.updateSimulation(this.simulation, this.nodeMap, this.linkMap);
+    const result = ForceGraph.updateOldVertexAndEdgeMaps(
+      newVertexMap, this.vertexMap, newEdgeMap, this.edgeMap,
+    );
+    ForceGraph.updateVertexAndEdgePositions(this.vertexMap, this.edgeMap, this.nodeMap);
+    this.dispatcher.call('graphRebuild', result, result);
   }
 
   unpin(nodeID) {
+    console.log("unpin", nodeID);
     const node = this.nodeMap.get(nodeID);
     if (node) {
       node.fx = null;
       node.fy = null;
       node.fz = null;
     }
-  }
-
-  on(name, _) {
-    return arguments.length > 1 ? this.dispatcher.on(name, _) : this.dispatcher.on(name);
-  }
-
-  reheat() {
-    return this.simulation.alpha(1.0);
   }
 
   static edgeRequiresBezier(edge) {
