@@ -41,6 +41,15 @@ const SceneManager = (container) => {
     // console.log(renderer.info);
   }
 
+  function resetCamera() {
+    camera.position.set(0, 0, 100);
+    camera.rotation.set(0, 0, 0);
+    controls.target.set(0, 0, 0);
+    controls.enableDamping = false;
+    controls.update();
+    controls.enableDamping = true;
+  }
+
   function animate() {
     event.call('render', {}, {});
     update();
@@ -82,6 +91,7 @@ const SceneManager = (container) => {
     canvas,
     controls,
     on(name, _) { return arguments.length > 1 ? event.on(name, _) : event.on(name); },
+    resetCamera,
     scene,
     start,
     stop,

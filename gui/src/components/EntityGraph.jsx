@@ -2,7 +2,6 @@ import React from "react";
 import ForceGraph from '../physics/ForceGraph';
 import GraphManager from '../graphics/GraphManager';
 import { SceneManager } from '../graphics/SceneManager';
-import { TextLoader } from '../graphics/TextLoader';
 import { connect } from 'react-redux';
 import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
@@ -35,12 +34,7 @@ class EntityGraph extends React.Component {
 
   updateCamera(prevProps, nextProps) {
     if (prevProps.cameraNonce != nextProps.cameraNonce) {
-      this.sceneManager.camera.position.set(0, 0, 100);
-      this.sceneManager.camera.rotation.set(0, 0, 0);
-      this.sceneManager.controls.target.set(0, 0, 0);
-      this.sceneManager.controls.enableDamping = false;
-      this.sceneManager.controls.update();
-      this.sceneManager.controls.enableDamping = true;
+      this.sceneManager.resetCamera();
     }
   }
 
@@ -54,13 +48,11 @@ class EntityGraph extends React.Component {
   }
 
   componentDidMount(prevProps) {
-    this.textLoader = TextLoader();
     this.forceGraph = new ForceGraph();
     this.sceneManager = SceneManager(this.mount);
-    this.threeGraph = GraphManager({
+    this.threeGraph = new GraphManager({
         forceGraph: this.forceGraph,
         sceneManager: this.sceneManager,
-        textLoader: this.textLoader,
     });
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.push(vertex.label, vertex.eid);
@@ -71,7 +63,6 @@ class EntityGraph extends React.Component {
     this.threeGraph.on("deselect", (vertex) => {
       this.props.deselectEntity();
     });
-    this.sceneManager.scene.add(this.threeGraph.object);
     this.updateGraph({}, this.props);
     this.start();
   }

@@ -1,139 +1,151 @@
 import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
+import { TextLoader } from './TextLoader';
 import Edge from './Edge';
 import Vertex from './Vertex';
 
-const GraphManager = (opts) => {
-  const { forceGraph, sceneManager, textLoader } = opts;
-  const graphObject = new THREE.Object3D();
-  const controls = new DragControls([], sceneManager.camera, sceneManager.canvas);
-  const envelopes = new Map();
-  const dispatcher = dispatch(
-    'deselect',
-    'doubleclick',
-    'select',
-  );
 
-  let previousClickObject = null,
-    previousClickTime = Date.now();
+class GraphManager {
 
-  controls.on('select', (event) => {
-    console.log('select', event);
-    const { envelope } = event.object.parent;
-    const vertex = envelope.data;
-    envelope.select();
-    forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
-    forceGraph.reheat();
-    dispatcher.call('select', vertex, vertex);
-  });
+  constructor(opts) {
+    this.forceGraph = opts.forceGraph;
+    this.sceneManager = opts.sceneManager;
+    this.textLoader = TextLoader();
+    this.graphObject = new THREE.Object3D();
+    this.controls = new DragControls([], this.sceneManager.camera, this.sceneManager.canvas);
+    this.envelopes = new Map();
+    this.dispatcher = dispatch('deselect', 'doubleclick', 'select');
+    this.previousClickObject = null;
+    this.previousClickTime = Date.now();
+    this.sceneManager.scene.add(this.graphObject);
+    this.controls.on('deselect', this.onDeselect.bind(this));
+    this.controls.on('drag', this.onDrag.bind(this));
+    this.controls.on('dragend', this.onDragEnd.bind(this));
+    this.controls.on('dragstart', this.onDragStart.bind(this));
+    this.controls.on('mouseout', this.onMouseOut.bind(this));
+    this.controls.on('mouseover', this.onMouseOver.bind(this));
+    this.controls.on('select', this.onSelect.bind(this));
+    this.forceGraph.on('graphRebuild', this.onGraphRebuild.bind(this));
+    this.forceGraph.on('graphTick', this.onGraphTick.bind(this));
+    this.sceneManager.on('render', this.onRender.bind(this));
+  }
 
-  controls.on('deselect', (event) => {
+  on(name, _) { return arguments.length > 1 ? this.dispatcher.on(name, _) : this.dispatcher.on(name); }
+
+  onDeselect(event) {
     console.log('deselect', event);
     const { replaced } = event;
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
     envelope.deselect();
-    forceGraph.unpin(vertex.id);
+    this.forceGraph.unpin(vertex.id);
     if (!replaced) {
-      dispatcher.call('deselect', vertex, vertex);
+      this.dispatcher.call('deselect', vertex, vertex);
     }
-  });
+  }
 
-  controls.on('dragstart', (event) => {
+  onDrag(event) {
+    console.log('drag', event);
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data;
+    const { position } = event;
+    this.forceGraph.pin(vertex.id, position.x, position.y, position.z);
+    this.forceGraph.reheat();
+  }
+
+  onDragEnd(event) {
+    console.log('dragend', event);
+    this.sceneManager.controls.enabled = true;
+  }
+
+  onDragStart(event) {
     console.log('dragstart', event);
-    sceneManager.controls.enabled = false;
+    this.sceneManager.controls.enabled = false;
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
     const currentClickObject = envelope;
     const currentClickTime = Date.now();
     if (
-      (currentClickObject === previousClickObject)
-      && ((currentClickTime - previousClickTime) < 250)
+      (currentClickObject === this.previousClickObject)
+      && ((currentClickTime - this.previousClickTime) < 250)
     ) {
       console.log('doubleclick');
-      dispatcher.call('doubleclick', vertex, vertex);
+      this.dispatcher.call('doubleclick', vertex, vertex);
     }
-    previousClickObject = currentClickObject;
-    previousClickTime = currentClickTime;
-  });
+    this.previousClickObject = currentClickObject;
+    this.previousClickTime = currentClickTime;
+  }
 
-  controls.on('drag', (event) => {
-    console.log('drag', event);
-    const { envelope } = event.object.parent;
-    const vertex = envelope.data;
-    const { position } = event;
-    forceGraph.pin(vertex.id, position.x, position.y, position.z);
-    forceGraph.reheat();
-  });
+  onEdgeEnter(data) {
+    const threeEdge = new Edge();
+    threeEdge.enter(data, this.graphObject, this.controls, this.textLoader);
+    this.envelopes.set(data.id, threeEdge);
+  }
 
-  controls.on('dragend', (event) => {
-    console.log('dragend', event);
-    sceneManager.controls.enabled = true;
-  });
+  onEdgeUpdate(data) { this.envelopes.get(data.id).update(data); }
 
-  controls.on('mouseover', (event) => {
-    console.log('mouseover', event);
-    const { envelope } = event.object.parent;
-    envelope.mouseover();
-  });
+  onEdgeGraphTick(data) { this.envelopes.get(data.id).graphTick(data); }
 
-  controls.on('mouseout', (event) => {
+  onEdgeExit(data) { this.envelopes.get(data.id).exit(); }
+
+  onFrameTick(envelope) {
+    envelope.frameTick();
+  }
+
+  onGraphRebuild(data) {
+    data.vertices.entrances.forEach(this.onVertexEnter.bind(this));
+    data.vertices.updates.forEach(this.onVertexUpdate.bind(this));
+    data.vertices.exits.forEach(this.onVertexExit.bind(this));
+    data.edges.entrances.forEach(this.onEdgeEnter.bind(this));
+    data.edges.updates.forEach(this.onEdgeUpdate.bind(this));
+    data.edges.exits.forEach(this.onEdgeExit.bind(this));
+  }
+
+  onGraphTick(data) {
+    data.vertices.forEach(this.onVertexGraphTick.bind(this));
+    data.edges.forEach(this.onEdgeGraphTick.bind(this));
+  }
+
+  onMouseOut(event) {
     console.log('mouseout', event);
     const { envelope } = event.object.parent;
     envelope.mouseout();
-  });
+  }
 
-  function onVertexEnter(data) {
+  onMouseOver(event) {
+    console.log('mouseover', event);
+    const { envelope } = event.object.parent;
+    envelope.mouseover();
+  }
+
+  onRender() {
+    this.forceGraph.tick();
+    this.envelopes.forEach(this.onFrameTick.bind(this));
+  }
+
+  onSelect(event) {
+    console.log('select', event);
+    const { envelope } = event.object.parent;
+    const vertex = envelope.data;
+    envelope.select();
+    this.forceGraph.pin(vertex.id, vertex.x, vertex.y, vertex.z);
+    this.forceGraph.reheat();
+    this.dispatcher.call('select', vertex, vertex);
+  }
+
+  onVertexEnter(data) {
     const threeVertex = new Vertex();
-    threeVertex.enter(data, graphObject, controls, textLoader);
-    envelopes.set(data.id, threeVertex);
-  }
-  function onVertexUpdate(data) { envelopes.get(data.id).update(data); }
-  function onVertexGraphTick(data) { envelopes.get(data.id).graphTick(data); }
-  function onVertexExit(data) { envelopes.get(data.id).exit(); }
-
-  function onEdgeEnter(data) {
-    const threeEdge = new Edge();
-    threeEdge.enter(data, graphObject, controls, textLoader);
-    envelopes.set(data.id, threeEdge);
-  }
-  function onEdgeUpdate(data) { envelopes.get(data.id).update(data); }
-  function onEdgeGraphTick(data) { envelopes.get(data.id).graphTick(data); }
-  function onEdgeExit(data) { envelopes.get(data.id).exit(); }
-
-  function onGraphRebuild(data) {
-    console.log('onGraphRebuild', data);
-    data.vertices.entrances.forEach(onVertexEnter);
-    data.vertices.updates.forEach(onVertexUpdate);
-    data.vertices.exits.forEach(onVertexExit);
-    data.edges.entrances.forEach(onEdgeEnter);
-    data.edges.updates.forEach(onEdgeUpdate);
-    data.edges.exits.forEach(onEdgeExit);
+    threeVertex.enter(data, this.graphObject, this.controls, this.textLoader);
+    this.envelopes.set(data.id, threeVertex);
   }
 
-  function onGraphTick(data) {
-    data.vertices.forEach(onVertexGraphTick);
-    data.edges.forEach(onEdgeGraphTick);
-  }
+  onVertexUpdate(data) { this.envelopes.get(data.id).update(data); }
 
-  function init() {
-    forceGraph.on('graphRebuild', onGraphRebuild);
-    forceGraph.on('graphTick', onGraphTick);
-    sceneManager.scene.add(graphObject);
-    sceneManager.on('render', () => {
-      forceGraph.tick();
-      envelopes.forEach((envelope) => { envelope.frameTick(); });
-    });
-  }
+  onVertexGraphTick(data) { this.envelopes.get(data.id).graphTick(data); }
 
-  init();
+  onVertexExit(data) { this.envelopes.get(data.id).exit(); }
 
-  return {
-    object: graphObject,
-    envelopes,
-    on(name, _) { return arguments.length > 1 ? dispatcher.on(name, _) : dispatcher.on(name); },
-  };
 };
 
 export default GraphManager;
