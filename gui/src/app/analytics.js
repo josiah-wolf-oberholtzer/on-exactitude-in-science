@@ -10,7 +10,7 @@ const pageView = trackPageView((action) => ({
 const selectEvent = trackEvent((action) => ({
   category: 'interaction', action: 'selected', label: action.payload.label, value: action.payload.eid,
 }));
-const deselectEvent = trackEvent((action) => ({
+const deselectEvent = trackEvent(() => ({
   category: 'interaction', action: 'deselected',
 }));
 const eventsMap = {

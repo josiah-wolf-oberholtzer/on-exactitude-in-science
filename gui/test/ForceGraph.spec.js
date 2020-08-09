@@ -3,6 +3,7 @@ import { Vector3 } from 'three';
 import ForceGraph from '../src/physics/ForceGraph';
 
 const { expect } = chai;
+
 const vertices = [
   {
     id: 'vertex-1',
@@ -29,6 +30,7 @@ const vertices = [
     eid: 444,
   },
 ];
+
 const edges = [
   {
     id: 'edge-aaa',
@@ -50,10 +52,13 @@ const edges = [
     target: 'vertex-4',
   },
 ];
+
 const filterObj = (obj, keys) => keys.reduce((newObj, key) => (
   obj[key] !== undefined ? { ...newObj, [key]: obj[key] } : newObj
 ), {});
+
 const filterObjects = (objects, keys) => objects.map((obj) => filterObj(obj, keys));
+
 const setupEventMap = (graph) => {
   const eventMap = new Map([
     ['vertexEnter', []],
@@ -75,30 +80,31 @@ const setupEventMap = (graph) => {
   graph.on('edgeTick', (edge) => eventMap.get('edgeTick').push(edge.id));
   return eventMap;
 };
+
 const clearEventMap = (eventMap) => {
   eventMap.forEach((value) => { value.length = 0; });
 };
 
 describe('ForceGraph', () => {
   describe('Initially', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
 
     it('will have empty maps', () => {
-      expect(graph.edgeMap().size).to.equal(0);
-      expect(graph.linkMap().size).to.equal(0);
-      expect(graph.nodeMap().size).to.equal(0);
-      expect(graph.vertexMap().size).to.equal(0);
+      expect(graph.edgeMap.size).to.equal(0);
+      expect(graph.linkMap.size).to.equal(0);
+      expect(graph.nodeMap.size).to.equal(0);
+      expect(graph.vertexMap.size).to.equal(0);
     });
   });
 
   describe('After one update', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
     const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -155,7 +161,7 @@ describe('ForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-1-rudder',
         'vertex-2-rudder',
         'vertex-1-to-edge-aaa',
@@ -165,7 +171,7 @@ describe('ForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -206,7 +212,7 @@ describe('ForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -248,7 +254,7 @@ describe('ForceGraph', () => {
   });
 
   describe('After two updates', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
     const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     clearEventMap(eventMap);
@@ -256,7 +262,7 @@ describe('ForceGraph', () => {
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -312,7 +318,7 @@ describe('ForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-2-rudder',
         'vertex-3-rudder',
         'vertex-2-to-edge-bbb',
@@ -322,7 +328,7 @@ describe('ForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -363,7 +369,7 @@ describe('ForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -404,7 +410,7 @@ describe('ForceGraph', () => {
   });
 
   describe('After three updates', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
     const eventMap = setupEventMap(graph);
     graph.update([vertices[0], vertices[1]], [edges[0]]);
     graph.update([vertices[1], vertices[2]], [edges[1]]);
@@ -413,7 +419,7 @@ describe('ForceGraph', () => {
 
     it('will have these nodes', () => {
       const nodes = filterObjects(
-        Array.from(graph.nodeMap().values()),
+        Array.from(graph.nodeMap.values()),
         ['eid', 'id', 'label', 'name', 'type', 'role', 'x', 'y', 'z'],
       );
       expect(nodes).to.deep.equal([
@@ -461,7 +467,7 @@ describe('ForceGraph', () => {
     });
 
     it('will have these links', () => {
-      expect(Array.from(graph.linkMap().keys())).to.deep.equal([
+      expect(Array.from(graph.linkMap.keys())).to.deep.equal([
         'vertex-1-rudder',
         'vertex-4-rudder',
         'edge-ccc',
@@ -470,7 +476,7 @@ describe('ForceGraph', () => {
 
     it('will have these vertices', () => {
       const vertexSummaries = filterObjects(
-        Array.from(graph.vertexMap().values()),
+        Array.from(graph.vertexMap.values()),
         ['eid', 'id', 'label', 'name', 'position', 'rudderPosition'],
       );
       expect(vertexSummaries).to.deep.equal([
@@ -511,7 +517,7 @@ describe('ForceGraph', () => {
 
     it('will have these edges', () => {
       const edgeSummaries = filterObjects(
-        Array.from(graph.edgeMap().values()),
+        Array.from(graph.edgeMap.values()),
         ['id', 'label', 'name', 'role', 'sourcePosition', 'targetPosition', 'controlPosition'],
       );
       expect(edgeSummaries).to.deep.equal([
@@ -547,7 +553,7 @@ describe('ForceGraph', () => {
   });
 
   describe('After one tick', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
     const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     clearEventMap(eventMap);
@@ -568,7 +574,7 @@ describe('ForceGraph', () => {
   });
 
   describe('After two ticks', () => {
-    const graph = ForceGraph();
+    const graph = new ForceGraph();
     const eventMap = setupEventMap(graph);
     graph.update(vertices, edges);
     graph.tick();

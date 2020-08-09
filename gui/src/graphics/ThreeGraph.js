@@ -136,7 +136,7 @@ const ThreeGraph = (opts) => {
     forceGraph.on('edgeExit', onEdgeExit);
     forceGraph.on('edgeTick', onEdgeTick);
     sceneManager.scene.add(graphObject);
-    sceneManager.on('render', forceGraph.tick);
+    sceneManager.on('render', () => { forceGraph.tick(); });
   }
 
   init();

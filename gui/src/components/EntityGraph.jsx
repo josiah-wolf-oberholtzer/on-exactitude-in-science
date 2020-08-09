@@ -55,7 +55,7 @@ class EntityGraph extends React.Component {
 
   componentDidMount(prevProps) {
     this.textLoader = TextLoader();
-    this.forceGraph = ForceGraph();
+    this.forceGraph = new ForceGraph();
     this.sceneManager = SceneManager(this.mount);
     this.threeGraph = ThreeGraph({
         forceGraph: this.forceGraph,
@@ -63,7 +63,6 @@ class EntityGraph extends React.Component {
         textLoader: this.textLoader,
     });
     this.threeGraph.on("doubleclick", (vertex) => {
-      //this.props.fetchByEntity(vertex.label, vertex.eid);
       this.props.push(vertex.label, vertex.eid);
     });
     this.threeGraph.on("select", (vertex) => {
@@ -87,12 +86,10 @@ class EntityGraph extends React.Component {
   }
 
   start() {
-    // this.forceGraph.start();
     this.sceneManager.start();
   }
 
   stop() {
-    // this.forceGraph.stop();
     this.sceneManager.stop();
   }
 
