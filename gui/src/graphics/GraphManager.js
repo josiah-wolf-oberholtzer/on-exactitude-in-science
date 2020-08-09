@@ -29,7 +29,13 @@ class GraphManager {
     this.sceneManager.on('beforeRender', this.onBeforeRender.bind(this));
   }
 
-  on(name, _) { return arguments.length > 1 ? this.dispatcher.on(name, _) : this.dispatcher.on(name); }
+  on(name, _) {
+    if (arguments.length > 1) {
+      this.dispatcher.on(name, _);
+    } else {
+      this.dispatcher.on(name);
+    }
+  }
 
   onDeselect(event) {
     console.log('deselect', event);

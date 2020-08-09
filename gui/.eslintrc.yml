@@ -15,10 +15,12 @@ parserOptions:
 plugins:
   - react
 rules:
+  class-methods-use-this: 0
+  func-names: 0
   import/no-named-default: 0
   import/prefer-default-export: 0
-  no-console:
-  - 0
+  no-console: 0
+  no-continue: 0
   no-param-reassign:
   - error
   - props: false

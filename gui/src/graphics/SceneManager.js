@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { dispatch } from 'd3-dispatch';
 
-class SceneManager { 
-  constructor(container)  {
+class SceneManager {
+  constructor(container) {
     // allocation
     this.container = container;
-    this.renderer = new THREE.WebGLRenderer({alpha: false, antialias: true, stencil: false});
+    this.renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, stencil: false });
     this.canvas = this.renderer.domElement;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
@@ -40,9 +40,14 @@ class SceneManager {
     this.frameId = requestAnimationFrame(this.animate.bind(this));
   }
 
-  on(name, _) { return arguments.length > 1 ? this.dispatcher.on(name, _) : this.dispatcher.on(name); }
+  on(name, _) {
+    if (arguments.length > 1) {
+      return this.dispatcher.on(name, _);
+    }
+    return this.dispatcher.on(name);
+  }
 
-  onWindowResize() { update(); }
+  onWindowResize() { this.update(); }
 
   render() {
     this.renderer.render(this.scene, this.camera);
