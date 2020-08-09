@@ -1,8 +1,8 @@
 import React from "react";
 import ForceGraph from '../physics/ForceGraph';
+import GraphManager from '../graphics/GraphManager';
 import { SceneManager } from '../graphics/SceneManager';
 import { TextLoader } from '../graphics/TextLoader';
-import { ThreeGraph } from '../graphics/ThreeGraph';
 import { connect } from 'react-redux';
 import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
@@ -57,7 +57,7 @@ class EntityGraph extends React.Component {
     this.textLoader = TextLoader();
     this.forceGraph = new ForceGraph();
     this.sceneManager = SceneManager(this.mount);
-    this.threeGraph = ThreeGraph({
+    this.threeGraph = GraphManager({
         forceGraph: this.forceGraph,
         sceneManager: this.sceneManager,
         textLoader: this.textLoader,

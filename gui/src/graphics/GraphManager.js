@@ -4,7 +4,7 @@ import { DragControls } from './DragControls';
 import ThreeEdge from './ThreeEdge';
 import ThreeVertex from './ThreeVertex';
 
-const ThreeGraph = (opts) => {
+const GraphManager = (opts) => {
   const { forceGraph, sceneManager, textLoader } = opts;
   const graphObject = new THREE.Object3D();
   const controls = new DragControls([], sceneManager.camera, sceneManager.canvas);
@@ -161,4 +161,4 @@ const ThreeGraph = (opts) => {
   };
 };
 
-export { ThreeGraph };
+export default GraphManager;
