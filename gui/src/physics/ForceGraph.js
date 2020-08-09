@@ -1,7 +1,7 @@
 import * as d3force3d from 'd3-force-3d';
 import { Vector3 } from 'three';
 import { dispatch } from 'd3-dispatch';
-import forceManyBodyGPU from './forceManyBodyGPU';
+// import forceManyBodyGPU from './forceManyBodyGPU';
 import forceManyBodyNaive from './forceManyBodyNaive';
 
 class ForceGraph {
@@ -9,6 +9,7 @@ class ForceGraph {
     this.dispatcher = dispatch(
       'vertexEnter', 'vertexExit', 'vertexUpdate', 'vertexTick',
       'edgeEnter', 'edgeExit', 'edgeUpdate', 'edgeTick',
+      'graphRebuild', 'graphTick',
     );
     this.edgeMap = new Map();
     this.linkMap = new Map();
@@ -48,8 +49,11 @@ class ForceGraph {
     const { newNodeMap, newLinkMap } = ForceGraph.buildNewNodeAndLinkMaps(newVertexMap, newEdgeMap);
     ForceGraph.updateOldNodeAndLinkMaps(newNodeMap, this.nodeMap, newLinkMap, this.linkMap);
     ForceGraph.updateSimulation(this.simulation, this.nodeMap, this.linkMap);
-    const result = ForceGraph.updateOldVertexAndEdgeMaps(newVertexMap, this.vertexMap, newEdgeMap, this.edgeMap);
+    const result = ForceGraph.updateOldVertexAndEdgeMaps(
+      newVertexMap, this.vertexMap, newEdgeMap, this.edgeMap,
+    );
     ForceGraph.updateVertexAndEdgePositions(this.vertexMap, this.edgeMap, this.nodeMap);
+    this.dispatcher.call('graphRebuild', result, result);
     result.vertices.entrances.forEach((vertex) => { this.dispatcher.call('vertexEnter', vertex, vertex); });
     result.vertices.exits.forEach((vertex) => { this.dispatcher.call('vertexExit', vertex, vertex); });
     result.vertices.updates.forEach((vertex) => { this.dispatcher.call('vertexUpdate', vertex, vertex); });
@@ -62,6 +66,11 @@ class ForceGraph {
     if (this.simulation.alpha() >= this.simulation.alphaMin()) {
       this.simulation.tick();
       ForceGraph.updateVertexAndEdgePositions(this.vertexMap, this.edgeMap, this.nodeMap);
+      const result = {
+        vertices: Array.from(this.vertexMap.values()),
+        edges: Array.from(this.edgeMap.values()),
+      };
+      this.dispatcher.call('graphTick', result, result);
       this.vertexMap.forEach((vertex) => { this.dispatcher.call('vertexTick', vertex, vertex); });
       this.edgeMap.forEach((edge) => { this.dispatcher.call('edgeTick', edge, edge); });
     }
