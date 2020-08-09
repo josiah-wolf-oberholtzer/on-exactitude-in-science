@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import { DragControls } from './DragControls';
+import ThreeEdge from './ThreeEdge';
 import ThreeVertex from './ThreeVertex';
 
 const ThreeGraph = (opts) => {
@@ -105,48 +106,24 @@ const ThreeGraph = (opts) => {
   }
 
   function onEdgeEnter(edge) {
-    const source = edge.sourcePosition,
-      target = edge.targetPosition,
-      lineColor = edge.label === 'alias_of' ? 0xcc9933 : 0x3399cc,
-      lineMaterial = new THREE.LineBasicMaterial({ color: lineColor }),
-      points = [],
-      geometry = new THREE.BufferGeometry(),
-      line = new THREE.Line(geometry, lineMaterial),
-      envelope = {
-        geometry, line, edge,
-      };
-    if (edge.controlPosition) {
-      const control = edge.controlPosition,
-        curve = new THREE.QuadraticBezierCurve3(source, control, target);
-      points.push(...curve.getPoints(25));
-    } else {
-      points.push(source);
-      points.push(target);
-    }
-    geometry.setFromPoints(points);
-    envelopes.set(edge.id, envelope);
-    graphObject.add(line);
+    const threeEdge = ThreeEdge();
+    threeEdge.enter(edge, graphObject, controls, textLoader);
+    envelopes.set(edge.id, threeEdge);
   }
 
   function onEdgeUpdate(edge) {
-    const envelope = envelopes.get(edge.id),
-      source = edge.sourcePosition,
-      target = edge.targetPosition,
-      points = [];
-    if (edge.controlPosition) {
-      const control = edge.controlPosition,
-        curve = new THREE.QuadraticBezierCurve3(source, control, target);
-      points.push(...curve.getPoints(25));
-    } else {
-      points.push(source);
-      points.push(target);
-    }
-    envelope.geometry.setFromPoints(points);
+    const threeEdge = envelopes.get(edge.id);
+    threeEdge.update(edge);
+  }
+
+  function onEdgeTick(edge) {
+    const threeEdge = envelopes.get(edge.id);
+    threeEdge.tick(edge);
   }
 
   function onEdgeExit(edge) {
-    const envelope = envelopes.get(edge.id);
-    graphObject.remove(envelope.line);
+    const threeEdge = envelopes.get(edge.id);
+    threeEdge.exit();
   }
 
   function init() {
@@ -157,7 +134,7 @@ const ThreeGraph = (opts) => {
     forceGraph.on('edgeEnter', onEdgeEnter);
     forceGraph.on('edgeUpdate', onEdgeUpdate);
     forceGraph.on('edgeExit', onEdgeExit);
-    forceGraph.on('edgeTick', onEdgeUpdate);
+    forceGraph.on('edgeTick', onEdgeTick);
     sceneManager.scene.add(graphObject);
     sceneManager.on('render', forceGraph.tick);
   }
