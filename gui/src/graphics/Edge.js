@@ -4,13 +4,13 @@ class Edge {
   constructor() {
     this.controls = null;
     this.data = {};
-    this.scene = null;
     this.curve = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(),
       new THREE.Vector3(),
       new THREE.Vector3(),
     );
     this.group = new THREE.Group();
+    this.lineManager = null;
     this.lineMesh = new THREE.Line(
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: 0x336699 }),
@@ -19,10 +19,10 @@ class Edge {
     this.group.envelope = this;
   }
 
-  enter(newData, newScene, newControls) {
+  enter(newData, newControls, newLineManager) {
     this.controls = newControls;
-    this.scene = newScene;
-    this.scene.add(this.group);
+    this.lineManager = newLineManager;
+    this.lineManager.add(this);
     this.update(newData);
   }
 
@@ -31,10 +31,10 @@ class Edge {
   }
 
   exit() {
-    this.scene.remove(this.group);
-    this.scene = null;
+    this.lineManager.remove(this);
     this.data = {};
     this.controls = null;
+    this.lineManager = null;
   }
 
   frameTick() { }
