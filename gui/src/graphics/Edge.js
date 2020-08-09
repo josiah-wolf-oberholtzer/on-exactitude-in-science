@@ -13,7 +13,7 @@ class Edge {
     this.group = new THREE.Group();
     this.lineMesh = new THREE.Line(
       new THREE.BufferGeometry(),
-      new THREE.LineBasicMaterial({ color: 0xffffff }),
+      new THREE.LineBasicMaterial({ color: 0x336699 }),
     );
     this.group.add(this.lineMesh);
     this.group.envelope = this;

@@ -38,6 +38,18 @@ class Vertex {
     this.edgeRingMesh.receiveShadow = true;
     this.group.envelope = this;
     this.group.add(this.coreMesh);
+    this.hovered = false;
+    this.selected = false;
+  }
+
+  calculateColor() {
+    if (this.hovered) {
+      this.coreMesh.material.color.setHex(0xffff00);
+    } else if (this.selected) {
+      this.coreMesh.material.color.setHex(0xff0000);
+    } else {
+      this.coreMesh.material.color.setHex(0x6699cc);
+    }
   }
 
   static calculateCoreGeometry(label) {
@@ -138,14 +150,17 @@ class Vertex {
 
   select() {
     this.group.add(this.pointLight);
+    this.selected = true;
   }
 
   deselect() {
     this.group.remove(this.pointLight);
+    this.selected = false;
   }
 
   frameTick() {
     this.edgeRingMesh.rotation.y += 0.1;
+    this.calculateColor();
   }
 
   graphTick(newData) {
@@ -154,9 +169,13 @@ class Vertex {
     Object.assign(this.data, newData);
   }
 
-  mouseout() {}
+  mouseout() {
+    this.hovered = false;
+  }
 
-  mouseover() {}
+  mouseover() {
+    this.hovered = true;
+  }
 }
 
 export default Vertex;
