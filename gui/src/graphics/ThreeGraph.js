@@ -106,7 +106,7 @@ const ThreeGraph = (opts) => {
   }
 
   function onEdgeEnter(edge) {
-    const threeEdge = ThreeEdge();
+    const threeEdge = new ThreeEdge();
     threeEdge.enter(edge, graphObject, controls, textLoader);
     envelopes.set(edge.id, threeEdge);
   }

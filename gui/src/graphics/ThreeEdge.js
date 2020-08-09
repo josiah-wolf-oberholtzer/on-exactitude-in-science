@@ -1,67 +1,57 @@
 import * as THREE from 'three';
 
-const ThreeEdge = () => {
-  let controls,
-    data = {},
-    scene;
-
-  const curve = new THREE.QuadraticBezierCurve3(
-    new THREE.Vector3(),
-    new THREE.Vector3(),
-    new THREE.Vector3(),
-  );
-  const group = new THREE.Group();
-  const lineMesh = new THREE.Line(
-    new THREE.BufferGeometry(),
-    new THREE.LineBasicMaterial({ color: 0xffffff }),
-  );
-
-  function enter(newData, newScene, newControls, textLoader) {
-    controls = newControls;
-    scene = newScene;
-    scene.add(group);
-    update(newData);
+class ThreeEdge {
+  constructor() {
+    this.controls = null;
+    this.data = {};
+    this.scene = null;
+    this.curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(),
+      new THREE.Vector3(),
+      new THREE.Vector3(),
+    );
+    this.group = new THREE.Group();
+    this.lineMesh = new THREE.Line(
+      new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({ color: 0xffffff }),
+    );
+    this.group.add(this.lineMesh);
+    this.group.envelope = this;
   }
 
-  function update(newData) {
-    tick(newData);
+  enter(newData, newScene, newControls, textLoader) {
+    this.controls = newControls;
+    this.scene = newScene;
+    this.scene.add(this.group);
+    this.update(newData);
   }
 
-  function exit() {
-    scene.remove(group);
-    controls.remove(lineMesh);
-    scene = null;
-    data = {};
-    controls = null;
+  update(newData) {
+    this.tick(newData);
   }
 
-  function tick(newData) {
+  exit() {
+    this.scene.remove(this.group);
+    this.controls.remove(this.lineMesh);
+    this.scene = null;
+    this.data = {};
+    this.controls = null;
+  }
+
+  tick(newData) {
     if (newData.controlPosition) {
-      curve.v0.copy(newData.sourcePosition);
-      curve.v1.copy(newData.controlPosition);
-      curve.v2.copy(newData.targetPosition);
-      lineMesh.geometry.setFromPoints(curve.getPoints(25));
+      this.curve.v0.copy(newData.sourcePosition);
+      this.curve.v1.copy(newData.controlPosition);
+      this.curve.v2.copy(newData.targetPosition);
+      this.lineMesh.geometry.setFromPoints(this.curve.getPoints(25));
     } else {
-      lineMesh.geometry.setFromPoints([
+      this.lineMesh.geometry.setFromPoints([
         newData.sourcePosition,
         newData.targetPosition,
       ]);
     }
-    Object.assign(data, newData);
+    Object.assign(this.data, newData);
   }
-
-  const closure = {
-    enter,
-    exit,
-    tick,
-    update,
-    data: () => data,
-  };
-
-  group.envelope = closure;
-  group.add(lineMesh);
-
-  return closure;
-};
+}
 
 export default ThreeEdge;
