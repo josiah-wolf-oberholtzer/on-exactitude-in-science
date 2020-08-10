@@ -15,6 +15,7 @@ class Edge {
       new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: 0x336699 }),
     );
+    this.points = [];
     this.group.add(this.lineMesh);
     this.group.envelope = this;
   }
@@ -40,17 +41,19 @@ class Edge {
   frameTick() { }
 
   graphTick(newData) {
+    this.points.length = 0;
     if (newData.controlPosition) {
       this.curve.v0.copy(newData.sourcePosition);
       this.curve.v1.copy(newData.controlPosition);
       this.curve.v2.copy(newData.targetPosition);
-      this.lineMesh.geometry.setFromPoints(this.curve.getPoints(25));
+      this.points.push(...this.curve.getPoints(25));
     } else {
-      this.lineMesh.geometry.setFromPoints([
+      this.points.push(
         newData.sourcePosition,
         newData.targetPosition,
-      ]);
+      );
     }
+    this.lineMesh.geometry.setFromPoints(this.points);
     Object.assign(this.data, newData);
   }
 }
