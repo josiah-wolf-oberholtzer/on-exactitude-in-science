@@ -24,18 +24,18 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
     vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
     edge_counts = await (session.traversal().E().groupCount().by(__.label())).next()
     assert vertex_counts == {
-        "artist": 200,
-        "company": 200,
-        "master": 200,
-        "release": 200,
-        "track": 872,
+        "artist": 50,
+        "company": 50,
+        "master": 50,
+        "release": 50,
+        "track": 246,
     }
     assert edge_counts == {
-        "alias_of": 19,
-        "credited_with": 415,
-        "includes": 873,
-        "member_of": 12,
-        "released": 231,
-        "released_on": 188,
-        "subsidiary_of": 14,
+        "alias_of": 5,
+        "credited_with": 91,
+        "includes": 246,
+        "member_of": 7,
+        "released": 34,
+        "released_on": 50,
+        "subsidiary_of": 1,
     }
