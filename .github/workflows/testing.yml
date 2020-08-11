@@ -10,9 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Pull Docker images
-      run: |
-        docker-compose pull
-        docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+      run: docker-compose pull
+    - name: Pull latest
+      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: Build API container
       run: docker-compose build api
     - name: Bring containers online

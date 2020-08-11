@@ -1,6 +1,5 @@
 FROM alpine:3.11
 WORKDIR /app
-ENV SERVER_PORT=9090
 RUN apk update \
     && apk add --no-cache --virtual .build-dependencies build-base libffi-dev musl-dev python3-dev \
     && apk add --no-cache --virtual .runtime-dependencies curl git jq make python3
