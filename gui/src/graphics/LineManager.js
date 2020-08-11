@@ -34,9 +34,10 @@ class LineManager {
       const indices = [];
       let baseIndex = 0;
       for (const edge of this.edges.keys()) {
+        const color = edge.calculateColor();
         this.edges.set(edge, baseIndex);
         for (const [index, point] of edge.points.entries()) {
-          colors.push(0.2, 0.4, 0.6);
+          colors.push(color.r, color.g, color.b);
           positions.push(point.x, point.y, point.z);
           if (index > 0) {
             indices.push(baseIndex + index - 1, baseIndex + index);
@@ -55,9 +56,18 @@ class LineManager {
           positions.push(point.x, point.y, point.z);
         }
       }
-      this.geometry.getAttribute('color').copyArray(colors).needsUpdate = true;
       this.geometry.getAttribute('position').copyArray(positions).needsUpdate = true;
     }
+  }
+
+  updateColor(edge) {
+    const index = this.edges.get(edge);
+    const color = edge.calculateColor();
+    const attribute = this.geometry.getAttribute('color');
+    for (let i = 0; i < edge.points.length; i++) {
+      attribute.setXYZ(index + (i * 3), color.r, color.g, color.b);
+    }
+    attribute.needsUpdate = true;
   }
 }
 

@@ -18,6 +18,23 @@ class Edge {
     this.points = [];
     this.group.add(this.lineMesh);
     this.group.envelope = this;
+    this.hovered = false;
+    this.selected = false;
+  }
+
+  calculateColor() {
+    const color = new THREE.Color(0xffffff);
+    if (this.data.label === "alias_of") {
+      color.setHex(0xd0ff00);
+    } else {
+      color.setHex(0x336699);
+    }
+    if (this.selected) {
+      color.setHex(0xffff00);
+    } else if (this.hovererd) {
+      color.setHex(0xff0000);
+    }
+    return color;
   }
 
   enter(newData, newControls, newLineManager) {
@@ -55,6 +72,26 @@ class Edge {
     }
     this.lineMesh.geometry.setFromPoints(this.points);
     Object.assign(this.data, newData);
+  }
+
+  mouseout() {
+    this.hovered = false;
+    this.lineManager.updateColor(this);
+  }
+
+  mouseover() {
+    this.hovered = true;
+    this.lineManager.updateColor(this);
+  }
+
+  select() {
+    this.selected = true;
+    this.lineManager.updateColor(this);
+  }
+
+  deselect() {
+    this.selected = false;
+    this.lineManager.updateColor(this);
   }
 }
 
