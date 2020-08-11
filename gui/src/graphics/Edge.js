@@ -24,7 +24,7 @@ class Edge {
 
   calculateColor() {
     const color = new THREE.Color(0xffffff);
-    if (this.data.label === "alias_of") {
+    if (this.data.label === 'alias_of') {
       color.setHex(0xd0ff00);
     } else {
       color.setHex(0x336699);
@@ -63,7 +63,7 @@ class Edge {
       this.curve.v0.copy(newData.sourcePosition);
       this.curve.v1.copy(newData.controlPosition);
       this.curve.v2.copy(newData.targetPosition);
-      this.points.push(...this.curve.getPoints(25));
+      this.points.push(...this.curve.getPoints(10));
     } else {
       this.points.push(
         newData.sourcePosition,

@@ -4,7 +4,7 @@ class LineManager {
   constructor(parent) {
     this.edges = new Map();
     this.geometry = new THREE.BufferGeometry();
-    this.material = new THREE.LineBasicMaterial({vertexColors: true});
+    this.material = new THREE.LineBasicMaterial({ vertexColors: true });
     this.geometry.setAttribute('color', new THREE.Float32BufferAttribute([], 3));
     this.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
     this.geometry.setIndex(new THREE.Uint16BufferAttribute([], 1));
@@ -13,13 +13,13 @@ class LineManager {
     parent.add(this.line);
   }
 
-  add(edge) { 
+  add(edge) {
     this.edges.set(edge, 0);
     this.dirty = true;
     // this.group.add(edge.lineMesh);
   }
 
-  remove(edge) { 
+  remove(edge) {
     this.edges.delete(edge);
     this.dirty = true;
     // this.group.remove(edge.lineMesh);
@@ -27,7 +27,7 @@ class LineManager {
 
   frameTick() { }
 
-  graphTick() { 
+  graphTick() {
     const positions = [];
     const colors = [];
     if (this.dirty) {
