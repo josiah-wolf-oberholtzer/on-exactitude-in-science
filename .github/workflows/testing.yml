@@ -9,10 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Pull Docker images
+      run: |
+        docker-compose pull
+        docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: Build API container
       run: docker-compose build api
-    - name: Pull Docker images
-      run: docker-compose pull
     - name: Bring containers online
       run: docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
     - name: Wait for JanusGraph

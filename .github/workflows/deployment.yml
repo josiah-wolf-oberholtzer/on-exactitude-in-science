@@ -7,11 +7,13 @@ env:
   API_IMAGE: josiahwolfoberholtzer/on-exactitude-in-science-api
   GUI_IMAGE: josiahwolfoberholtzer/on-exactitude-in-science-gui
 jobs:
-  images:
-    name: Update Images
+  api:
+    name: API
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Pull latest
+      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: API image
       uses: docker/build-push-action@v1
       with:
@@ -21,6 +23,13 @@ jobs:
         tags: latest
         tag_with_sha: true
         path: api
+  gui:
+    name: GUI
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pull latest
+      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-gui:latest
     - name: GUI image
       uses: docker/build-push-action@v1
       with:
