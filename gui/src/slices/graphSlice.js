@@ -83,11 +83,11 @@ const graphSlice = createSlice({
       state.verticesByLabel = {};
       state.verticesByStyle = {};
       state.verticesByYear = {};
-      vertices.forEach(vertex => {
+      vertices.forEach((vertex) => {
         const items = [
           [state.verticesByLabel, [vertex.label[0].toUpperCase() + vertex.label.substring(1)]],
         ];
-        if (vertex.label == "release" || vertex.label == "track") {
+        if (vertex.label === 'release' || vertex.label === 'track') {
           items.push(
             [state.verticesByCountry, [vertex.country]],
             [state.verticesByFormat, vertex.formats],
@@ -96,9 +96,9 @@ const graphSlice = createSlice({
             [state.verticesByYear, [vertex.year]],
           );
         }
-        items.forEach(item => {
+        items.forEach((item) => {
           const [map, labels] = item;
-          labels.forEach(label => {
+          labels.forEach((label) => {
             if (map[label] === undefined) {
               map[label] = [vertex.id];
             } else {
@@ -107,13 +107,13 @@ const graphSlice = createSlice({
           });
         });
       });
-      edges.forEach(edge => {
+      edges.forEach((edge) => {
         const items = [
           [state.edgesByVertex, edge.source],
           [state.edgesByVertex, edge.target],
           [state.edgesByRole, edge.role],
         ];
-        items.forEach(item => {
+        items.forEach((item) => {
           const [map, label] = item;
           if (map[label] === undefined) {
             map[label] = [edge.id];
