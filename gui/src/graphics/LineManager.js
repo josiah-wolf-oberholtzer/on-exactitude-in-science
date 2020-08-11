@@ -29,13 +29,15 @@ class LineManager {
 
   graphTick() {
     const positions = [];
-    const colors = [];
     if (this.dirty) {
+      const colors = [];
       const indices = [];
       let baseIndex = 0;
+      // eslint-disable-next-line no-restricted-syntax
       for (const edge of this.edges.keys()) {
         const color = edge.calculateColor();
         this.edges.set(edge, baseIndex);
+        // eslint-disable-next-line no-restricted-syntax
         for (const [index, point] of edge.points.entries()) {
           colors.push(color.r, color.g, color.b);
           positions.push(point.x, point.y, point.z);
@@ -50,9 +52,10 @@ class LineManager {
       this.geometry.setIndex(new THREE.Uint16BufferAttribute(indices, 1));
       this.dirty = false;
     } else {
+      // eslint-disable-next-line no-restricted-syntax
       for (const edge of this.edges.keys()) {
+        // eslint-disable-next-line no-restricted-syntax,no-unused-vars
         for (const [index, point] of edge.points.entries()) {
-          colors.push(0.2, 0.4, 0.6);
           positions.push(point.x, point.y, point.z);
         }
       }
