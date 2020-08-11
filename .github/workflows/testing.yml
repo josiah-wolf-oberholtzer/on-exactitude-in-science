@@ -11,12 +11,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Pull Docker images
       run: docker-compose pull
+    - name: Bring backing containers online
+      run: docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
     - name: Pull latest
       run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: Build API container
       run: docker-compose build api
-    - name: Bring containers online
-      run: docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
     - name: Wait for JanusGraph
       run: docker-compose run --rm janusgraph-healthcheck
     - name: Load schema
