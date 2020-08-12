@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Pull latest
-      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+      run: docker pull alpine:3.11 josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: API image
       uses: docker/build-push-action@v1
       with:
@@ -29,7 +29,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Pull latest
-      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-gui:latest
+      run: docker pull alpine:3.11 josiahwolfoberholtzer/on-exactitude-in-science-gui:latest
     - name: GUI image
       uses: docker/build-push-action@v1
       with:
