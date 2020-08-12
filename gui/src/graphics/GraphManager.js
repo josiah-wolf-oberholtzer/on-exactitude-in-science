@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { dispatch } from 'd3-dispatch';
 import DragControls from './DragControls';
 import Edge from './Edge';
+import LineManager from './LineManager';
 import TextLoader from './TextLoader';
 import Vertex from './Vertex';
 
@@ -10,13 +11,14 @@ class GraphManager {
     this.forceGraph = forceGraph;
     this.sceneManager = sceneManager;
     this.textLoader = new TextLoader();
-    this.graphObject = new THREE.Object3D();
+    this.group = new THREE.Group();
+    this.lineManager = new LineManager(this.group);
     this.controls = new DragControls([], this.sceneManager.camera, this.sceneManager.canvas);
     this.envelopes = new Map();
     this.dispatcher = dispatch('deselect', 'doubleclick', 'select');
     this.previousClickObject = null;
     this.previousClickTime = Date.now();
-    this.sceneManager.scene.add(this.graphObject);
+    this.sceneManager.scene.add(this.group);
     this.controls.on('deselect', this.onDeselect.bind(this));
     this.controls.on('drag', this.onDrag.bind(this));
     this.controls.on('dragend', this.onDragEnd.bind(this));
@@ -83,7 +85,7 @@ class GraphManager {
 
   onEdgeEnter(data) {
     const threeEdge = new Edge();
-    threeEdge.enter(data, this.graphObject, this.controls, this.textLoader);
+    threeEdge.enter(data, this.controls, this.lineManager);
     this.envelopes.set(data.id, threeEdge);
   }
 
@@ -104,11 +106,13 @@ class GraphManager {
     data.edges.entrances.forEach(this.onEdgeEnter.bind(this));
     data.edges.updates.forEach(this.onEdgeUpdate.bind(this));
     data.edges.exits.forEach(this.onEdgeExit.bind(this));
+    this.lineManager.graphTick();
   }
 
   onGraphTick(data) {
     data.vertices.forEach(this.onVertexGraphTick.bind(this));
     data.edges.forEach(this.onEdgeGraphTick.bind(this));
+    this.lineManager.graphTick();
   }
 
   onMouseOut(event) {
@@ -126,6 +130,7 @@ class GraphManager {
   onBeforeRender() {
     this.forceGraph.tick();
     this.envelopes.forEach(this.onFrameTick.bind(this));
+    this.lineManager.frameTick();
   }
 
   onSelect(event) {
@@ -140,7 +145,7 @@ class GraphManager {
 
   onVertexEnter(data) {
     const threeVertex = new Vertex();
-    threeVertex.enter(data, this.graphObject, this.controls, this.textLoader);
+    threeVertex.enter(data, this.group, this.controls, this.textLoader);
     this.envelopes.set(data.id, threeVertex);
   }
 

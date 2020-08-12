@@ -56,33 +56,51 @@ def project_edge(traversal):
 
 def project_vertex(traversal):
     return (
-        traversal.project("id", "label", "values", "total_edge_count", "child_count",)
+        traversal.project(
+            "id", "label", "values", "total_edge_count", "child_count", "extra"
+        )
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
         .by(__.bothE().count())
         .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
+        .by(
+            __.choose(
+                __.hasLabel("track"), __.in_("includes").valueMap(), __.constant(False),
+            )
+        )
     )
 
 
 def cleanup_edge(result):
     result["id"] = result["id"]["@value"]["relationId"]
     result.update(result.pop("values", {}))
+    if "role" not in result:
+        result["role"] = result["label"].replace("_", " ").title()
     return result
 
 
-def cleanup_vertex(result, goblin_app):
-    vertex = goblin_app.vertices[result["label"]]
-    for key, value in result["values"].items():
+def cleanup_values(label, values, goblin_app):
+    vertex = goblin_app.vertices[label]
+    for key, value in values.items():
         prop = vertex.__properties__[key]
         if (
             value
             and getattr(prop, "cardinality", Cardinality.single) == Cardinality.single
         ):
-            result["values"][key] = value[0]
-    result["values"].pop("random")
+            values[key] = value[0]
+
+
+def cleanup_vertex(result, goblin_app):
+    cleanup_values(result["label"], result["values"], goblin_app)
     result["eid"] = result["values"].pop(result["label"] + "_id")
     result.update(result.pop("values"))
+    if extra := result.pop("extra"):
+        cleanup_values("release", extra, goblin_app)
+        result.update(extra)
+        result.pop("release_id")
+    if "is_main_release" in result:
+        result["main"] = result.pop("is_main_release")
     return result
 
 
@@ -101,7 +119,7 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
-    limit = validate_limit(request, default=200, minimum=50, maximum=1000)
+    limit = validate_limit(request, default=250, minimum=50, maximum=500)
     offset = validate_offset(request)
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")

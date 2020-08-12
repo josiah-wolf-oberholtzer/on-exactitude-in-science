@@ -36,6 +36,8 @@ const graphSlice = createSlice({
   name: 'graph',
   initialState: {
     edges: [],
+    edgesByRole: {},
+    edgesByVertex: {},
     error: null,
     loading: false,
     selected: {
@@ -44,6 +46,12 @@ const graphSlice = createSlice({
       name: null,
     },
     vertices: [],
+    verticesByCountry: {},
+    verticesByFormat: {},
+    verticesByGenre: {},
+    verticesByLabel: {},
+    verticesByStyle: {},
+    verticesByYear: {},
   },
   reducers: {
     deselectEntity(state) {
@@ -63,10 +71,57 @@ const graphSlice = createSlice({
     },
     [fetchByEntity.fulfilled]: (state, action) => {
       const { center, edges, vertices } = action.payload;
-      state.vertices = vertices;
-      state.edges = edges;
-      state.loading = false;
       document.title = `${center.name} | On Exactitude In Science`;
+      state.edges = edges;
+      state.edgesByRole = {};
+      state.edgesByVertex = {};
+      state.loading = false;
+      state.vertices = vertices;
+      state.verticesByCountry = {};
+      state.verticesByFormat = {};
+      state.verticesByGenre = {};
+      state.verticesByLabel = {};
+      state.verticesByStyle = {};
+      state.verticesByYear = {};
+      vertices.forEach((vertex) => {
+        const items = [
+          [state.verticesByLabel, [vertex.label[0].toUpperCase() + vertex.label.substring(1)]],
+        ];
+        if (vertex.label === 'release' || vertex.label === 'track') {
+          items.push(
+            [state.verticesByCountry, [vertex.country]],
+            [state.verticesByFormat, vertex.formats],
+            [state.verticesByGenre, vertex.genres],
+            [state.verticesByStyle, vertex.styles],
+            [state.verticesByYear, [vertex.year]],
+          );
+        }
+        items.forEach((item) => {
+          const [map, labels] = item;
+          labels.forEach((label) => {
+            if (map[label] === undefined) {
+              map[label] = [vertex.id];
+            } else {
+              map[label].push(vertex.id);
+            }
+          });
+        });
+      });
+      edges.forEach((edge) => {
+        const items = [
+          [state.edgesByVertex, edge.source],
+          [state.edgesByVertex, edge.target],
+          [state.edgesByRole, edge.role],
+        ];
+        items.forEach((item) => {
+          const [map, label] = item;
+          if (map[label] === undefined) {
+            map[label] = [edge.id];
+          } else {
+            map[label].push(edge.id);
+          }
+        });
+      });
     },
     [fetchByEntity.rejected]: (state, action) => {
       state.error = action.error;
