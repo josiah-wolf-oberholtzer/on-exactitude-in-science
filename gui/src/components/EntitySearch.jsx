@@ -2,10 +2,18 @@ import * as graphAPI from '../api/graphAPI';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import React from "react";
-import throttle from 'lodash/throttle';
 import { FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, makeStyles } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router'
+
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = React.useState(value);
+  React.useEffect(() => {
+    const handler = setTimeout(() => { setDebouncedValue(value); }, delay);
+    return () => { clearTimeout(handler); };
+  }, [value]);
+  return debouncedValue;
+}
 
 const useStyles = makeStyles((theme) => ({
   autocomplete: { marginRight: theme.spacing(2) },
@@ -23,23 +31,24 @@ const EntitySearch = (props) => {
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const [entityType, setEntityType] = React.useState('any');
-  const [nonce, setNonce] = React.useState(Date.now());
+  const [isSearching, setIsSearching] = React.useState(false);
+  const debouncedSearchTerm = useDebounce(inputValue, 200);
 
-  const fetch = throttle(() => {
-    const thisNonce = Date.now();
-    setNonce(thisNonce);
-    graphAPI.search(inputValue, entityType).then((response) => {
-      let newOptions = [];
-      if (response.data.result) {
-        newOptions = [...newOptions, ...response.data.result];
-      }
-      if (thisNonce >= nonce) {
+  React.useEffect(() => {
+    if (debouncedSearchTerm.length >= 3) {
+      setIsSearching(true);
+      graphAPI.search(debouncedSearchTerm, entityType).then((response) => {
+        const newOptions = [];
+        if (response.data.result) {
+          newOptions.push(...newOptions, ...response.data.result);
+        }
+        setIsSearching(false);
         setOptions(newOptions);
-      }
-    })
-  }, 200)
-
-  React.useEffect(() => {if (inputValue.length >= 3) { fetch() }}, [value, inputValue]);
+      });
+    } else {
+      setOptions([]);
+    }
+  }, [debouncedSearchTerm]);
 
   return (
     <React.Fragment>
