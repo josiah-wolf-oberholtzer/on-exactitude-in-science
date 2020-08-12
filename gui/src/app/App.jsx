@@ -1,6 +1,5 @@
 import React from 'react';
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
-import ShuffleRoundedIcon from '@material-ui/icons/ShuffleRounded';
 import { AppBar, Button, CssBaseline, Drawer, IconButton, InputAdornment, TextField, ThemeProvider, Toolbar, Typography, makeStyles, } from '@material-ui/core';
 import { ConnectedRouter, push } from 'connected-react-router'
 import { EntityDial, EntityCaption, EntityGraph, EntitySearch, Fetcher, Loading } from '../components';
@@ -41,13 +40,6 @@ const App = (props) => {
             <Typography variant="h6" className={classes.title} onClick={() => props.push("/")}>
               On Exactitude In Science
             </Typography>
-            <Button
-              className={classes.menuButton}
-              onClick={() => props.push("/random")}
-              startIcon={<ShuffleRoundedIcon />}
-            >
-              Random
-            </Button>
             <EntitySearch />
           </Toolbar>
         </AppBar>
