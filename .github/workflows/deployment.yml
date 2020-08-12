@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: API image
-      uses: docker/build-push-action@v1
+      uses: docker/build-push-action@v1.1.0
       with:
         username: josiahwolfoberholtzer
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: GUI image
-      uses: docker/build-push-action@v1
+      uses: docker/build-push-action@v1.1.0
       with:
         username: josiahwolfoberholtzer
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
