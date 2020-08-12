@@ -42,7 +42,8 @@ jobs:
   kubernetes:
     name: Update Kubernetes
     needs:
-    - images
+    - api
+    - gui
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
