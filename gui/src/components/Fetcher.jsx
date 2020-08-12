@@ -5,22 +5,26 @@ import { fetchByEntity, fetchRandom } from "../slices/graphSlice";
 const mapDispatchToProps = dispatch => {
   return {
     fetchByEntity: (label, id) => dispatch(fetchByEntity({label, id})),
-    fetchRandom: () => dispatch(fetchRandom()),
+    fetchRandom: (label) => dispatch(fetchRandom({label})),
   }
 }
 
 class Fetcher extends React.Component {
   match() {
+    const { label, id } = this.props.match.params;
     switch (this.props.match.path) {
       case "/":
         document.title = "Home | On Exactitude In Science"
         break;
+      case "/random/:label(artist|company|master|release|track)":
+        document.title = "Random | On Exactitude In Science"
+        this.props.fetchRandom(label);
+        break;
       case "/random":
         document.title = "Random | On Exactitude In Science"
-        this.props.fetchRandom(label, id);
+        this.props.fetchRandom();
         break;
       case "/:label(artist|company|master|release|track)/:id":
-        const { label, id } = this.props.match.params;
         this.props.fetchByEntity(label, id);
         break;
       default:

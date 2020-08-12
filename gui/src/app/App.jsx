@@ -25,6 +25,7 @@ const App = (props) => {
     <ConnectedRouter history={history} noInitialPop>
       <Switch>
         <Route exact path="/:label(artist|company|master|release|track)/:id" component={Fetcher} />
+        <Route exact path="/random/:label(artist|company|master|release|track)" component={Fetcher} />
         <Route exact path="/random" component={Fetcher} />
         <Route exact path="/" component={Fetcher} />
         <Route path="*" component={Fetcher} />
