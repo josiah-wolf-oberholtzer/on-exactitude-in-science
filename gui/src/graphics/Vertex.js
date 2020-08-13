@@ -159,7 +159,7 @@ class Vertex {
   }
 
   frameTick() {
-    this.edgeRingMesh.rotation.y += 0.1;
+    this.edgeRingMesh.rotation.y += 0.05 + ((this.data.random || 1) * 0.1);
     this.calculateColor();
   }
 

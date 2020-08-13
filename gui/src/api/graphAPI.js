@@ -19,8 +19,8 @@ const fetchLocalityByVertex = async (id) => {
   return response;
 };
 
-const fetchRandomVertex = async () => {
-  const url = `${urlBase()}/random`;
+const fetchRandomVertex = async (label) => {
+  const url = `${urlBase()}/random` + (label !== undefined ? `/${label}` : "");
   const response = await axios.get(url);
   return response;
 };

@@ -66,7 +66,10 @@ def project_vertex(traversal):
         .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
         .by(
             __.choose(
-                __.hasLabel("track"), __.in_("includes").valueMap(), __.constant(False),
+                __.inE("includes").count().is_(P.gt(0)),
+                # __.hasLabel("track"),
+                __.in_("includes").valueMap(),
+                __.constant(False),
             )
         )
     )
@@ -97,8 +100,10 @@ def cleanup_vertex(result, goblin_app):
     result.update(result.pop("values"))
     if extra := result.pop("extra"):
         cleanup_values("release", extra, goblin_app)
-        result.update(extra)
-        result.pop("release_id")
+        for key, value in extra.items():
+            if key in result or key.endswith("_id"):
+                continue
+            result[key] = value
     if "is_main_release" in result:
         result["main"] = result.pop("is_main_release")
     return result

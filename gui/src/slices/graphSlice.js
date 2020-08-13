@@ -16,11 +16,12 @@ const fetchByEntity = createAsyncThunk(
     }
   },
 );
+
 const fetchRandom = createAsyncThunk(
   'graph/fetchRandom',
   async (spec, { dispatch, rejectWithValue }) => {
     try {
-      const response = await graphAPI.fetchRandomVertex();
+      const response = await graphAPI.fetchRandomVertex(spec.label);
       const { label, eid } = response.data.result;
       dispatch(replace(`/${label}/${eid}`));
       return response.data.result;
@@ -32,6 +33,7 @@ const fetchRandom = createAsyncThunk(
     }
   },
 );
+
 const graphSlice = createSlice({
   name: 'graph',
   initialState: {
@@ -137,6 +139,7 @@ const graphSlice = createSlice({
     },
   },
 });
+
 const { deselectEntity, selectEntity } = graphSlice.actions;
 
 export {
