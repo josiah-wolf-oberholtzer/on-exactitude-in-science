@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Pull cache
+      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: API image
       uses: docker/build-push-action@v1.1.0
       with:
@@ -27,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Pull cache
+      run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-gui:latest
     - name: GUI image
       uses: docker/build-push-action@v1.1.0
       with:
