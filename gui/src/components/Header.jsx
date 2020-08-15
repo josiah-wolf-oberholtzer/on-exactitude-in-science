@@ -33,7 +33,7 @@ const mapDispatchToProps = dispatch => {
 
 const mapStateToProps = state => {
   return {
-    open: state.layout.sidebarOpen,
+    open: state.layout.sidebar.open,
   }
 }
 

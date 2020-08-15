@@ -16,7 +16,7 @@ const layoutSlice = createSlice({
   },
   reducers: {
     toggleSidebar(state) {
-      state.sidebar.open = !state.sidebarOpen;
+      state.sidebar.open = !state.sidebar.open;
     },
     toggleSidebarSection(state, action) {
       state.sidebar[action.payload + "Open"] = !state.sidebar[action.payload + "Open"];
