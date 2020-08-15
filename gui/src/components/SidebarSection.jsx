@@ -2,7 +2,7 @@ import React from 'react';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 
-import { Collapse, Divider, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
+import { Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   chips: {

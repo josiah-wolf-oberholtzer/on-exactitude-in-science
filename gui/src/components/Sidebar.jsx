@@ -1,4 +1,6 @@
 import React from 'react';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import { Badge, Chip, Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
 import SidebarSection from './SidebarSection';
@@ -10,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
     flexShrink: 0,
     width: drawerWidth,
   },
-  drawerPaper: { 
+  drawerPaper: {
     backdropFilter: "blur(5px)",
     backgroundColor: '#00000080',
     width: drawerWidth,
@@ -21,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const mapStateToProps = state => {
-  return { 
+  return {
     edgesByRole: state.graph.edgesByRole,
     open: state.layout.sidebarOpen,
     verticesByCountry: state.graph.verticesByCountry,
@@ -37,8 +39,18 @@ const objectToChips = (object) => {
   return Object.entries(object).sort().map(entry => {
     const [label, ids] = entry;
     return (
-      <Badge badgeContent={ids.length} max={9999} key={label}>
-        <Chip label={label} clickable/> 
+      <Badge
+        badgeContent={ids.length}
+        key={label}
+        max={9999}
+      >
+        <Chip
+          deleteIcon={<FilterListIcon />}
+          label={label}
+          onClick={() => {}}
+          onDelete={() => {}}
+          variant="outlined"
+        />
       </Badge>
     )
   })
