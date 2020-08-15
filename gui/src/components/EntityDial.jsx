@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   speedDial: {
     position: 'absolute',
     bottom: theme.spacing(2),
-    left: theme.spacing(2),
+    right: theme.spacing(2),
   },
   speedDialAction: {},
 }));
@@ -63,29 +63,6 @@ const EntityDial = (props) => {
       onOpen={handleOpen}
       open={open}
     >
-      <SpeedDialAction
-        className={classes.speedDialAction}
-        key="focus"
-        icon={<CenterFocusStrongIcon />}
-        onClick={() => {
-            props.refocusCamera();
-            handleClose();
-        }}
-        tooltipOpen
-        tooltipPlacement="right"
-        tooltipTitle="Focus"
-      />
-      { props.label !== null &&
-        <SpeedDialAction
-          className={classes.speedDialAction}
-          key="connections"
-          icon={<AssessmentIcon />}
-          onClick={handleClose}
-          tooltipOpen
-          tooltipPlacement="right"
-          tooltipTitle="Connections"
-        />
-      }
       { props.label !== null &&
         <SpeedDialAction
           className={classes.speedDialAction}
@@ -96,10 +73,33 @@ const EntityDial = (props) => {
             handleClose();
           }}
           tooltipOpen
-          tooltipPlacement="right"
+          tooltipPlacement="left"
           tooltipTitle="Discogs"
         />
       }
+      { props.label !== null &&
+        <SpeedDialAction
+          className={classes.speedDialAction}
+          key="connections"
+          icon={<AssessmentIcon />}
+          onClick={handleClose}
+          tooltipOpen
+          tooltipPlacement="left"
+          tooltipTitle="Connections"
+        />
+      }
+      <SpeedDialAction
+        className={classes.speedDialAction}
+        key="focus"
+        icon={<CenterFocusStrongIcon />}
+        onClick={() => {
+            props.refocusCamera();
+            handleClose();
+        }}
+        tooltipOpen
+        tooltipPlacement="left"
+        tooltipTitle="Focus"
+      />
     </SpeedDial>
   )
 }

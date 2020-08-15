@@ -7,9 +7,9 @@ import { connect } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   caption: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: theme.spacing(2),
-    left: theme.spacing(10),
+    right: theme.spacing(10),
   },
 }));
 

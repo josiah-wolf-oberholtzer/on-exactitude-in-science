@@ -1,55 +1,38 @@
 import React from 'react';
-import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
-import { AppBar, Button, CssBaseline, Drawer, IconButton, InputAdornment, TextField, ThemeProvider, Toolbar, Typography, makeStyles, } from '@material-ui/core';
-import { ConnectedRouter, push } from 'connected-react-router'
-import { EntityDial, EntityCaption, EntityGraph, EntitySearch, Fetcher, Loading } from '../components';
-import { Switch, Route } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { CssBaseline, ThemeProvider, makeStyles, } from '@material-ui/core';
+import { ConnectedRouter } from 'connected-react-router'
 import { history } from './store';
 import { theme } from './theme';
+import EntityCaption from '../components/EntityCaption';
+import EntityDial from '../components/EntityDial';
+import Graph from '../components/Graph';
+import Header from '../components/Header';
+import Loading from '../components/Loading';
+import Routing from '../components/Routing';
+import Sidebar from '../components/Sidebar';
 
 const useStyles = makeStyles((theme) => ({
-  menuButton: { marginRight: theme.spacing(2) },
-  title: { flexGrow: 1 },
+  root: { display: 'flex' },
 }));
 
-const mapDispatchToProps = dispatch => {
-  return {
-    push: path => dispatch(push(path)),
-  }
-}
-
-const App = (props) => {
+const App = () => {
   const classes = useStyles();
   return (
     <ConnectedRouter history={history} noInitialPop>
-      <Switch>
-        <Route exact path="/:label(artist|company|master|release|track)/:id" component={Fetcher} />
-        <Route exact path="/random/:label(artist|company|master|release|track)" component={Fetcher} />
-        <Route exact path="/random" component={Fetcher} />
-        <Route exact path="/" component={Fetcher} />
-        <Route path="*" component={Fetcher} />
-      </Switch>
+      <Routing />
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <EntityGraph />
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-              <MenuRoundedIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title} onClick={() => props.push("/")}>
-              On Exactitude In Science
-            </Typography>
-            <EntitySearch />
-          </Toolbar>
-        </AppBar>
-        <EntityDial />
-        <EntityCaption />
-        <Loading />
+        <div className={classes.root}>
+          <Graph />
+          <EntityDial />
+          <EntityCaption />
+          <Header />
+          <Sidebar />
+          <Loading />
+        </div>
       </ThemeProvider>
     </ConnectedRouter>
   )
 };
 
-export default connect(null, mapDispatchToProps)(App);
+export default App;
