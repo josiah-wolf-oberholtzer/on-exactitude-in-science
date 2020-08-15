@@ -24,7 +24,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-class EntityGraph extends React.Component {
+class Graph extends React.Component {
 
   static defaultProps = {
     center: null,
@@ -86,4 +86,4 @@ class EntityGraph extends React.Component {
   }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(EntityGraph);
+export default connect(mapStateToProps, mapDispatchToProps)(Graph);

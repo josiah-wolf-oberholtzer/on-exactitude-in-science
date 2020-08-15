@@ -21,7 +21,11 @@ const Loading = (props) => {
         className={classes.backdrop}
         open={props.loading}
       >
-        <CircularProgress color="inherit" />
+        <CircularProgress
+          color="inherit"
+          size={120}
+          variant="indeterminate" 
+        />
       </Backdrop>
     </div>
   );
