@@ -20,17 +20,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SidebarSection = (props) => {
-  const { children, title } = props;
+  const { children, onClick, open, title } = props;
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const handleClick = () => { setOpen(!open); };
   return (
     <React.Fragment>
-      <ListItem button key={title} onClick={handleClick}>
+      <ListItem button key={title} onClick={onClick}>
         <ListItemText primary={title} />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
+      <Collapse in={open} timeout="auto">
         <Divider />
         <div className={classes.chips}>
           {children}

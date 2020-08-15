@@ -3,17 +3,29 @@ import { createSlice } from '@reduxjs/toolkit';
 const layoutSlice = createSlice({
   name: 'layout',
   initialState: {
-    sidebarOpen: false,
+    sidebar: {
+      countriesOpen: false,
+      entitiesOpen: false,
+      formatsOpen: false,
+      genresOpen: false,
+      open: false,
+      rolesOpen: false,
+      stylesOpen: false,
+      yearsOpen: false,
+    }
   },
   reducers: {
     toggleSidebar(state) {
-      state.sidebarOpen = !state.sidebarOpen;
+      state.sidebar.open = !state.sidebarOpen;
     },
+    toggleSidebarSection(state, action) {
+      state.sidebar[action.payload + "Open"] = !state.sidebar[action.payload + "Open"];
+    }
   },
 });
 
-const { toggleSidebar } = layoutSlice.actions;
+const { toggleSidebar, toggleSidebarSection } = layoutSlice.actions;
 
-export { toggleSidebar };
+export { toggleSidebar, toggleSidebarSection };
 
 export default layoutSlice.reducer;
