@@ -1,5 +1,8 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { dispatch } from 'd3-dispatch';
 
 class SceneManager {
@@ -13,22 +16,33 @@ class SceneManager {
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
     this.dispatcher = dispatch('beforeRender');
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    this.renderScene = new RenderPass(this.scene, this.camera);
+    this.composer = new EffectComposer(this.renderer);
+
     // settings
-    this.frameId = null;
+    this.bloomPass.radius = 1.5;
+    this.bloomPass.strength = 1.0;
+    this.bloomPass.threshold = 0.0;
     this.camera.position.z = 100;
     this.controls.dampingFactory = 0.01;
     this.controls.enableDamping = true;
+    this.frameId = null;
     this.hemisphereLight.position.set(0, 1000, 0);
+    this.renderer.autoClear = false;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ReinhardToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.toneMappingExposure = 2.0;
     this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(0x000000, 50, 200);
+    this.scene.fog = new THREE.Fog(0x000000, 0, 250);
+
     // structure
     this.container.appendChild(this.canvas);
     this.scene.add(this.hemisphereLight);
+    this.composer.addPass(this.renderScene);
+    this.composer.addPass(this.bloomPass);
     this.update();
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
   }
@@ -50,7 +64,9 @@ class SceneManager {
   onWindowResize() { this.update(); }
 
   render() {
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
+    this.renderer.clear();
+    this.composer.render();
   }
 
   resetCamera() {
@@ -69,8 +85,10 @@ class SceneManager {
   update() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
+    this.composer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.composer.setSize(window.innerWidth, window.innerHeight);
     this.controls.update();
   }
 }

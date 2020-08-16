@@ -5,8 +5,10 @@ import { combineReducers } from 'redux';
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
 import { createBrowserHistory } from 'history';
 import { createMiddleware } from 'redux-beacon';
-import { persistStore, persistReducer } from 'redux-persist';
-import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
+import {
+  persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER,
+} from 'redux-persist';
+
 import storage from 'redux-persist/lib/storage';
 
 import cameraReducer from '../slices/cameraSlice';
@@ -26,13 +28,13 @@ const persistConfig = {
   key: 'root',
   whitelist: ['layout'],
   storage,
-}
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const gaMiddleware = createMiddleware(
   {
-    [LOCATION_CHANGE]: trackPageView((action) => ({ 
+    [LOCATION_CHANGE]: trackPageView((action) => ({
       page: action.payload.location.pathname,
     })),
     'graph/selectEntity': trackEvent((action) => ({
@@ -50,13 +52,13 @@ const store = configureStore({
   reducer: persistedReducer,
   middleware: getDefaultMiddleware({
     serializableCheck: {
-      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
-    }
+      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    },
   }).concat(routerMiddleware(history)).concat(gaMiddleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 
-const persistor = persistStore(store)
+const persistor = persistStore(store);
 
 export { history, persistor };
 

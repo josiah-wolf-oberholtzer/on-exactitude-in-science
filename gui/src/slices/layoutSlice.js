@@ -12,15 +12,15 @@ const layoutSlice = createSlice({
       rolesOpen: false,
       stylesOpen: false,
       yearsOpen: false,
-    }
+    },
   },
   reducers: {
     toggleSidebar(state) {
       state.sidebar.open = !state.sidebar.open;
     },
     toggleSidebarSection(state, action) {
-      state.sidebar[action.payload + "Open"] = !state.sidebar[action.payload + "Open"];
-    }
+      state.sidebar[`${action.payload}Open`] = !state.sidebar[`${action.payload}Open`];
+    },
   },
 });
 
