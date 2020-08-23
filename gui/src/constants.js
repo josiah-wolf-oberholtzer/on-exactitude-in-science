@@ -1,7 +1,7 @@
-const COUNTRIES= 'countries';
-const FORMATS = 'formats';
-const GENRES = 'genres';
-const LABELS = 'labels';
-const ROLES = 'roles';
-const STYLES = 'styles';
-const YEARS = 'years';
+export const COUNTRIES = 'countries';
+export const FORMATS = 'formats';
+export const GENRES = 'genres';
+export const LABELS = 'labels';
+export const ROLES = 'roles';
+export const STYLES = 'styles';
+export const YEARS = 'years';

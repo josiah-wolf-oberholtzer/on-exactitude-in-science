@@ -35,7 +35,7 @@ self.onmessage = (e) => {
       forceGraph.update(data.vertices, data.edges);
       break;
     default:
-      throw {message, data};
+      throw { message, data };
       break;
   }
 };

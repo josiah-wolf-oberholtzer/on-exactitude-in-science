@@ -5,6 +5,7 @@ import { Badge, Chip, Drawer, List, Toolbar, makeStyles, } from '@material-ui/co
 import { connect } from 'react-redux';
 import SidebarSection from './SidebarSection';
 import { toggleSidebarSection } from '../slices/layoutSlice';
+import { COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS } from '../constants';
 
 const drawerWidth = '320px';
 
@@ -28,7 +29,7 @@ const mapStateToProps = state => {
     edgesByRole: state.graph.edgesByRole,
     open: state.layout.sidebar.open,
     countriesOpen: state.layout.sidebar.countriesOpen,
-    entitiesOpen: state.layout.sidebar.entitiesOpen,
+    labelsOpen: state.layout.sidebar.labelsOpen,
     formatsOpen: state.layout.sidebar.formatsOpen,
     genresOpen: state.layout.sidebar.genresOpen,
     rolesOpen: state.layout.sidebar.rolesOpen,
@@ -40,18 +41,6 @@ const mapStateToProps = state => {
     verticesByLabel: state.graph.verticesByLabel,
     verticesByStyle: state.graph.verticesByStyle,
     verticesByYear: state.graph.verticesByYear,
-  }
-}
-
-const mapDispatchToProps = dispatch => {
-  return {
-    toggleCountriesSection: () => dispatch(toggleSidebarSection("countries")),
-    toggleEntitiesSection: () => dispatch(toggleSidebarSection("entities")),
-    toggleFormatsSection: () => dispatch(toggleSidebarSection("formats")),
-    toggleGenresSection: () => dispatch(toggleSidebarSection("genres")),
-    toggleRolesSection: () => dispatch(toggleSidebarSection("roles")),
-    toggleStyleSection: () => dispatch(toggleSidebarSection("styles")),
-    toggleYearsSection: () => dispatch(toggleSidebarSection("years")),
   }
 }
 
@@ -90,58 +79,58 @@ const Sidebar = (props) => {
       <div className={classes.drawerContainer}>
         <List>
           <SidebarSection
-            onClick={props.toggleEntitiesSection}
-            open={props.entitiesOpen}
-            title="Entities"
-          >
-            {objectToChips(props.verticesByLabel)}
-          </SidebarSection>
+            category={LABELS}
+            highlightedNames={[]}
+            names={props.verticesByLabel}
+            open={props.labelsOpen}
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleRolesSection}
+            category={ROLES}
+            highlightedNames={[]}
+            names={props.edgesByRole}
             open={props.rolesOpen}
-            title="Roles"
-          >
-            {objectToChips(props.edgesByRole)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleYearsSection}
+            category={YEARS}
+            highlightedNames={[]}
+            names={props.verticesByYear}
             open={props.yearsOpen}
-            title="Years"
-          >
-            {objectToChips(props.verticesByYear)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleFormatsSection}
+            category={FORMATS}
+            highlightedNames={[]}
+            names={props.verticesByFormat}
             open={props.formatsOpen}
-            title="Formats"
-          >
-            {objectToChips(props.verticesByFormat)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleStyleSection}
+            category={STYLES}
+            highlightedNames={[]}
+            names={props.verticesByStyle}
             open={props.stylesOpen}
-            title="Styles"
-          >
-            {objectToChips(props.verticesByStyle)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleGenresSection}
+            category={GENRES}
+            highlightedNames={[]}
+            names={props.verticesByGenre}
             open={props.genresOpen}
-            title="Genres"
-          >
-            {objectToChips(props.verticesByGenre)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
           <SidebarSection
-            onClick={props.toggleCountriesSection}
+            category={COUNTRIES}
+            highlightedNames={[]}
+            names={props.verticesByCountry}
             open={props.countriesOpen}
-            title="Countries"
-          >
-            {objectToChips(props.verticesByCountry)}
-          </SidebarSection>
+            pinnedNames={[]}
+          />
         </List>
       </div>
     </Drawer>
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Sidebar);
+export default connect(mapStateToProps)(Sidebar);

@@ -5,9 +5,9 @@ const layoutSlice = createSlice({
   initialState: {
     sidebar: {
       countriesOpen: false,
-      entitiesOpen: false,
       formatsOpen: false,
       genresOpen: false,
+      labelsOpen: false,
       open: false,
       rolesOpen: false,
       stylesOpen: false,
@@ -19,7 +19,8 @@ const layoutSlice = createSlice({
       state.sidebar.open = !state.sidebar.open;
     },
     toggleSidebarSection(state, action) {
-      state.sidebar[`${action.payload}Open`] = !state.sidebar[`${action.payload}Open`];
+      const { category } = action.payload;
+      state.sidebar[`${category}Open`] = !state.sidebar[`${category}Open`];
     },
   },
 });

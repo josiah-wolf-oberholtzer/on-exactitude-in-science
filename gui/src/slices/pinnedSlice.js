@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const pinnedSlice = createSlice({
-  name: "pinned",
+  name: 'pinned',
   initialState: {
     countries: [],
     formats: [],
@@ -21,7 +21,7 @@ const pinnedSlice = createSlice({
           names.push(name);
         }
       } else {
-        throw `Bad category ${category}`
+        throw `Bad category ${category}`;
       }
     },
     unpin(state, action) {
@@ -33,7 +33,7 @@ const pinnedSlice = createSlice({
           names.splice(index, 1);
         }
       } else {
-        throw `Bad category ${category}`
+        throw `Bad category ${category}`;
       }
     },
   },

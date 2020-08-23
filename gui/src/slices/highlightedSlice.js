@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const highlightedSlice = createSlice({
-  name: "highlighted",
+  name: 'highlighted',
   initialState: {
     countries: [],
     formats: [],
@@ -21,7 +21,7 @@ const highlightedSlice = createSlice({
           names.push(name);
         }
       } else {
-        throw `Bad category ${category}`
+        throw `Bad category ${category}`;
       }
     },
     unhighlight(state, action) {
@@ -33,10 +33,10 @@ const highlightedSlice = createSlice({
           names.splice(index, 1);
         }
       } else {
-        throw `Bad category ${category}`
+        throw `Bad category ${category}`;
       }
     },
-  }
+  },
 });
 
 const { highlight, unhighlight } = highlightedSlice.actions;
