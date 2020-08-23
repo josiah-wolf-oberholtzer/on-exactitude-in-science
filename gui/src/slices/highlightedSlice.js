@@ -19,6 +19,7 @@ const highlightedSlice = createSlice({
         const index = names.indexOf(name);
         if (index === -1) {
           names.push(name);
+          names.sort();
         }
       } else {
         throw `Bad category ${category}`;

@@ -37,7 +37,7 @@ const SidebarSection = (props) => {
   const classes = useStyles();
   const pinnedChips = [];
   const unpinnedChips = [];
-  pinnedNames.sort().forEach((name) => {
+  pinnedNames.forEach((name) => {
     const ids = names[name] || [];
     const chip = (
       <Badge
@@ -54,7 +54,7 @@ const SidebarSection = (props) => {
     )
     pinnedChips.push(chip);
   });
-  Object.entries(names).sort().map(entry => {
+  Object.entries(names).map(entry => {
     const [name, ids] = entry;
     if (!pinnedNames.includes(name)) {
       const chip = (
