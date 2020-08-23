@@ -164,8 +164,18 @@ class Vertex {
   }
 
   graphTick(newData) {
-    this.group.position.copy(newData.position);
-    this.group.lookAt(newData.rudderPosition);
+    // newData.position may not be a Vector3
+    this.group.position.set(
+      newData.position.x,
+      newData.position.y,
+      newData.position.z,
+    );
+    // newData.rudderPosition may not be a Vector3
+    this.group.lookAt(
+      newData.rudderPosition.x,
+      newData.rudderPosition.y,
+      newData.rudderPosition.z,
+    );
     Object.assign(this.data, newData);
   }
 

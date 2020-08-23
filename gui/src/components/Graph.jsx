@@ -1,5 +1,6 @@
 import React from "react";
 import ForceGraph from '../physics/ForceGraph';
+// import ForceGraph from '../physics/ForceGraphProxy';
 import GraphManager from '../graphics/GraphManager';
 import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
@@ -44,6 +45,7 @@ class Graph extends React.Component {
       prevProps.vertices != nextProps.vertices
     ) {
       this.forceGraph.update(nextProps.vertices, nextProps.edges);
+      this.forceGraph.reheat();
     }
   }
 

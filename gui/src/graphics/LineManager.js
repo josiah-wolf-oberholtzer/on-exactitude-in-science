@@ -16,13 +16,11 @@ class LineManager {
   add(edge) {
     this.edges.set(edge, 0);
     this.dirty = true;
-    // this.group.add(edge.lineMesh);
   }
 
   remove(edge) {
     this.edges.delete(edge);
     this.dirty = true;
-    // this.group.remove(edge.lineMesh);
   }
 
   frameTick() { }

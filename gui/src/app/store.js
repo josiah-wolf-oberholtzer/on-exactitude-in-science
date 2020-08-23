@@ -13,14 +13,18 @@ import storage from 'redux-persist/lib/storage';
 
 import cameraReducer from '../slices/cameraSlice';
 import graphReducer from '../slices/graphSlice';
+import highlightedReducer from '../slices/highlightedSlice';
 import layoutReducer from '../slices/layoutSlice';
+import pinnedReducer from '../slices/pinnedSlice';
 
 const history = createBrowserHistory();
 
 const rootReducer = combineReducers({
   camera: cameraReducer,
   graph: graphReducer,
+  highlighted: highlightedReducer,
   layout: layoutReducer,
+  pinned: pinnedReducer,
   router: connectRouter(history),
 });
 
