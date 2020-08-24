@@ -1,4 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS } from '../constants';
+
+const categories = [COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS];
 
 const pinnedSlice = createSlice({
   name: 'pinned',
@@ -12,36 +15,17 @@ const pinnedSlice = createSlice({
     years: [],
   },
   reducers: {
-    pin(state, action) {
-      const { category, name } = action.payload;
-      const names = state[category];
-      if (names !== undefined) {
-        const index = names.indexOf(name);
-        if (index === -1) {
-          names.push(name);
-          names.sort();
-        }
-      } else {
-        throw `Bad category ${category}`;
-      }
-    },
-    unpin(state, action) {
-      const { category, name } = action.payload;
-      const names = state[category];
-      if (names !== undefined) {
-        const index = names.indexOf(name);
-        if (index !== -1) {
-          names.splice(index, 1);
-        }
-      } else {
-        throw `Bad category ${category}`;
-      }
-    },
+    setPinned(state, action) {
+      categories.forEach(category => {
+        const names = new Set(action.payload[category] || []);
+        state[category] = Array.from(names).sort();
+      });
+    }
   },
 });
 
-const { pin, unpin } = pinnedSlice.actions;
+const { setPinned } = pinnedSlice.actions;
 
-export { pin, unpin };
+export { setPinned };
 
 export default pinnedSlice.reducer;

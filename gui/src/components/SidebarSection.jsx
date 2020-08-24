@@ -5,8 +5,11 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { connect } from 'react-redux';
 import { Badge, Chip, Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
-import { pin, unpin } from '../slices/pinnedSlice';
 import { toggleSidebarSection } from '../slices/layoutSlice';
+import { useLocation } from "react-router-dom";
+import { push } from 'connected-react-router';
+import * as QueryString from 'query-string';
+import { queryObjectToString, queryStringToObject } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
   chips: {
@@ -28,11 +31,35 @@ const mapDispatchToProps = dispatch => {
     pin: (category, name) => { dispatch(pin({category, name})) },
     unpin: (category, name) => { dispatch(unpin({category, name})) },
     toggleOpen: category => { dispatch(toggleSidebarSection({category})) },
+    pushPin: (location, category, name) => {
+      dispatch(push(pinQuery(location, category, name)));
+    },
+    pushUnpin: (location, category, name) => {
+      dispatch(push(unpinQuery(location, category, name)));
+    },
   }
+}
+
+const pinQuery = (location, category, name) => {
+  const parsedQuery = queryStringToObject(location.search);
+  const names = new Set(parsedQuery[category]);
+  names.add(name);
+  parsedQuery[category] = Array.from(names).sort()
+  return location.pathname + "?" + queryObjectToString( parsedQuery);
+
+}
+
+const unpinQuery = (location, category, name) => {
+  const parsedQuery = queryStringToObject(location.search);
+  const names = new Set(parsedQuery[category]);
+  names.delete(name);
+  parsedQuery[category] = Array.from(names).sort()
+  return location.pathname + "?" + queryObjectToString( parsedQuery);
 }
 
 const SidebarSection = (props) => {
   const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
+  const location = useLocation();
   const title = category.charAt(0).toUpperCase() + category.slice(1)
   const classes = useStyles();
   const pinnedChips = [];
@@ -48,7 +75,7 @@ const SidebarSection = (props) => {
           deleteIcon={<CancelIcon />}
           label={name}
           onClick={() => {}}
-          onDelete={() => {props.unpin(category, name)}}
+          onDelete={() => {props.pushUnpin(location, category, name)}}
         />
       </Badge>
     )
@@ -66,7 +93,7 @@ const SidebarSection = (props) => {
             deleteIcon={<FilterListIcon />}
             label={name}
             onClick={() => {}}
-            onDelete={() => {props.pin(category, name)}}
+            onDelete={() => {props.pushPin(location, category, name)}}
             variant="outlined"
           />
         </Badge>
