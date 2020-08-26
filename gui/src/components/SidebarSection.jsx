@@ -28,8 +28,6 @@ const useStyles = makeStyles((theme) => ({
 
 const mapDispatchToProps = dispatch => {
   return {
-    pin: (category, name) => { dispatch(pin({category, name})) },
-    unpin: (category, name) => { dispatch(unpin({category, name})) },
     toggleOpen: category => { dispatch(toggleSidebarSection({category})) },
     pushPin: (location, category, name) => {
       dispatch(push(pinQuery(location, category, name)));
@@ -45,7 +43,7 @@ const pinQuery = (location, category, name) => {
   const names = new Set(parsedQuery[category]);
   names.add(name);
   parsedQuery[category] = Array.from(names).sort()
-  return location.pathname + "?" + queryObjectToString( parsedQuery);
+  return location.pathname + "?" + queryObjectToString(parsedQuery);
 
 }
 

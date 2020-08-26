@@ -7,15 +7,15 @@ const urlBase = () => {
   return 'http://localhost:9090';
 };
 
-const fetchLocalityByEntity = async (label, id) => {
+const fetchLocalityByEntity = async (label, id, filters) => {
   const url = `${urlBase()}/locality/${label}/${id}`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, {params: filters || {}});
   return response;
 };
 
-const fetchLocalityByVertex = async (id) => {
+const fetchLocalityByVertex = async (id, filters) => {
   const url = `${urlBase()}/locality/${id}`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, {params: filters || {}});
   return response;
 };
 
