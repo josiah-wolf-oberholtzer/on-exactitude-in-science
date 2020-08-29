@@ -31,6 +31,22 @@ async def get_locality_by_vertex_id(goblin_app, vertex_id, limit=200, offset=0):
 
 
 async def get_locality(goblin_app, session, center_traversal, limit=200, offset=0):
+    pass_one_result = await get_locality_pass_one_query(
+        center_traversal, limit=limit, offset=offset
+    )
+    root_vertex, vertices, edges = get_locality_pass_one_cleanup(
+        goblin_app, pass_one_result
+    )
+    pass_two_result = await get_locality_pass_two_query(session, sorted(vertices))
+    edges.update(get_locality_pass_two_cleanup(pass_two_result))
+    return (
+        root_vertex,
+        [vertex for _, vertex in sorted(vertices.items())],
+        [edge for _, edge in sorted(edges.items())],
+    )
+
+
+async def get_locality_pass_one_query(center_traversal, limit=200, offset=0):
     traversal = center_traversal.union(
         project_vertex(__.identity()),
         project_edge(
@@ -52,35 +68,40 @@ async def get_locality(goblin_app, session, center_traversal, limit=200, offset=
             .limit(limit)
         ),
     )
-    result = await traversal.toList()
+    return await traversal.toList()
 
+
+def get_locality_pass_one_cleanup(goblin_app, result):
     edges = {}
     vertices = {}
     root_vertex = cleanup_vertex(result[0], goblin_app)
-    root_vertex["is_center"] = True
+    root_vertex.update(is_center=True, edge_count=0)
     vertices[root_vertex["id"]] = root_vertex
     for i, entry in enumerate(result[1:]):
         source, edge, target = entry["source"], entry["edge"], entry["target"]
         if source["id"] not in vertices:
             vertices[source["id"]] = cleanup_vertex(source, goblin_app)
+            vertices[source["id"]]["edge_count"] = 0
         if target["id"] not in vertices:
             vertices[target["id"]] = cleanup_vertex(target, goblin_app)
+            vertices[target["id"]]["edge_count"] = 0
         edge = cleanup_edge(edge)
         edge.update(source=source["id"], target=target["id"])
         edges[edge["id"]] = edge
-
-    for entry in result[1:]:
-        source, target = entry["source"], entry["target"]
-        vertices[source["id"]].setdefault("edge_count", 0)
         vertices[source["id"]]["edge_count"] += 1
-        vertices[target["id"]].setdefault("edge_count", 0)
         vertices[target["id"]]["edge_count"] += 1
+    return root_vertex, vertices, edges
 
+
+async def get_locality_pass_two_query(session, vertex_ids):
+    """
+    Collect all edges between any combination of `vertex_ids`.
+    """
     traversal = (
         session.g.V()
-        .hasId(*sorted(vertices))
+        .hasId(*sorted(vertex_ids))
         .bothE()
-        .where(__.otherV().hasId(*sorted(vertices)))
+        .where(__.otherV().hasId(*sorted(vertex_ids)))
         .dedup()
         .project("id", "label", "values", "source", "target")
         .by(__.id())
@@ -89,16 +110,15 @@ async def get_locality(goblin_app, session, center_traversal, limit=200, offset=
         .by(__.outV().id())
         .by(__.inV().id())
     )
-    result = await traversal.toList()
+    return await traversal.toList()
+
+
+def get_locality_pass_two_cleanup(result):
+    edges = {}
     for edge in result:
         edge = cleanup_edge(edge)
         edges[edge["id"]] = edge
-
-    return (
-        root_vertex,
-        [vertex for _, vertex in sorted(vertices.items())],
-        [edge for _, edge in sorted(edges.items())],
-    )
+    return edges
 
 
 async def get_path(goblin_app, source_label, source_id, target_label, target_id):

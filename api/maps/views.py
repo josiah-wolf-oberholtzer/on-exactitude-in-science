@@ -59,7 +59,6 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
-    print("Query:", list(request.query.items()))
     limit = validate_limit(request, default=250, minimum=50, maximum=500)
     offset = validate_offset(request)
     vertex_label = validate_vertex_label(request)

@@ -220,8 +220,7 @@ async def test_vertex_by_label(api_client):
 async def test_locality_by_label(api_client):
     response = await api_client.get("/locality/release/1")
     json = await response.json()
-    assert json
-    assert response.status == 200
+    assert response.status == 200, json
 
 
 @pytest.mark.asyncio
