@@ -188,7 +188,12 @@ async def get_search(goblin_app, query, limit=20, vertex_label=None):
         has_contains_fuzzy.insert(0, vertex_label)
         has_fuzzy.insert(0, vertex_label)
     traversal = project_vertex(
-        session.g.V().or_(__.has(*has_contains_fuzzy), __.has(*has_fuzzy),).limit(limit)
+        session.g.V()
+        .or_(
+            __.has(*has_contains_fuzzy),
+            __.has(*has_fuzzy),
+        )
+        .limit(limit)
     )
     result = await traversal.toList()
     for entry in result:
