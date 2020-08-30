@@ -17,10 +17,6 @@ jobs:
       run: docker pull josiahwolfoberholtzer/on-exactitude-in-science-api:latest
     - name: Build API container
       run: docker-compose build api
-    - name: Wait for JanusGraph
-      run: docker-compose run --rm janusgraph-healthcheck
-    - name: Load schema
-      run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
     - name: Run black
       run: |
         docker-compose run --rm api black --version
@@ -33,6 +29,10 @@ jobs:
       run: |
         docker-compose run --rm api mypy --version
         docker-compose run --rm api make mypy
+    - name: Wait for JanusGraph
+      run: docker-compose run --rm janusgraph-healthcheck
+    - name: Load schema
+      run: docker-compose run --rm api python3 -m maps schema --graph testgraph load
     - name: Run pytest
       run: |
         docker-compose run --rm api pytest --version
@@ -40,6 +40,9 @@ jobs:
     - name: Dump Docker logs
       if: ${{ failure() }}
       run: docker-compose logs
+    - name: Stop containers
+      if: ${{ always() }}
+      run: docker-compose stop
   gui:
     name: GUI
     runs-on: ubuntu-latest
