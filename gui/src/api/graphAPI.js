@@ -9,13 +9,13 @@ const urlBase = () => {
 
 const fetchLocalityByEntity = async (label, id, filters) => {
   const url = `${urlBase()}/locality/${label}/${id}`;
-  const response = await axios.get(url, {params: filters || {}});
+  const response = await axios.get(url, { params: filters || {} });
   return response;
 };
 
 const fetchLocalityByVertex = async (id, filters) => {
   const url = `${urlBase()}/locality/${id}`;
-  const response = await axios.get(url, {params: filters || {}});
+  const response = await axios.get(url, { params: filters || {} });
   return response;
 };
 

@@ -22,7 +22,7 @@ const highlightedSlice = createSlice({
           names.sort();
         }
       } else {
-        throw `Bad category ${category}`;
+        throw new Error(`Bad category ${category}`);
       }
     },
     unhighlight(state, action) {
@@ -34,7 +34,7 @@ const highlightedSlice = createSlice({
           names.splice(index, 1);
         }
       } else {
-        throw `Bad category ${category}`;
+        throw new Error(`Bad category ${category}`);
       }
     },
   },

@@ -15,7 +15,6 @@ class ForceGraphProxy {
           this.dispatcher.call('graphTick', data, data);
           break;
         default:
-          throw { message, data };
           break;
       }
     };
