@@ -12,25 +12,27 @@ from maps.graphutils import (
 from maps.gremlin import textContainsFuzzy, textFuzzy
 
 
-async def get_locality_by_entity_id(
-    goblin_app, vertex_label, vertex_id, limit=200, offset=0
+async def get_locality(
+    goblin_app,
+    vertex_id,
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    limit=200,
+    offset=0,
+    roles=None,
+    styles=None,
+    years=None,
+    vertex_label=None,
 ):
     session = await goblin_app.session()
-    center_traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
-    return await get_locality(
-        goblin_app, session, center_traversal, limit=limit, offset=offset
-    )
-
-
-async def get_locality_by_vertex_id(goblin_app, vertex_id, limit=200, offset=0):
-    session = await goblin_app.session()
-    center_traversal = session.g.V(vertex_id)
-    return await get_locality(
-        goblin_app, session, center_traversal, limit=limit, offset=offset
-    )
-
-
-async def get_locality(goblin_app, session, center_traversal, limit=200, offset=0):
+    if vertex_label:
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
+    else:
+        center_traversal = session.g.V(vertex_id)
     pass_one_result = await get_locality_pass_one_query(
         center_traversal, limit=limit, offset=offset
     )

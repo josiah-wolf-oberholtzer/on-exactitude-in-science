@@ -69,15 +69,30 @@ async def get_locality(request):
     # cache_key = str(request.rel_url).encode()
     # if (cached := await cache.get(cache_key)) is not None:
     #    return aiohttp.web.json_response(cached)
-    if vertex_label:
-        root_vertex, vertices, edges = await queries.get_locality_by_entity_id(
-            request.app["goblin"], vertex_label, vertex_id, limit=limit, offset=offset
-        )
-    else:
-        root_vertex, vertices, edges = await queries.get_locality_by_vertex_id(
-            request.app["goblin"], vertex_id, limit=limit, offset=offset
-        )
-    data = {"result": {"center": root_vertex, "edges": edges, "vertices": vertices}}
+    query = dict(
+        countries=request.query.get("country[]"),
+        formats=request.query.get("format[]"),
+        genres=request.query.get("genre[]"),
+        labels=request.query.get("label[]"),
+        roles=request.query.get("role[]"),
+        styles=request.query.get("style[]"),
+        years=request.query.get("year[]"),
+    )
+    root_vertex, vertices, edges = await queries.get_locality(
+        request.app["goblin"],
+        vertex_id,
+        limit=limit,
+        offset=offset,
+        vertex_label=vertex_label,
+        **query,
+    )
+    data = {
+        "result": {
+            "center": root_vertex,
+            "edges": edges,
+            "vertices": vertices,
+        },
+    }
     # await cache.set(cache_key, data)
     return aiohttp.web.json_response(data)
 
