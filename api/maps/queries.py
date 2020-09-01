@@ -34,12 +34,25 @@ async def get_locality(
     else:
         center_traversal = session.g.V(vertex_id)
     pass_one_result = await get_locality_pass_one_query(
-        center_traversal, limit=limit, offset=offset
+        center_traversal,
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        limit=limit,
+        offset=offset,
+        roles=roles,
+        styles=styles,
+        years=years,
     )
     root_vertex, vertices, edges = get_locality_pass_one_cleanup(
         goblin_app, pass_one_result
     )
-    pass_two_result = await get_locality_pass_two_query(session, sorted(vertices))
+    pass_two_result = await get_locality_pass_two_query(
+        session,
+        sorted(vertices),
+        roles=roles,
+    )
     edges.update(get_locality_pass_two_cleanup(pass_two_result))
     return (
         root_vertex,
@@ -48,20 +61,145 @@ async def get_locality(
     )
 
 
-async def get_locality_pass_one_query(center_traversal, limit=200, offset=0):
+def build_locality_edge_filter(
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    roles=None,
+    styles=None,
+    years=None,
+):
+    traversals = [
+        traversal
+        for traversal in (
+            build_locality_label_filter(labels),
+            build_locality_release_filter(
+                countries=countries,
+                formats=formats,
+                genres=genres,
+                styles=styles,
+                years=years,
+            ),
+            build_locality_role_filter(roles),
+        )
+        if traversal is not None
+    ]
+    if not traversals:
+        return [__.identity()]
+    return traversals
+
+
+def build_locality_label_filter(labels):
+    valid_labels = ["artist", "company", "master", "release", "track"]
+    if validated_labels := [label for label in (labels or []) if label in valid_labels]:
+        return __.otherV().hasLabel(*validated_labels)
+    return None
+
+
+def build_locality_release_filter(
+    countries=None,
+    formats=None,
+    genres=None,
+    styles=None,
+    years=None,
+):
+    if not any((countries, formats, genres, styles, years)):
+        return None
+    traversal = __.coalesce(__.in_("includes"), __.identity())
+    # TODO: Determine if we want "all within" or "any within" behavior for country, format, genre, style
+    if countries:
+        traversal = traversal.has("country", P.within(*countries))
+    if formats:
+        traversal = traversal.has("formats", P.within(*formats))
+    if genres:
+        traversal = traversal.has("genres", P.within(*genres))
+    if styles:
+        traversal = traversal.has("styles", P.within(*styles))
+    if years:
+        valid_years = []
+        for year in years:
+            try:
+                valid_years.append(int(year))
+            except Exception:
+                pass
+        traversal = traversal.has("year", P.within(*valid_years))
+    return __.otherV().choose(
+        __.hasLabel("release", "track"),
+        traversal,
+        __.identity(),
+    )
+
+
+def build_locality_role_filter(roles):
+    roles_to_labels = {
+        "Alias Of": "alias_of",
+        "Includes": "includes",
+        "Member Of": "member_of",
+        "Released": "released",
+        "Released On": "released_on",
+        "Subsidiary Of": "subsidiary_of",
+        "Subrelease Of": "subrelease_of",
+    }
+    traversals = []
+    labels = []
+    credits = []
+    for role in roles or []:
+        if (label := roles_to_labels.get(role)) is not None:
+            labels.append(label)
+        else:
+            credits.append(role)
+    if labels:
+        traversals.append(__.hasLabel(*labels))
+    if credits:
+        traversals.append(__.has("credited_with", "name", P.within(*credits)))
+    if len(traversals) > 1:
+        return __.or_(*traversals)
+    elif len(traversals) == 1:
+        return traversals[0]
+    return None
+
+
+async def get_locality_pass_one_query(
+    center_traversal,
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    limit=200,
+    offset=0,
+    roles=None,
+    styles=None,
+    years=None,
+):
+    edge_filters = build_locality_edge_filter(
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        roles=roles,
+        styles=styles,
+        years=years,
+    )
     traversal = center_traversal.union(
         project_vertex(__.identity()),
         project_edge(
             __.repeat(
-                __.choose(
-                    __.loops().is_(P.eq(0)),
-                    __.bothE().range(offset, offset + 50),
-                    __.local(__.bothE().sample(10)),
-                )
+                __.bothE()
                 .dedup()
+                .and_(*edge_filters)
+                # Retain more edges for center vertex than second+ degree vertices
+                # Order 1st-degree edges so they can be ranged over deterministically
+                # .choose(
+                #    __.loops().is_(P.eq(0)),
+                #    __.local(__.order().range(offset, offset + 50)),
+                #    __.local(__.sample(10)),
+                # )
+                .order()
                 .aggregate("edges")
                 .otherV()
                 .where(__.bothE().count().is_(P.lt(100)))
+                .dedup()
                 .aggregate("vertices")
             )
             .until(__.cap("vertices").unfold().count().is_(P.gt(limit)))
@@ -70,7 +208,9 @@ async def get_locality_pass_one_query(center_traversal, limit=200, offset=0):
             .limit(limit)
         ),
     )
-    return await traversal.toList()
+    print(f"Traversal: {traversal}")
+    result = await traversal.toList()
+    return result
 
 
 def get_locality_pass_one_cleanup(goblin_app, result):
@@ -95,15 +235,23 @@ def get_locality_pass_one_cleanup(goblin_app, result):
     return root_vertex, vertices, edges
 
 
-async def get_locality_pass_two_query(session, vertex_ids):
+async def get_locality_pass_two_query(session, vertex_ids, roles=None):
     """
     Collect all edges between any combination of `vertex_ids`.
     """
+    edge_filters = [
+        traversal
+        for traversal in [
+            __.otherV().hasId(*sorted(vertex_ids)),
+            build_locality_role_filter(roles=roles),
+        ]
+        if traversal is not None
+    ]
     traversal = (
         session.g.V()
         .hasId(*sorted(vertex_ids))
         .bothE()
-        .where(__.otherV().hasId(*sorted(vertex_ids)))
+        .and_(*edge_filters)
         .dedup()
         .project("id", "label", "values", "source", "target")
         .by(__.id())
