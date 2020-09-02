@@ -48,12 +48,12 @@ async def get_locality(
     root_vertex, vertices, edges = get_locality_pass_one_cleanup(
         goblin_app, pass_one_result
     )
-    pass_two_result = await get_locality_pass_two_query(
-        session,
-        sorted(vertices),
-        roles=roles,
-    )
-    edges.update(get_locality_pass_two_cleanup(pass_two_result))
+    #pass_two_result = await get_locality_pass_two_query(
+    #    session,
+    #    sorted(vertices),
+    #    roles=roles,
+    #)
+    #edges.update(get_locality_pass_two_cleanup(pass_two_result))
     return (
         root_vertex,
         [vertex for _, vertex in sorted(vertices.items())],
@@ -91,8 +91,8 @@ def build_locality_edge_filter(
 
 
 def build_locality_label_filter(labels):
-    valid_labels = ["artist", "company", "master", "release", "track"]
-    if validated_labels := [label for label in (labels or []) if label in valid_labels]:
+    valid_labels = ["Artist", "Company", "Master", "Release", "Track"]
+    if validated_labels := [label.lower() for label in (labels or []) if label in valid_labels]:
         return __.otherV().hasLabel(*validated_labels)
     return None
 
@@ -185,9 +185,19 @@ async def get_locality_pass_one_query(
         project_vertex(__.identity()),
         project_edge(
             __.repeat(
-                __.bothE()
+                __.local(
+                    __.bothE()
+                    .choose(
+                        __.loops().is_(P.eq(0)),
+                        __.order().range(offset, offset + 50),
+                        __.sample(5),
+                    )
+                )
+                #.hasLabel("alias_of", "member_of", "released")
+                #.and_(*edge_filters)
                 .dedup()
-                .and_(*edge_filters)
+                #.local(__.limit(10))
+                #.simplePath()
                 # Retain more edges for center vertex than second+ degree vertices
                 # Order 1st-degree edges so they can be ranged over deterministically
                 # .choose(
@@ -195,14 +205,13 @@ async def get_locality_pass_one_query(
                 #    __.local(__.order().range(offset, offset + 50)),
                 #    __.local(__.sample(10)),
                 # )
-                .order()
                 .aggregate("edges")
                 .otherV()
                 .where(__.bothE().count().is_(P.lt(100)))
-                .dedup()
-                .aggregate("vertices")
             )
-            .until(__.cap("vertices").unfold().count().is_(P.gt(limit)))
+            #.until(__.cap("vertices").unfold().count().is_(P.gt(limit)))
+            #.times(3)
+            .until(__.cap("edges").unfold().count().is_(P.gt(limit)))
             .cap("edges")
             .unfold()
             .limit(limit)

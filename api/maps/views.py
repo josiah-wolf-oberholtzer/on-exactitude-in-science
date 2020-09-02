@@ -70,13 +70,13 @@ async def get_locality(request):
     # if (cached := await cache.get(cache_key)) is not None:
     #    return aiohttp.web.json_response(cached)
     query = dict(
-        countries=request.query.getall("country[]", []),
-        formats=request.query.getall("format[]", []),
-        genres=request.query.getall("genre[]", []),
-        labels=request.query.getall("label[]", []),
-        roles=request.query.getall("role[]", []),
-        styles=request.query.getall("style[]", []),
-        years=request.query.getall("year[]", []),
+        countries=request.query.getall("countries[]", []),
+        formats=request.query.getall("formats[]", []),
+        genres=request.query.getall("genres[]", []),
+        labels=request.query.getall("labels[]", []),
+        roles=request.query.getall("roles[]", []),
+        styles=request.query.getall("styles[]", []),
+        years=request.query.getall("years[]", []),
     )
     root_vertex, vertices, edges = await queries.get_locality(
         request.app["goblin"],
