@@ -112,9 +112,9 @@ class Vertex {
     this.coreMesh.scale.setScalar(newRadii.baseRadius);
     this.textA.position.set(0, 0, textPositionZ);
     this.textB.position.set(0, 0, textPositionZ);
-    if (!this.radii.childRingVisible && newRadii.childRingVisible) {
+    if (newRadii.childRingVisible) {
       this.group.add(this.childRingMesh);
-    } else if (this.radii.childRingVisible && !newRadii.childRingVisible) {
+    } else {
       this.group.remove(this.childRingMesh);
     }
     this.childRingMesh.geometry.dispose();
@@ -123,9 +123,9 @@ class Vertex {
       newRadii.childRingOuterRadius,
       32,
     );
-    if (!this.radii.edgeRingVisible && newRadii.edgeRingVisible) {
+    if (newRadii.edgeRingVisible) {
       this.group.add(this.edgeRingMesh);
-    } else if (this.radii.edgeRingVisible && !newRadii.edgeRingVisible) {
+    } else {
       this.group.remove(this.edgeRingMesh);
     }
     this.edgeRingMesh.geometry.dispose();
@@ -176,7 +176,7 @@ class Vertex {
       newData.rudderPosition.y,
       newData.rudderPosition.z,
     );
-    Object.assign(this.data, newData);
+    this.data = newData;
   }
 
   mouseout() {

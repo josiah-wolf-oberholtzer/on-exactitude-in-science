@@ -207,7 +207,7 @@ class ForceGraph {
       }
     });
     newVertexMap.forEach((newVertex, vertexId) => {
-      const vertex = oldVertexMap.get(vertexId) || newVertex;
+      const vertex = {...(oldVertexMap.get(vertexId) || {}), ...newVertex};
       if (oldVertexMap.has(vertexId)) { // update
         result.vertices.updates.push(vertex);
       } else { // entrance
