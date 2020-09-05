@@ -36,20 +36,6 @@ def cleanup_vertex(result, goblin_app):
     return result
 
 
-def project_edge(traversal):
-    return (
-        traversal.project("source", "edge", "target")
-        .by(project_vertex(__.outV()))
-        .by(
-            __.project("id", "label", "values")
-            .by(__.id())
-            .by(__.label())
-            .by(__.valueMap())
-        )
-        .by(project_vertex(__.inV()))
-    )
-
-
 def project_vertex(traversal):
     return (
         traversal.project(
