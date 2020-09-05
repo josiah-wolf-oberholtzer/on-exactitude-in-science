@@ -78,7 +78,7 @@ async def get_locality(request):
         styles=request.query.getall("styles[]", []),
         years=request.query.getall("years[]", []),
     )
-    root_vertex, vertices, edges = await queries.get_locality(
+    locality = await queries.get_locality(
         request.app["goblin"],
         vertex_id,
         limit=limit,
@@ -86,6 +86,9 @@ async def get_locality(request):
         vertex_label=vertex_label,
         **query,
     )
+    if locality is None:
+        raise aiohttp.web.HTTPNotFound()
+    root_vertex, vertices, edges = locality
     data = {
         "result": {
             "center": root_vertex,

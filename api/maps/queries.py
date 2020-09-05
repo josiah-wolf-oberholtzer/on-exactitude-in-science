@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Order, P, Scope
@@ -7,6 +8,7 @@ from maps.graphutils import (
     cleanup_edge,
     cleanup_vertex,
     project_vertex,
+    roles_to_labels,
 )
 from maps.gremlin import textContainsFuzzy, textFuzzy
 
@@ -26,10 +28,16 @@ async def get_locality(
     vertex_label=None,
 ):
     session = await goblin_app.session()
-    result = await get_locality_query(
-        session,
+    root_result = await get_vertex(
+        goblin_app,
         vertex_id,
         vertex_label=vertex_label,
+    )
+    if not root_result:
+        return None
+    edge_result = await get_locality_query(
+        session,
+        root_result["id"],
         countries=countries,
         formats=formats,
         genres=genres,
@@ -41,19 +49,18 @@ async def get_locality(
         years=years,
     )
     root_vertex, vertices, edges = get_locality_cleanup(
-        goblin_app, result, vertex_id, vertex_label=vertex_label
+        goblin_app, edge_result, root_result["id"]
     )
-    return (
-        root_vertex,
-        [vertex for _, vertex in sorted(vertices.items())],
-        [edge for _, edge in sorted(edges.items())],
+    root_vertex.update(
+        in_roles=root_result.get("in_roles", []),
+        out_roles=root_result.get("out_roles", []),
     )
+    return root_vertex, vertices, edges
 
 
 async def get_locality_query(
     session,
     vertex_id,
-    vertex_label=None,
     countries=None,
     formats=None,
     genres=None,
@@ -73,13 +80,9 @@ async def get_locality_query(
         styles=styles,
         years=years,
     )
-    if vertex_label:
-        traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
-    else:
-        traversal = session.g.V(vertex_id)
+    center_traversal = session.g.V(vertex_id)
     traversal = (
-        traversal.as_("center")
-        .repeat(
+        center_traversal.repeat(
             __.local(
                 __.bothE()
                 .dedup()
@@ -147,8 +150,8 @@ async def get_locality_query(
     return await traversal.toList()
 
 
-def get_locality_cleanup(goblin_app, result, vertex_id, vertex_label=None):
-    root_vertex = None
+def get_locality_cleanup(goblin_app, result, vertex_id):
+    root_vertex = {}
     edges = {}
     vertices = {}
     for entry in result:
@@ -164,19 +167,30 @@ def get_locality_cleanup(goblin_app, result, vertex_id, vertex_label=None):
         edges[edge["id"]] = edge
         vertices[source["id"]]["edge_count"] += 1
         vertices[target["id"]]["edge_count"] += 1
-    if vertex_label:
-        for _, vertex in vertices.items():
-            if vertex["eid"] == vertex_id and vertex["label"] == vertex_label:
-                vertex["is_center"] = True
-                root_vertex = vertex
-                break
-    else:
-        for _, vertex in vertices.items():
-            if vertex["id"] == vertex_id:
-                vertex["is_center"] = True
-                root_vertex = vertex
-                break
-    return root_vertex, vertices, edges
+    for _, vertex in vertices.items():
+        if vertex["id"] == vertex_id:
+            vertex["is_center"] = True
+            vertex["depth"] = 0
+            root_vertex = vertex
+            break
+    edge_deque = deque(edge for _, edge in sorted(edges.items()))
+    while edge_deque:
+        edge = edge_deque.popleft()
+        source = vertices[edge["source"]]
+        target = vertices[edge["target"]]
+        if "depth" in source and "depth" in target:
+            continue
+        elif "depth" in source:
+            target["depth"] = source["depth"] + 1
+        elif "depth" in target:
+            source["depth"] = target["depth"] + 1
+        else:
+            edge_deque.append(edge)
+    return (
+        root_vertex,
+        [vertex for _, vertex in sorted(vertices.items())],
+        [edge for _, edge in sorted(edges.items())],
+    )
 
 
 def build_locality_edge_filter(
@@ -252,15 +266,6 @@ def build_locality_release_filter(
 
 
 def build_locality_role_filter(roles):
-    roles_to_labels = {
-        "Alias Of": "alias_of",
-        "Includes": "includes",
-        "Member Of": "member_of",
-        "Released": "released",
-        "Released On": "released_on",
-        "Subsidiary Of": "subsidiary_of",
-        "Subrelease Of": "subrelease_of",
-    }
     traversals = []
     labels = []
     credits = []
@@ -358,6 +363,13 @@ async def get_search(goblin_app, query, limit=20, vertex_label=None):
     for entry in result:
         cleanup_vertex(entry, goblin_app)
     return result
+
+
+async def get_vertex(goblin_app, vertex_id, vertex_label=None):
+    if vertex_label:
+        return await get_vertex_by_entity_id(goblin_app, vertex_label, vertex_id)
+    else:
+        return await get_vertex_by_vertex_id(goblin_app, vertex_id)
 
 
 async def get_vertex_by_entity_id(goblin_app, vertex_label, vertex_id):
