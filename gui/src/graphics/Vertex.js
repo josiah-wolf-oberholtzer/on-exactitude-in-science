@@ -75,7 +75,7 @@ class Vertex {
     const edgeRingInnerRadius = baseRadius + 0.5;
     const edgeRingOuterRadius = edgeRingInnerRadius + (0.1 * +edgeRingVisible);
     const childRingInnerRadius = edgeRingOuterRadius + 0.25;
-    const childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) * 0.25);
+    const childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) ** 0.5);
     const childRingVisible = newData.child_count > 0;
     return {
       baseRadius,

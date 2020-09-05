@@ -104,7 +104,7 @@ class ForceGraph {
     const newVertexMap = new Map(newVertices.map((vertex) => {
       const extra = {
         position: new Vector3(),
-        radius: Math.sqrt(vertex.child_count + 1),
+        radius: (vertex.child_count + 1) ** 0.5,
         rudderPosition: new Vector3(),
       };
       return [vertex.id, { ...vertex, ...extra }];
@@ -207,7 +207,7 @@ class ForceGraph {
       }
     });
     newVertexMap.forEach((newVertex, vertexId) => {
-      const vertex = {...(oldVertexMap.get(vertexId) || {}), ...newVertex};
+      const vertex = { ...(oldVertexMap.get(vertexId) || {}), ...newVertex };
       if (oldVertexMap.has(vertexId)) { // update
         result.vertices.updates.push(vertex);
       } else { // entrance

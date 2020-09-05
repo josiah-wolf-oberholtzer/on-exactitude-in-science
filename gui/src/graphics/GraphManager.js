@@ -153,7 +153,7 @@ class GraphManager {
 
   onVertexGraphTick(data) { this.envelopes.get(data.id).graphTick(data); }
 
-  onVertexExit(data) { 
+  onVertexExit(data) {
     this.envelopes.get(data.id).exit();
     this.envelopes.delete(data.id);
   }
