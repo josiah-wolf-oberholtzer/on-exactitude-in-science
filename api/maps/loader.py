@@ -227,7 +227,8 @@ async def upsert_vertex(xml_entity, session):
         .has(label, entity_key, xml_entity.entity_id)
         .fold()
         .coalesce(
-            __.unfold(), __.addV(label).property(entity_key, xml_entity.entity_id),
+            __.unfold(),
+            __.addV(label).property(entity_key, xml_entity.entity_id),
         )
         .property("last_modified", time.time())
         .property("random", random.random())

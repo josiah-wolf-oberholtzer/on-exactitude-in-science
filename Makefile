@@ -15,7 +15,7 @@ fetch-dataset:
 reset-janusgraph:
 	docker-compose stop
 	docker-compose rm -f
-	docker-compose up -d scylla-a scylla-b scylla-c elasticsearch janusgraph
+	docker-compose up -d scylla elasticsearch janusgraph
 
 wait-for-janusgraph:
 	docker-compose run --rm janusgraph-healthcheck

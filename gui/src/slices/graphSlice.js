@@ -5,8 +5,11 @@ import * as graphAPI from '../api/graphAPI';
 const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
   async (spec, { rejectWithValue }) => {
+    console.log('fetch', spec);
     try {
-      const response = await graphAPI.fetchLocalityByEntity(spec.label, spec.id);
+      const response = await graphAPI.fetchLocalityByEntity(
+        spec.label, spec.id, spec.filters,
+      );
       return response.data.result;
     } catch (err) {
       if (!err.response) {

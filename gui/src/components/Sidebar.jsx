@@ -1,16 +1,23 @@
 import React from 'react';
-import { Badge, Chip, Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
+import { Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
 import SidebarSection from './SidebarSection';
+import SidebarSectionCountries from './SidebarSectionCountries';
+import SidebarSectionFormats from './SidebarSectionFormats';
+import SidebarSectionGenres from './SidebarSectionGenres';
+import SidebarSectionLabels from './SidebarSectionLabels';
+import SidebarSectionRoles from './SidebarSectionRoles';
+import SidebarSectionStyles from './SidebarSectionStyles';
+import SidebarSectionYears from './SidebarSectionYears';
 
-const drawerWidth = '320px';
+const drawerWidth = '420px';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
     flexShrink: 0,
     width: drawerWidth,
   },
-  drawerPaper: { 
+  drawerPaper: {
     backdropFilter: "blur(5px)",
     backgroundColor: '#00000080',
     width: drawerWidth,
@@ -21,27 +28,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const mapStateToProps = state => {
-  return { 
-    edgesByRole: state.graph.edgesByRole,
-    open: state.layout.sidebarOpen,
-    verticesByCountry: state.graph.verticesByCountry,
-    verticesByFormat: state.graph.verticesByFormat,
-    verticesByGenre: state.graph.verticesByGenre,
-    verticesByLabel: state.graph.verticesByLabel,
-    verticesByStyle: state.graph.verticesByStyle,
-    verticesByYear: state.graph.verticesByYear,
+  return {
+    open: state.layout.sidebar.open,
   }
-}
-
-const objectToChips = (object) => {
-  return Object.entries(object).sort().map(entry => {
-    const [label, ids] = entry;
-    return (
-      <Badge badgeContent={ids.length} max={9999} key={label}>
-        <Chip label={label} clickable/> 
-      </Badge>
-    )
-  })
 }
 
 const Sidebar = (props) => {
@@ -57,27 +46,13 @@ const Sidebar = (props) => {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
-          <SidebarSection title="Entities">
-            {objectToChips(props.verticesByLabel)}
-          </SidebarSection>
-          <SidebarSection title="Roles">
-            {objectToChips(props.edgesByRole)}
-          </SidebarSection>
-          <SidebarSection title="Countries">
-            {objectToChips(props.verticesByCountry)}
-          </SidebarSection>
-          <SidebarSection title="Formats">
-            {objectToChips(props.verticesByFormat)}
-          </SidebarSection>
-          <SidebarSection title="Genres">
-            {objectToChips(props.verticesByGenre)}
-          </SidebarSection>
-          <SidebarSection title="Styles">
-            {objectToChips(props.verticesByStyle)}
-          </SidebarSection>
-          <SidebarSection title="Years">
-            {objectToChips(props.verticesByYear)}
-          </SidebarSection>
+          <SidebarSectionLabels />
+          <SidebarSectionRoles />
+          <SidebarSectionYears />
+          <SidebarSectionFormats />
+          <SidebarSectionStyles />
+          <SidebarSectionGenres />
+          <SidebarSectionCountries />
         </List>
       </div>
     </Drawer>

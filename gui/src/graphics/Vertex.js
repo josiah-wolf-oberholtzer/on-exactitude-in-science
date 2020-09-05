@@ -75,7 +75,7 @@ class Vertex {
     const edgeRingInnerRadius = baseRadius + 0.5;
     const edgeRingOuterRadius = edgeRingInnerRadius + (0.1 * +edgeRingVisible);
     const childRingInnerRadius = edgeRingOuterRadius + 0.25;
-    const childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) * 0.25);
+    const childRingOuterRadius = childRingInnerRadius + ((newData.child_count || 1) ** 0.5);
     const childRingVisible = newData.child_count > 0;
     return {
       baseRadius,
@@ -112,9 +112,9 @@ class Vertex {
     this.coreMesh.scale.setScalar(newRadii.baseRadius);
     this.textA.position.set(0, 0, textPositionZ);
     this.textB.position.set(0, 0, textPositionZ);
-    if (!this.radii.childRingVisible && newRadii.childRingVisible) {
+    if (newRadii.childRingVisible) {
       this.group.add(this.childRingMesh);
-    } else if (this.radii.childRingVisible && !newRadii.childRingVisible) {
+    } else {
       this.group.remove(this.childRingMesh);
     }
     this.childRingMesh.geometry.dispose();
@@ -123,9 +123,9 @@ class Vertex {
       newRadii.childRingOuterRadius,
       32,
     );
-    if (!this.radii.edgeRingVisible && newRadii.edgeRingVisible) {
+    if (newRadii.edgeRingVisible) {
       this.group.add(this.edgeRingMesh);
-    } else if (this.radii.edgeRingVisible && !newRadii.edgeRingVisible) {
+    } else {
       this.group.remove(this.edgeRingMesh);
     }
     this.edgeRingMesh.geometry.dispose();
@@ -164,9 +164,19 @@ class Vertex {
   }
 
   graphTick(newData) {
-    this.group.position.copy(newData.position);
-    this.group.lookAt(newData.rudderPosition);
-    Object.assign(this.data, newData);
+    // newData.position may not be a Vector3
+    this.group.position.set(
+      newData.position.x,
+      newData.position.y,
+      newData.position.z,
+    );
+    // newData.rudderPosition may not be a Vector3
+    this.group.lookAt(
+      newData.rudderPosition.x,
+      newData.rudderPosition.y,
+      newData.rudderPosition.z,
+    );
+    this.data = newData;
   }
 
   mouseout() {

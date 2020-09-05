@@ -85,6 +85,7 @@ async def test_search(api_client):
                 "id": ...,
                 "label": "artist",
                 "last_modified": ...,
+                "out_roles": ["Remix"],
                 "name": "Mood II Swing",
                 "random": ...,
                 "total_edge_count": 1,
@@ -96,6 +97,7 @@ async def test_search(api_client):
                 "formats": ["Compilation", "CD", "Mixed"],
                 "genres": ["Electronic"],
                 "id": ...,
+                "in_roles": ["Includes", "Released", "Remix"],
                 "label": "track",
                 "last_modified": ...,
                 "main": False,
@@ -113,6 +115,7 @@ async def test_search(api_client):
                 "id": ...,
                 "formats": ["Album", "CD"],
                 "genres": ["Electronic"],
+                "in_roles": ["Includes"],
                 "label": "track",
                 "last_modified": ...,
                 "main": True,
@@ -149,6 +152,7 @@ async def test_search_by_label(api_client):
                 "child_count": 0,
                 "eid": 3,
                 "id": ...,
+                "in_roles": ["Released On"],
                 "label": "company",
                 "last_modified": ...,
                 "name": "Seasons Recordings",
@@ -176,10 +180,12 @@ async def test_vertex_by_goblin_id(api_client):
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
             "id": id,
+            "in_roles": ["Released"],
             "main": True,
             "label": "release",
             "last_modified": last_modified,
             "name": "Stockholm",
+            "out_roles": ["Includes", "Released On"],
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
@@ -203,10 +209,12 @@ async def test_vertex_by_label(api_client):
             "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
             "genres": ["Electronic"],
             "id": id,
+            "in_roles": ["Released"],
             "main": True,
             "label": "release",
             "last_modified": last_modified,
             "name": "Stockholm",
+            "out_roles": ["Includes", "Released On"],
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
@@ -220,8 +228,7 @@ async def test_vertex_by_label(api_client):
 async def test_locality_by_label(api_client):
     response = await api_client.get("/locality/release/1")
     json = await response.json()
-    assert json
-    assert response.status == 200
+    assert response.status == 200, json
 
 
 @pytest.mark.asyncio

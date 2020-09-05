@@ -1,5 +1,6 @@
 import React from 'react';
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
+import MenuOpenRoundedIcon from '@material-ui/icons/MenuOpenRounded';
 import { AppBar, IconButton, Toolbar, Typography, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router'
@@ -30,7 +31,11 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const mapStateToProps = state => { return {} }
+const mapStateToProps = state => {
+  return {
+    open: state.layout.sidebar.open,
+  }
+}
 
 const Header = (props) => {
   const classes = useStyles();
@@ -47,7 +52,7 @@ const Header = (props) => {
           edge="start" 
           onClick={props.toggleSidebar}
         >
-          <MenuRoundedIcon />
+          { props.open ? <MenuOpenRoundedIcon /> : <MenuRoundedIcon /> }
         </IconButton>
         <Typography variant="h6" className={classes.title} onClick={() => props.push("/")}>
           On Exactitude In Science

@@ -13,19 +13,21 @@ class SceneManager {
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
     this.dispatcher = dispatch('beforeRender');
+
     // settings
-    this.frameId = null;
     this.camera.position.z = 100;
     this.controls.dampingFactory = 0.01;
     this.controls.enableDamping = true;
+    this.frameId = null;
     this.hemisphereLight.position.set(0, 1000, 0);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ReinhardToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.toneMappingExposure = 2.0;
     this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(0x000000, 50, 200);
+    this.scene.fog = new THREE.Fog(0x000000, 0, 250);
+
     // structure
     this.container.appendChild(this.canvas);
     this.scene.add(this.hemisphereLight);
@@ -69,9 +71,9 @@ class SceneManager {
   update() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
+    this.controls.update();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.controls.update();
   }
 }
 

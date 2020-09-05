@@ -1,24 +1,25 @@
 import React from "react";
 import ForceGraph from '../physics/ForceGraph';
+// import ForceGraph from '../physics/ForceGraphProxy';
 import GraphManager from '../graphics/GraphManager';
 import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
-import { deselectEntity, fetchByEntity, selectEntity } from '../slices/graphSlice';
+import { deselectEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
 
 const mapStateToProps = state => {
   return {
+    cameraNonce: state.camera.nonce,
     center: state.graph.center,
     edges: state.graph.edges,
+    location: state.router.location,
     vertices: state.graph.vertices,
-    cameraNonce: state.camera.nonce,
   } 
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchByEntity: (label, id) => dispatch(fetchByEntity({label, id})),
-    push: (label, id) => dispatch(push(`/${label}/${id}`)),
+    push: (location, label, id) => dispatch(push(`/${label}/${id}` + location.search)),
     selectEntity: (eid, label, name) => dispatch(selectEntity({eid, label, name})),
     deselectEntity: () => dispatch(deselectEntity()),
   }
@@ -44,6 +45,7 @@ class Graph extends React.Component {
       prevProps.vertices != nextProps.vertices
     ) {
       this.forceGraph.update(nextProps.vertices, nextProps.edges);
+      this.forceGraph.reheat();
     }
   }
 
@@ -52,7 +54,7 @@ class Graph extends React.Component {
     this.sceneManager = new SceneManager(this.mount);
     this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
     this.threeGraph.on("doubleclick", (vertex) => {
-      this.props.push(vertex.label, vertex.eid);
+      this.props.push(this.props.location, vertex.label, vertex.eid);
     });
     this.threeGraph.on("select", (vertex) => {
       this.props.selectEntity(vertex.eid, vertex.label, vertex.name);
