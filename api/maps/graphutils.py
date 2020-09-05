@@ -63,7 +63,6 @@ def project_vertex(traversal):
         .by(
             __.choose(
                 __.inE("includes").count().is_(P.gt(0)),
-                # __.hasLabel("track"),
                 __.in_("includes").valueMap(),
                 __.constant(False),
             )

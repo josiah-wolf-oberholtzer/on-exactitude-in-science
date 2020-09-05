@@ -1,3 +1,4 @@
+import json
 import random
 
 from aiogremlin.process.graph_traversal import __
@@ -27,14 +28,24 @@ async def get_locality(
     vertex_label=None,
 ):
     session = await goblin_app.session()
-    if vertex_label:
-        center_traversal = session.g.V().has(
-            vertex_label, f"{vertex_label}_id", vertex_id
-        )
-    else:
-        center_traversal = session.g.V(vertex_id)
+    diagnostic_result = await get_locality_diagnostic(
+        session,
+        vertex_id,
+        vertex_label=vertex_label,
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        limit=limit,
+        offset=offset,
+        roles=roles,
+        styles=styles,
+        years=years,
+    )
     pass_one_result = await get_locality_pass_one_query(
-        center_traversal,
+        session,
+        vertex_id,
+        vertex_label=vertex_label,
         countries=countries,
         formats=formats,
         genres=genres,
@@ -160,8 +171,10 @@ def build_locality_role_filter(roles):
     return None
 
 
-async def get_locality_pass_one_query(
-    center_traversal,
+async def get_locality_diagnostic(
+    session,
+    vertex_id, 
+    vertex_label=None,
     countries=None,
     formats=None,
     genres=None,
@@ -181,44 +194,158 @@ async def get_locality_pass_one_query(
         styles=styles,
         years=years,
     )
+    if vertex_label:
+        traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
+    else:
+        traversal = session.g.V(vertex_id)
+    traversal = (
+        traversal
+        .as_("center")
+        .repeat(
+            __.local(
+                __.bothE()
+                .dedup()
+                .and_(*edge_filters)
+                .choose(
+                    __.loops().is_(0),
+                    __.order().range(offset, offset + 50),
+                    __.limit(5),
+                )
+            )
+            .dedup()
+            .aggregate("edges")
+            .otherV()
+            .dedup()
+            .where(__.local(__.bothE().count().is_(P.lt(100))))
+        )
+        .until(__.cap("edges").unfold().count().is_(P.gt(100)))
+        .cap("edges").unfold()
+        .limit(limit)
+        .project("source", "edge", "target")
+        .by(
+            __.outV()
+            .project("id", "label", "values", "total_edge_count", "child_count", "extra")
+            .by(__.id())
+            .by(__.label())
+            .by(__.valueMap())
+            .by(__.bothE().count())
+            .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
+            .by(
+                __.choose(
+                    __.inE("includes").count().is_(P.gt(0)),
+                    __.in_("includes").valueMap(),
+                    __.constant(False),
+                )
+            )
+        )
+        .by(
+            __.project("id", "label", "values")
+            .by(__.id())
+            .by(__.label())
+            .by(__.valueMap())
+        )
+        .by(
+            __.inV()
+            .project("id", "label", "values", "total_edge_count", "child_count", "extra")
+            .by(__.id())
+            .by(__.label())
+            .by(__.valueMap())
+            .by(__.bothE().count())
+            .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
+            .by(
+                __.choose(
+                    __.inE("includes").count().is_(P.gt(0)),
+                    __.in_("includes").valueMap(),
+                    __.constant(False),
+                )
+            )
+        )
+    )
+    print("DIAGNOSTIC TRAVERSAL", traversal)
+    result = await traversal.toList()
+    print("DIAGNOSTIC RESULT", json.dumps(result, indent=4))
+    return result
+
+
+async def get_locality_pass_one_query(
+    session,
+    vertex_id, 
+    vertex_label=None,
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    limit=200,
+    offset=0,
+    roles=None,
+    styles=None,
+    years=None,
+):
+    """
+    g.V().has("artist","artist_id",41)
+      .repeat(
+        __.local(
+          __.bothE()
+          .and(hasLabel("alias_of","member_of","released"))
+          .dedup()
+          .choose(loops().is(0),order().range(0,50),limit(5))
+        )
+        .dedup()
+        .aggregate("e")
+        .otherV()
+        .dedup()
+        .where(local(bothE().count().is(P.lt(100))))
+      )
+      .until(cap("e").unfold().count().is(P.gt(100)))
+      .cap("e").unfold()
+    """
+    if vertex_label:
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
+    else:
+        center_traversal = session.g.V(vertex_id)
+
+    edge_filters = build_locality_edge_filter(
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        roles=roles,
+        styles=styles,
+        years=years,
+    )
     traversal = center_traversal.union(
         project_vertex(__.identity()),
         project_edge(
             __.repeat(
                 __.local(
                     __.bothE()
+                    .dedup()
+                    .and_(*edge_filters)
                     .choose(
-                        __.loops().is_(P.eq(0)),
+                        __.loops().is_(0),
                         __.order().range(offset, offset + 50),
                         __.sample(5),
                     )
                 )
-                #.hasLabel("alias_of", "member_of", "released")
-                #.and_(*edge_filters)
                 .dedup()
-                #.local(__.limit(10))
-                #.simplePath()
-                # Retain more edges for center vertex than second+ degree vertices
-                # Order 1st-degree edges so they can be ranged over deterministically
-                # .choose(
-                #    __.loops().is_(P.eq(0)),
-                #    __.local(__.order().range(offset, offset + 50)),
-                #    __.local(__.sample(10)),
-                # )
                 .aggregate("edges")
                 .otherV()
+                .dedup()
                 .where(__.bothE().count().is_(P.lt(100)))
             )
-            #.until(__.cap("vertices").unfold().count().is_(P.gt(limit)))
-            #.times(3)
             .until(__.cap("edges").unfold().count().is_(P.gt(limit)))
             .cap("edges")
             .unfold()
             .limit(limit)
         ),
     )
-    print(f"Traversal: {traversal}")
+    print(f"TRAVERSAL: {traversal}")
     result = await traversal.toList()
+    print("RESULT", len(result))
     return result
 
 
