@@ -191,13 +191,13 @@ class ForceGraph {
       }
     });
     newEdgeMap.forEach((newEdge, edgeId) => {
-      const edge = oldEdgeMap.get(edgeId) || newEdge;
+      const edge = { ...(oldEdgeMap.get(edgeId) || {}), ...newEdge };
       if (oldEdgeMap.has(edgeId)) { // update
         result.edges.updates.push(edge);
       } else { // entrance
-        oldEdgeMap.set(edgeId, edge);
         result.edges.entrances.push(edge);
       }
+      oldEdgeMap.set(edgeId, edge);
     });
     Array.from(oldVertexMap.keys()).forEach((vertexId) => {
       if (!newVertexMap.has(vertexId)) {
@@ -211,9 +211,9 @@ class ForceGraph {
       if (oldVertexMap.has(vertexId)) { // update
         result.vertices.updates.push(vertex);
       } else { // entrance
-        oldVertexMap.set(vertexId, vertex);
         result.vertices.entrances.push(vertex);
       }
+      oldVertexMap.set(vertexId, vertex);
     });
     return result;
   }
