@@ -75,19 +75,26 @@ const graphSlice = createSlice({
       state.loading = true;
     },
     [fetchByEntity.fulfilled]: (state, action) => {
+      // Refactor objByCategory logic into separate functions
       const { center, edges, vertices } = action.payload;
       document.title = `${center.name} | On Exactitude In Science`;
       state.edges = edges;
-      state.edgesByRole = {};
-      state.edgesByVertex = {};
       state.loading = false;
       state.vertices = vertices;
+      state.edgesByRole = {};
+      state.edgesByVertex = {};
       state.verticesByCountry = {};
       state.verticesByFormat = {};
       state.verticesByGenre = {};
       state.verticesByLabel = {};
       state.verticesByStyle = {};
       state.verticesByYear = {};
+      (center.in_roles || []).forEach((role) => {
+        state.edgesByRole[role] = [];
+      });
+      (center.out_roles || []).forEach((role) => {
+        state.edgesByRole[role] = [];
+      });
       vertices.forEach((vertex) => {
         const items = [
           [state.verticesByLabel, [vertex.label[0].toUpperCase() + vertex.label.substring(1)]],

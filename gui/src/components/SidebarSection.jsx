@@ -4,7 +4,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { connect } from 'react-redux';
-import { Badge, Chip, Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
+import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
 import { toggleSidebarSection } from '../slices/layoutSlice';
 import { useLocation } from "react-router-dom";
 import { push } from 'connected-react-router';
@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
 const mapDispatchToProps = dispatch => {
   return {
     toggleOpen: category => { dispatch(toggleSidebarSection({category})) },
+    clear: (location, category) => {
+      dispatch(push(clearQuery(location, category)));
+    },
     pushPin: (location, category, name) => {
       dispatch(push(pinQuery(location, category, name)));
     },
@@ -55,6 +58,12 @@ const unpinQuery = (location, category, name) => {
   return location.pathname + "?" + queryObjectToString( parsedQuery);
 }
 
+const clearQuery = (location, category) => {
+  const parsedQuery = queryStringToObject(location.search);
+  parsedQuery[category] = [];
+  return location.pathname + "?" + queryObjectToString(parsedQuery);
+}
+
 const SidebarSection = (props) => {
   const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
   const location = useLocation();
@@ -62,6 +71,7 @@ const SidebarSection = (props) => {
   const classes = useStyles();
   const pinnedChips = [];
   const unpinnedChips = [];
+  const suggestionChips = [];
   pinnedNames.forEach((name) => {
     const ids = names[name] || [];
     const chip = (
@@ -84,7 +94,7 @@ const SidebarSection = (props) => {
     if (!pinnedNames.includes(name)) {
       const chip = (
         <Badge
-          badgeContent={ids.length}
+          badgeContent={ids.length > 0 ? ids.length : "?"}
           key={name}
         >
           <Chip
@@ -96,7 +106,11 @@ const SidebarSection = (props) => {
           />
         </Badge>
       )
-      pinnedChips.push(chip);
+      if (ids.length) {
+        unpinnedChips.push(chip);
+      } else {
+        suggestionChips.push(chip);
+      }
     }
   });
   return (
@@ -106,11 +120,35 @@ const SidebarSection = (props) => {
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto">
-        <Divider />
-        <div className={classes.chips}>
-          {pinnedChips}
-          {unpinnedChips}
-        </div>
+        { pinnedChips.length > 0 && 
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+              {pinnedChips}
+              <Chip
+                label="Clear Filters"
+                onClick={() => {props.clear(location, category)}}
+                variant="outlined"
+              />
+            </div>
+          </React.Fragment>
+        }
+        { unpinnedChips.length > 0 && 
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+              {unpinnedChips}
+            </div>
+          </React.Fragment>
+        }
+        { suggestionChips.length > 0 &&
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+              {suggestionChips}
+            </div>
+          </React.Fragment>
+        }
         <Divider />
       </Collapse>
     </React.Fragment>
