@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as d3 from 'd3-scale-chromatic';
 
 class Vertex {
   constructor() {
@@ -45,10 +46,18 @@ class Vertex {
   calculateColor() {
     if (this.hovered) {
       this.coreMesh.material.color.setHex(0xffff00);
+      this.childRingMesh.material.color.setHex(0xffff00);
     } else if (this.selected) {
       this.coreMesh.material.color.setHex(0xff0000);
+      this.childRingMesh.material.color.setHex(0xff0000);
     } else {
-      this.coreMesh.material.color.setHex(0x6699cc);
+      const colorScheme = d3.schemeSpectral[10]
+      this.coreMesh.material.color.set(
+        colorScheme[(this.data.depth || 0) % 10]
+      );
+      this.childRingMesh.material.color.set(
+        colorScheme[((this.data.depth || 0) + 1) % 10]
+      );
     }
   }
 

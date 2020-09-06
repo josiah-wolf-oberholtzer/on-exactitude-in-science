@@ -23,7 +23,7 @@
     "connected-react-router": "^6.8.0",
     "d3-dispatch": "^1.0.6",
     "d3-force-3d": "^2.1.0",
-    "d3-timer": "^1.0.10",
+    "d3-scale-chromatic": "^2.0.0",
     "gpu.js": "^2.9.4",
     "history": "^4.7.2",
     "immutable": "^4.0.0-rc.1",
