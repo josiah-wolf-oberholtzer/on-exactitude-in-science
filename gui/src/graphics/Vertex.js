@@ -51,12 +51,12 @@ class Vertex {
       this.coreMesh.material.color.setHex(0xff0000);
       this.childRingMesh.material.color.setHex(0xff0000);
     } else {
-      const colorScheme = d3.schemeSpectral[10]
+      const colorScheme = d3.schemeSpectral[10];
       this.coreMesh.material.color.set(
-        colorScheme[(this.data.depth || 0) % 10]
+        colorScheme[(this.data.depth || 0) % 10],
       );
       this.childRingMesh.material.color.set(
-        colorScheme[((this.data.depth || 0) + 1) % 10]
+        colorScheme[((this.data.depth || 0) + 1) % 10],
       );
     }
   }

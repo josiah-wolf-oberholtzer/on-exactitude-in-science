@@ -1,6 +1,6 @@
 FROM alpine:3.11 as builder
 
-RUN apk update && apk add libx11 libxext nodejs yarn
+RUN apk update && apk add nodejs yarn
 COPY package.json .
 RUN yarn install --no-optional
 COPY . .
