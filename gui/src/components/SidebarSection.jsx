@@ -3,6 +3,11 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+
+import PinDropIcon from '@material-ui/icons/PinDrop';
+import StarIcon from '@material-ui/icons/Star';
+import StarRateIcon from '@material-ui/icons/StarRate';
+
 import { connect } from 'react-redux';
 import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
 import { toggleSidebarSection } from '../slices/layoutSlice';
@@ -65,13 +70,18 @@ const clearQuery = (location, category) => {
 }
 
 const SidebarSection = (props) => {
-  const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
+  const { category, highlightedNames, onClick, open, pinnedNames } = props;
+  const names = Array.from(Object.entries(props.names || {}));
+  const suggestedNames = new Set(props.suggestedNames || []);
   const location = useLocation();
   const title = category.charAt(0).toUpperCase() + category.slice(1)
   const classes = useStyles();
   const pinnedChips = [];
   const unpinnedChips = [];
   const suggestionChips = [];
+  if (names.length > 0) {
+    names.sort();
+  }
   pinnedNames.forEach((name) => {
     const ids = names[name] || [];
     const chip = (
@@ -80,7 +90,9 @@ const SidebarSection = (props) => {
         key={name}
       >
         <Chip
+          color="primary"
           deleteIcon={<CancelIcon />}
+          icon={suggestedNames.has(name) ? <StarRateIcon /> : null}
           label={name}
           onClick={() => {}}
           onDelete={() => {props.pushUnpin(location, category, name)}}
@@ -89,7 +101,7 @@ const SidebarSection = (props) => {
     )
     pinnedChips.push(chip);
   });
-  Object.entries(names).map(entry => {
+  names.forEach((entry) => {
     const [name, ids] = entry;
     if (!pinnedNames.includes(name)) {
       const chip = (
@@ -99,6 +111,7 @@ const SidebarSection = (props) => {
         >
           <Chip
             deleteIcon={<FilterListIcon />}
+            icon={suggestedNames.has(name) ? <StarRateIcon /> : null}
             label={name}
             onClick={() => {}}
             onDelete={() => {props.pushPin(location, category, name)}}

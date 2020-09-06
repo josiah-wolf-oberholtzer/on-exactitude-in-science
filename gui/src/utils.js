@@ -26,4 +26,10 @@ const queryObjectToString = (queryObject) => {
   return queryString;
 };
 
-export { queryStringToObject, queryObjectToString };
+function union(setA, setB) {
+  const result = new Set(setA);
+  setB.forEach((elem) => { result.add(elem); });
+  return result;
+}
+
+export { queryStringToObject, queryObjectToString, union };

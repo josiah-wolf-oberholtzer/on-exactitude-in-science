@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from 'connected-react-router';
 import * as graphAPI from '../api/graphAPI';
+import { union } from '../utils';
 
 const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
@@ -40,6 +41,7 @@ const fetchRandom = createAsyncThunk(
 const graphSlice = createSlice({
   name: 'graph',
   initialState: {
+    centerRoles: [],
     edges: [],
     edgesByRole: {},
     edgesByVertex: {},
@@ -78,6 +80,7 @@ const graphSlice = createSlice({
       // Refactor objByCategory logic into separate functions
       const { center, edges, vertices } = action.payload;
       document.title = `${center.name} | On Exactitude In Science`;
+      state.centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
       state.edges = edges;
       state.loading = false;
       state.vertices = vertices;
@@ -89,10 +92,7 @@ const graphSlice = createSlice({
       state.verticesByLabel = {};
       state.verticesByStyle = {};
       state.verticesByYear = {};
-      (center.in_roles || []).forEach((role) => {
-        state.edgesByRole[role] = [];
-      });
-      (center.out_roles || []).forEach((role) => {
+      state.centerRoles.forEach((role) => {
         state.edgesByRole[role] = [];
       });
       vertices.forEach((vertex) => {
