@@ -50,6 +50,9 @@ async def get_locality(
     )
     vertices, edges = get_locality_cleanup(goblin_app, edge_result, root_vertex["id"])
     root_vertex["depth"] = 0
+    root_vertex["maximum_depth"] = vertices.get(root_vertex["id"], {}).get(
+        "maximum_depth", 1
+    )
     vertices[root_vertex["id"]] = root_vertex
     return (
         root_vertex,
@@ -172,6 +175,7 @@ def get_locality_cleanup(goblin_app, result, vertex_id):
             vertex["depth"] = 0
             break
     edge_deque = deque(edge for _, edge in sorted(edges.items()))
+    maximum_depth = 1
     while edge_deque:
         edge = edge_deque.popleft()
         source = vertices[edge["source"]]
@@ -180,10 +184,16 @@ def get_locality_cleanup(goblin_app, result, vertex_id):
             continue
         elif "depth" in source:
             target["depth"] = source["depth"] + 1
+            if target["depth"] > maximum_depth:
+                maximum_depth = target["depth"]
         elif "depth" in target:
             source["depth"] = target["depth"] + 1
+            if source["depth"] > maximum_depth:
+                maximum_depth = source["depth"]
         else:
             edge_deque.append(edge)
+    for vertex in vertices.values():
+        vertex["maximum_depth"] = maximum_depth
     return vertices, edges
 
 
