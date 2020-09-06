@@ -99,7 +99,7 @@ async def get_locality_query(
             .dedup()
             .where(__.local(__.bothE().count().is_(P.lt(100))))
         )
-        .until(__.cap("edges").unfold().count().is_(P.gt(100)))
+        .until(__.cap("edges").unfold().count().is_(P.gt(limit)))
         .cap("edges")
         .unfold()
         .limit(limit)
