@@ -28,16 +28,16 @@ async def get_locality(
     vertex_label=None,
 ):
     session = await goblin_app.session()
-    root_result = await get_vertex(
+    root_vertex = await get_vertex(
         goblin_app,
         vertex_id,
         vertex_label=vertex_label,
     )
-    if not root_result:
+    if not root_vertex:
         return None
     edge_result = await get_locality_query(
         session,
-        root_result["id"],
+        root_vertex["id"],
         countries=countries,
         formats=formats,
         genres=genres,
@@ -48,14 +48,14 @@ async def get_locality(
         styles=styles,
         years=years,
     )
-    root_vertex, vertices, edges = get_locality_cleanup(
-        goblin_app, edge_result, root_result["id"]
+    vertices, edges = get_locality_cleanup(goblin_app, edge_result, root_vertex["id"])
+    root_vertex["depth"] = 0
+    vertices[root_vertex["id"]] = root_vertex
+    return (
+        root_vertex,
+        [vertex for _, vertex in sorted(vertices.items())],
+        [edge for _, edge in sorted(edges.items())],
     )
-    root_vertex.update(
-        in_roles=root_result.get("in_roles", []),
-        out_roles=root_result.get("out_roles", []),
-    )
-    return root_vertex, vertices, edges
 
 
 async def get_locality_query(
@@ -151,7 +151,6 @@ async def get_locality_query(
 
 
 def get_locality_cleanup(goblin_app, result, vertex_id):
-    root_vertex = {}
     edges = {}
     vertices = {}
     for entry in result:
@@ -167,11 +166,10 @@ def get_locality_cleanup(goblin_app, result, vertex_id):
         edges[edge["id"]] = edge
         vertices[source["id"]]["edge_count"] += 1
         vertices[target["id"]]["edge_count"] += 1
+    # find the root so we can establish depth calculations
     for _, vertex in vertices.items():
         if vertex["id"] == vertex_id:
-            vertex["is_center"] = True
             vertex["depth"] = 0
-            root_vertex = vertex
             break
     edge_deque = deque(edge for _, edge in sorted(edges.items()))
     while edge_deque:
@@ -186,11 +184,7 @@ def get_locality_cleanup(goblin_app, result, vertex_id):
             source["depth"] = target["depth"] + 1
         else:
             edge_deque.append(edge)
-    return (
-        root_vertex,
-        [vertex for _, vertex in sorted(vertices.items())],
-        [edge for _, edge in sorted(edges.items())],
-    )
+    return vertices, edges
 
 
 def build_locality_edge_filter(
@@ -277,7 +271,7 @@ def build_locality_role_filter(roles):
     if labels:
         traversals.append(__.hasLabel(*labels))
     if credits:
-        traversals.append(__.has("credited_with", "name", P.within(*credits)))
+        traversals.append(__.has("credited_with", "role", P.within(*credits)))
     if len(traversals) > 1:
         return __.or_(*traversals)
     elif len(traversals) == 1:

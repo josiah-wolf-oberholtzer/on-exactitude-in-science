@@ -94,11 +94,11 @@ const graphSlice = createSlice({
         ];
         if (vertex.label === 'release' || vertex.label === 'track') {
           items.push(
-            [state.verticesByCountry, [vertex.country]],
-            [state.verticesByFormat, vertex.formats],
-            [state.verticesByGenre, vertex.genres],
-            [state.verticesByStyle, vertex.styles],
-            [state.verticesByYear, [vertex.year]],
+            [state.verticesByCountry, vertex.country !== undefined ? [vertex.country] : []],
+            [state.verticesByFormat, vertex.formats || []],
+            [state.verticesByGenre, vertex.genres || []],
+            [state.verticesByStyle, vertex.styles || []],
+            [state.verticesByYear, vertex.year !== undefined ? [vertex.year] : []],
           );
         }
         items.forEach((item) => {
