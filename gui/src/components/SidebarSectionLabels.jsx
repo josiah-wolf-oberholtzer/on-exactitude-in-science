@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.labelsOpen,
     highlightedNames: state.highlighted.labels,
     names: state.graph.verticesByLabel,
-    pinnedNames: state.pinned.labels,
+    filteredNames: state.filtered.labels,
   }
 }
 
@@ -19,7 +19,8 @@ const SidebarSectionLabels = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
+      title="Labels"
     />
   )
 }

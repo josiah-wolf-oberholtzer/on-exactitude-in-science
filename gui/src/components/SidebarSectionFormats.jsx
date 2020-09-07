@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.formatsOpen,
     highlightedNames: state.highlighted.formats,
     names: state.graph.verticesByFormat,
-    pinnedNames: state.pinned.formats,
+    filteredNames: state.filtered.formats,
   }
 }
 
@@ -19,7 +19,8 @@ const SidebarSectionFormats = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
+      title="Formats"
     />
   )
 }

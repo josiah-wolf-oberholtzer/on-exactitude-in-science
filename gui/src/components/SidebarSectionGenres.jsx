@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.genresOpen,
     highlightedNames: state.highlighted.genres,
     names: state.graph.verticesByGenre,
-    pinnedNames: state.pinned.genres,
+    filteredNames: state.filtered.genres,
   }
 }
 
@@ -19,7 +19,8 @@ const SidebarSectionGenres = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
+      title="Genres"
     />
   )
 }

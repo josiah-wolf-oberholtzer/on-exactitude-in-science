@@ -1,4 +1,5 @@
 import * as QueryString from 'query-string';
+import { CATEGORIES } from './constants';
 
 const queryStringToObject = (queryString) => {
   const queryObject = {
@@ -9,7 +10,7 @@ const queryStringToObject = (queryString) => {
   };
   Object.entries(queryObject).forEach((entry) => {
     const [key, value] = entry;
-    if (typeof value === 'string') {
+    if (typeof value === 'string' && CATEGORIES.has(key)) {
       queryObject[key] = [value];
     }
   });

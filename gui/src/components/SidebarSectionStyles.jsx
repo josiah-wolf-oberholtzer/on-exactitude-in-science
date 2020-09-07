@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.stylesOpen,
     highlightedNames: state.highlighted.styles,
     names: state.graph.verticesByStyle,
-    pinnedNames: state.pinned.styles,
+    filteredNames: state.filtered.styles,
   }
 }
 
@@ -19,7 +19,8 @@ const SidebarSectionStyles = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
+      title="Styles"
     />
   )
 }

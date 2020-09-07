@@ -3,13 +3,13 @@ import * as QueryString from 'query-string';
 import { connect } from "react-redux";
 import { fetchByEntity, fetchRandom } from "../slices/graphSlice";
 import { queryStringToObject } from '../utils';
-import { setPinned } from "../slices/pinnedSlice";
+import { setFiltered } from "../slices/filteredSlice";
 
 const mapDispatchToProps = dispatch => {
   return {
     fetchByEntity: (label, id, filters) => dispatch(fetchByEntity({label, id, filters})),
     fetchRandom: (label) => dispatch(fetchRandom({label})),
-    setPinned: (pins) => dispatch(setPinned(pins)),
+    setFiltered: (pins) => dispatch(setFiltered(pins)),
   }
 }
 
@@ -18,7 +18,7 @@ class Fetcher extends React.Component {
     const { label, id } = this.props.match.params;
     const { search } = this.props.location;
     const filters = queryStringToObject(search);
-    this.props.setPinned(filters);
+    this.props.setFiltered(filters);
     switch (this.props.match.path) {
       case "/":
         document.title = "Home | On Exactitude In Science"

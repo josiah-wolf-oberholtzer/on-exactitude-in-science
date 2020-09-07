@@ -15,7 +15,7 @@ import cameraReducer from '../slices/cameraSlice';
 import graphReducer from '../slices/graphSlice';
 import highlightedReducer from '../slices/highlightedSlice';
 import layoutReducer from '../slices/layoutSlice';
-import pinnedReducer from '../slices/pinnedSlice';
+import filteredReducer from '../slices/filteredSlice';
 
 const history = createBrowserHistory();
 
@@ -24,7 +24,7 @@ const rootReducer = combineReducers({
   graph: graphReducer,
   highlighted: highlightedReducer,
   layout: layoutReducer,
-  pinned: pinnedReducer,
+  filtered: filteredReducer,
   router: connectRouter(history),
 });
 

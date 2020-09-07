@@ -70,19 +70,18 @@ const clearQuery = (location, category) => {
 }
 
 const SidebarSection = (props) => {
-  const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
+  const { category, highlightedNames, names, onClick, open, filteredNames, title } = props;
   const sortedNames = Array.from(Object.entries(props.names || {}));
   const suggestedNames = new Set(props.suggestedNames || []);
   const location = useLocation();
-  const title = category.charAt(0).toUpperCase() + category.slice(1)
   const classes = useStyles();
-  const pinnedChips = [];
-  const unpinnedChips = [];
+  const filteredChips = [];
+  const unfilteredChips = [];
   const suggestionChips = [];
-  if (names.length > 0) {
+  if ((names || []).length > 0) {
     names.sort();
   }
-  pinnedNames.forEach((name) => {
+  (filteredNames || []).forEach((name) => {
     const ids = names[name] || [];
     const chip = (
       <Badge
@@ -99,11 +98,11 @@ const SidebarSection = (props) => {
         />
       </Badge>
     )
-    pinnedChips.push(chip);
+    filteredChips.push(chip);
   });
-  sortedNames.forEach((entry) => {
+  (sortedNames || []).forEach((entry) => {
     const [name, ids] = entry;
-    if (!pinnedNames.includes(name)) {
+    if (!filteredNames.includes(name)) {
       const chip = (
         <Badge
           badgeContent={ids.length > 0 ? ids.length : "?"}
@@ -120,7 +119,7 @@ const SidebarSection = (props) => {
         </Badge>
       )
       if (ids.length) {
-        unpinnedChips.push(chip);
+        unfilteredChips.push(chip);
       } else {
         suggestionChips.push(chip);
       }
@@ -133,11 +132,19 @@ const SidebarSection = (props) => {
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto">
-        { pinnedChips.length > 0 && 
+        { props.children &&
           <React.Fragment>
             <Divider />
             <div className={classes.chips}>
-              {pinnedChips}
+            { props.children }
+            </div>
+          </React.Fragment>
+        }
+        { filteredChips.length > 0 && 
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+              {filteredChips}
               <Chip
                 label="Clear Filters"
                 onClick={() => {props.clear(location, category)}}
@@ -146,11 +153,11 @@ const SidebarSection = (props) => {
             </div>
           </React.Fragment>
         }
-        { unpinnedChips.length > 0 && 
+        { unfilteredChips.length > 0 && 
           <React.Fragment>
             <Divider />
             <div className={classes.chips}>
-              {unpinnedChips}
+              {unfilteredChips}
             </div>
           </React.Fragment>
         }

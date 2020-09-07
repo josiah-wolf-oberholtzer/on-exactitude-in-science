@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.yearsOpen,
     highlightedNames: state.highlighted.years,
     names: state.graph.verticesByYear,
-    pinnedNames: state.pinned.years,
+    filteredNames: state.filtered.years,
   }
 }
 
@@ -19,7 +19,8 @@ const SidebarSectionYears = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
+      title="Years"
     />
   )
 }
