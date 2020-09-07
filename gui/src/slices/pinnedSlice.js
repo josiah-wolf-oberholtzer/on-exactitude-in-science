@@ -8,6 +8,8 @@ const categories = [COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS];
 const pinnedSlice = createSlice({
   name: 'pinned',
   initialState: {
+    limit: 250,
+    showSecondaryReleases: false,
     countries: [],
     formats: [],
     genres: [],
