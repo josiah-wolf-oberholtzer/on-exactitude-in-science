@@ -49,8 +49,10 @@ def cleanup_vertex(result, goblin_app):
     if extra := result.pop("extra"):
         cleanup_values("release", extra, goblin_app)
         for key, value in extra.items():
-            if key in result or key.endswith("_id"):
+            if key.endswith("_id"):
                 continue
+            elif key == "name":
+                key = f"release_{key}"
             result[key] = value
     if "is_main_release" in result:
         result["main"] = result.pop("is_main_release")

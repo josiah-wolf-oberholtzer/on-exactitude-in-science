@@ -110,18 +110,35 @@ const EntitySearch = (props) => {
           />
         )}
         renderOption={(option) => (
-          <Grid
-            container
-            justify="space-between"
-          >
-            <Grid item>
-              {option.name}
+          <Grid container>
+            <Grid container item justify="space-between">
+              <Grid item>
+                {option.name}
+              </Grid>
+              <Grid item>
+                <Typography variant="body2" color="textSecondary">
+                  {option.label}
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Typography variant="body2" color="textSecondary">
-                {option.label}
-              </Typography>
-            </Grid>
+            { option.label === "release" && 
+              <Grid container item justify="space-between">
+                <Grid item>
+                  <Typography variant="body2" color="textSecondary">
+                    ({option.year !== undefined ? option.year : "unknown" })
+                  </Typography>
+                </Grid>
+              </Grid>
+            }
+            { option.label === "track" && 
+              <Grid container item justify="space-between">
+                <Grid item>
+                  <Typography variant="body2" color="textSecondary">
+                    ({option.year !== undefined ? option.year : "unknown" }) {option.release_name}
+                  </Typography>
+                </Grid>
+              </Grid>
+            }
           </Grid>
         )}
         style={{ width: 400 }}

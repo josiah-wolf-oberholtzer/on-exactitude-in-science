@@ -26,7 +26,7 @@ class SceneManager {
     this.renderer.toneMapping = THREE.ReinhardToneMapping;
     this.renderer.toneMappingExposure = 2.0;
     this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(0x000000, 0, 250);
+    this.scene.fog = new THREE.FogExp2(0x000000, 0.00666);
 
     // structure
     this.container.appendChild(this.canvas);

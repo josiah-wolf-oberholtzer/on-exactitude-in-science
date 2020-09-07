@@ -70,8 +70,8 @@ const clearQuery = (location, category) => {
 }
 
 const SidebarSection = (props) => {
-  const { category, highlightedNames, onClick, open, pinnedNames } = props;
-  const names = Array.from(Object.entries(props.names || {}));
+  const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
+  const sortedNames = Array.from(Object.entries(props.names || {}));
   const suggestedNames = new Set(props.suggestedNames || []);
   const location = useLocation();
   const title = category.charAt(0).toUpperCase() + category.slice(1)
@@ -101,7 +101,7 @@ const SidebarSection = (props) => {
     )
     pinnedChips.push(chip);
   });
-  names.forEach((entry) => {
+  sortedNames.forEach((entry) => {
     const [name, ids] = entry;
     if (!pinnedNames.includes(name)) {
       const chip = (

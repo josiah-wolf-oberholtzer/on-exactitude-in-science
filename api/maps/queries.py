@@ -348,7 +348,7 @@ async def get_random(goblin_app, vertex_label=None):
     return result[0]
 
 
-async def get_search(goblin_app, query, limit=20, vertex_label=None):
+async def get_search(goblin_app, query, limit=50, vertex_label=None):
     session = await goblin_app.session()
     has_contains_fuzzy = ["name", textContainsFuzzy(query + " ")]
     has_fuzzy = ["name", textFuzzy(query + " ")]
@@ -361,6 +361,8 @@ async def get_search(goblin_app, query, limit=20, vertex_label=None):
             __.has(*has_contains_fuzzy),
             __.has(*has_fuzzy),
         )
+        .order()
+        .by(__.bothE().count(), Order.desc)
         .limit(limit)
     )
     result = await traversal.toList()
