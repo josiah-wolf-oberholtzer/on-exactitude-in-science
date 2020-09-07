@@ -43,7 +43,15 @@ const graphSlice = createSlice({
   initialState: {
     centerRoles: [],
     edges: [],
-    edgesByRole: {},
+    edgesByRole: {
+      'Alias Of': [],
+      Includes: [],
+      'Member Of': [],
+      Released: [],
+      'Released On': [],
+      'Subsidiary Of': [],
+      'Subrelease Of': [],
+    },
     edgesByVertex: {},
     error: null,
     loading: false,
@@ -54,9 +62,19 @@ const graphSlice = createSlice({
     },
     vertices: [],
     verticesByCountry: {},
-    verticesByFormat: {},
+    verticesByFormat: {
+      CD: [],
+      File: [],
+      Vinyl: [],
+    },
     verticesByGenre: {},
-    verticesByLabel: {},
+    verticesByLabel: {
+      Artist: [],
+      Company: [],
+      Master: [],
+      Release: [],
+      Track: [],
+    },
     verticesByStyle: {},
     verticesByYear: {},
   },
@@ -84,12 +102,30 @@ const graphSlice = createSlice({
       state.edges = edges;
       state.loading = false;
       state.vertices = vertices;
-      state.edgesByRole = {};
+      state.edgesByRole = {
+        'Alias Of': [],
+        Includes: [],
+        'Member Of': [],
+        Released: [],
+        'Released On': [],
+        'Subsidiary Of': [],
+        'Subrelease Of': [],
+      };
       state.edgesByVertex = {};
       state.verticesByCountry = {};
-      state.verticesByFormat = {};
+      state.verticesByFormat = {
+        CD: [],
+        File: [],
+        Vinyl: [],
+      };
       state.verticesByGenre = {};
-      state.verticesByLabel = {};
+      state.verticesByLabel = {
+        Artist: [],
+        Company: [],
+        Master: [],
+        Release: [],
+        Track: [],
+      };
       state.verticesByStyle = {};
       state.verticesByYear = {};
       state.centerRoles.forEach((role) => {
