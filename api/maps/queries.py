@@ -361,7 +361,8 @@ async def get_search(goblin_app, query, limit=50, vertex_label=None):
             __.has(*has_contains_fuzzy),
             __.has(*has_fuzzy),
         )
-        .order().by(__.bothE().count(), Order.desc)
+        .order()
+        .by(__.bothE().count(), Order.desc)
         .limit(limit)
     )
     result = await traversal.toList()
