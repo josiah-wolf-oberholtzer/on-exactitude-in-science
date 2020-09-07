@@ -49,10 +49,8 @@ async def get_locality(
         years=years,
     )
     vertices, edges = get_locality_cleanup(goblin_app, edge_result, root_vertex["id"])
-    root_vertex["depth"] = 0
-    root_vertex["maximum_depth"] = vertices.get(root_vertex["id"], {}).get(
-        "maximum_depth", 1
-    )
+    root_vertex.update(depth=0, edge_count=0, maximum_depth=1)
+    root_vertex.update(**vertices.get(root_vertex["id"], {}))
     vertices[root_vertex["id"]] = root_vertex
     return (
         root_vertex,
