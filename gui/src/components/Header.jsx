@@ -48,13 +48,18 @@ const Header = (props) => {
         <IconButton 
           aria-label="menu"
           className={classes.menuButton}
-          color="inherit"
+          color="primary"
           edge="start" 
           onClick={props.toggleSidebar}
         >
           { props.open ? <MenuOpenRoundedIcon /> : <MenuRoundedIcon /> }
         </IconButton>
-        <Typography variant="h6" className={classes.title} onClick={() => props.push("/")}>
+        <Typography 
+          className={classes.title}
+          color="primary"
+          onClick={() => props.push("/")}
+          variant="h6"
+        >
           On Exactitude In Science
         </Typography>
         <EntitySearch />

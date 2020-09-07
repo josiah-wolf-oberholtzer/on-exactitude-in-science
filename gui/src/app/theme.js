@@ -1,19 +1,24 @@
 import { createMuiTheme } from '@material-ui/core';
 
+const one = '#ffffff';
+const two = '#223344';
+const black = '#000';
+const white = '#fff';
+
 const theme = createMuiTheme({
   palette: {
     type: 'dark',
     primary: {
-      main: '#223344',
-      light: '#223344',
-      dark: '#223344',
-      contrastText: '#fff',
+      main: one,
+      light: one,
+      dark: one,
+      contrastText: black,
     },
     secondary: {
-      main: '#223344',
-      light: '#223344',
-      dark: '#223344',
-      contrastText: '#fff',
+      main: two,
+      light: two,
+      dark: two,
+      contrastText: white,
     },
   },
 });

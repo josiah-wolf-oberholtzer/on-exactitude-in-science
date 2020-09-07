@@ -22,6 +22,7 @@ const SidebarSectionRoles = (props) => {
       open={props.open}
       pinnedNames={props.pinnedNames}
       suggestedNames={props.suggestedNames}
+      title="Roles"
     />
   )
 }

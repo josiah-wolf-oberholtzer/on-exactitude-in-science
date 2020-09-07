@@ -70,19 +70,18 @@ const clearQuery = (location, category) => {
 }
 
 const SidebarSection = (props) => {
-  const { category, highlightedNames, names, onClick, open, pinnedNames } = props;
+  const { category, highlightedNames, names, onClick, open, pinnedNames, title } = props;
   const sortedNames = Array.from(Object.entries(props.names || {}));
   const suggestedNames = new Set(props.suggestedNames || []);
   const location = useLocation();
-  const title = category.charAt(0).toUpperCase() + category.slice(1)
   const classes = useStyles();
   const pinnedChips = [];
   const unpinnedChips = [];
   const suggestionChips = [];
-  if (names.length > 0) {
+  if ((names || []).length > 0) {
     names.sort();
   }
-  pinnedNames.forEach((name) => {
+  (pinnedNames || []).forEach((name) => {
     const ids = names[name] || [];
     const chip = (
       <Badge
@@ -101,7 +100,7 @@ const SidebarSection = (props) => {
     )
     pinnedChips.push(chip);
   });
-  sortedNames.forEach((entry) => {
+  (sortedNames || []).forEach((entry) => {
     const [name, ids] = entry;
     if (!pinnedNames.includes(name)) {
       const chip = (
@@ -133,6 +132,14 @@ const SidebarSection = (props) => {
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto">
+        { props.children &&
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+            { props.children }
+            </div>
+          </React.Fragment>
+        }
         { pinnedChips.length > 0 && 
           <React.Fragment>
             <Divider />

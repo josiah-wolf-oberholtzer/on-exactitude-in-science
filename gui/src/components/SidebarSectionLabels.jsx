@@ -20,6 +20,7 @@ const SidebarSectionLabels = (props) => {
       names={props.names}
       open={props.open}
       pinnedNames={props.pinnedNames}
+      title="Labels"
     />
   )
 }

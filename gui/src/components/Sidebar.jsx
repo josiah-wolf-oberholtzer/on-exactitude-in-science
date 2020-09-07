@@ -1,11 +1,12 @@
 import React from 'react';
 import { Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
-import SidebarSection from './SidebarSection';
 import SidebarSectionCountries from './SidebarSectionCountries';
+import SidebarSectionEdgeLimits from './SidebarSectionEdgeLimits';
 import SidebarSectionFormats from './SidebarSectionFormats';
 import SidebarSectionGenres from './SidebarSectionGenres';
 import SidebarSectionLabels from './SidebarSectionLabels';
+import SidebarSectionMainReleases from './SidebarSectionMainReleases';
 import SidebarSectionRoles from './SidebarSectionRoles';
 import SidebarSectionStyles from './SidebarSectionStyles';
 import SidebarSectionYears from './SidebarSectionYears';
@@ -53,6 +54,8 @@ const Sidebar = (props) => {
           <SidebarSectionStyles />
           <SidebarSectionGenres />
           <SidebarSectionCountries />
+          <SidebarSectionEdgeLimits />
+          <SidebarSectionMainReleases />
         </List>
       </div>
     </Drawer>
