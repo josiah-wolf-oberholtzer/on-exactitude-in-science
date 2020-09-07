@@ -19,9 +19,9 @@ const mapDispatchToProps = dispatch => {
     pushChecked: (location, checked) => {
       const parsedQuery = queryStringToObject(location.search);
       if (checked) {
-        parsedQuery.showSecondaryReleases = true;
+        parsedQuery.secondary = true;
       } else {
-        delete parsedQuery.showSecondaryReleases;
+        delete parsedQuery.secondary;
       }
       dispatch(push(location.pathname + "?" + queryObjectToString(parsedQuery)));
     }
