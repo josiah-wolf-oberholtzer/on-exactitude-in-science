@@ -1,9 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {
-  COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS,
-} from '../constants';
-
-const categories = [COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS];
+import { CATEGORIES } from '../constants';
 
 const filteredSlice = createSlice({
   name: 'filtered',
@@ -20,10 +16,19 @@ const filteredSlice = createSlice({
   },
   reducers: {
     setFiltered(state, action) {
-      categories.forEach((category) => {
+      CATEGORIES.forEach((category) => {
         const names = new Set(action.payload[category] || []);
         state[category] = Array.from(names).sort();
       });
+      // Use constants
+      state.limit = parseInt(action.payload.limit) || 250;
+      if (state.limit < 0) {
+        state.limit = 0;
+      }
+      if (state.limit > 500) {
+        state.limit = 500;
+      }
+      state.showSecondaryReleases = action.payload.secondary === "true";
     },
   },
 });
