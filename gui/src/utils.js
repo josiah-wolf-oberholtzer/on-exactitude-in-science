@@ -1,7 +1,6 @@
 import * as QueryString from 'query-string';
 import { CATEGORIES } from './constants';
 
-
 const queryStringToObject = (queryString) => {
   const queryObject = {
     ...QueryString.parse(

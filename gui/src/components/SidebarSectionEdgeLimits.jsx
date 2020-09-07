@@ -2,7 +2,7 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import Slider from '@material-ui/core/Slider';
 import { connect } from 'react-redux';
-import { LIMIT } from '../constants';
+import { EDGE_LIMIT_DEFAULT, EDGE_LIMIT_MINIMUM, EDGE_LIMIT_MAXIMUM } from '../constants';
 import { useLocation } from "react-router-dom";
 import { push } from 'connected-react-router';
 import { queryObjectToString, queryStringToObject } from '../utils';
@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => {
   return {
     pushLimit: (location, limit) => {
       const parsedQuery = queryStringToObject(location.search);
-      if (limit === LIMIT) {
+      if (limit === EDGE_LIMIT_DEFAULT) {
         delete parsedQuery.limit; 
       } else {
         parsedQuery.limit = limit;
@@ -39,14 +39,15 @@ const SidebarSectionEdgeLimits = (props) => {
     >
       <Slider
         defaultValue={props.limit}
-        max={500}
+        max={EDGE_LIMIT_MAXIMUM}
+        // Calculate marks programmatically
         marks={[
           {value: 100, label: 100},
           {value: 200, label: 200},
           {value: 300, label: 300},
           {value: 400, label: 400},
         ]}
-        min={0}
+        min={EDGE_LIMIT_MINIMUM}
         onChange={(event, newValue) => { props.pushLimit(location, newValue) }}
         step={25}
         value={props.limit}

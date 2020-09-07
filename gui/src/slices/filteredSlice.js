@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { CATEGORIES } from '../constants';
+import {
+  CATEGORIES, EDGE_LIMIT_DEFAULT, EDGE_LIMIT_MINIMUM, EDGE_LIMIT_MAXIMUM,
+} from '../constants';
 
 const filteredSlice = createSlice({
   name: 'filtered',
@@ -21,14 +23,14 @@ const filteredSlice = createSlice({
         state[category] = Array.from(names).sort();
       });
       // Use constants
-      state.limit = parseInt(action.payload.limit) || 250;
-      if (state.limit < 0) {
-        state.limit = 0;
+      state.limit = parseInt(action.payload.limit, 10) || EDGE_LIMIT_DEFAULT;
+      if (state.limit < EDGE_LIMIT_MINIMUM) {
+        state.limit = EDGE_LIMIT_MINIMUM;
       }
-      if (state.limit > 500) {
-        state.limit = 500;
+      if (state.limit > EDGE_LIMIT_MAXIMUM) {
+        state.limit = EDGE_LIMIT_MAXIMUM;
       }
-      state.showSecondaryReleases = action.payload.secondary === "true";
+      state.showSecondaryReleases = action.payload.secondary === 'true';
     },
   },
 });
