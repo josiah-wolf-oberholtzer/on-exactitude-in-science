@@ -55,7 +55,7 @@ const Sidebar = (props) => {
           <SidebarSectionGenres />
           <SidebarSectionCountries />
           <SidebarSectionEdgeLimits />
-          <SidebarSectionMainReleases />
+          { /* <SidebarSectionMainReleases /> */ }
         </List>
       </div>
     </Drawer>

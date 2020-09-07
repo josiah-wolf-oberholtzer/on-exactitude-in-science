@@ -66,7 +66,7 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
-    show_secondary_entities = validate_boolean(request, "secondary", False)
+    # show_secondary_entities = validate_boolean(request, "secondary", False)
     limit = validate_limit(request, default=250, minimum=0, maximum=500)
     offset = validate_offset(request)
     vertex_label = validate_vertex_label(request)
@@ -87,7 +87,6 @@ async def get_locality(request):
         limit=limit,
         offset=offset,
         roles=request.query.getall("roles[]", []),
-        show_secondary_entities=show_secondary_entities,
         styles=request.query.getall("styles[]", []),
         vertex_label=vertex_label,
         years=request.query.getall("years[]", []),

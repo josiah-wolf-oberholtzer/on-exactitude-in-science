@@ -169,7 +169,6 @@ const SidebarSection = (props) => {
             </div>
           </React.Fragment>
         }
-        <Divider />
       </Collapse>
     </React.Fragment>
   )
