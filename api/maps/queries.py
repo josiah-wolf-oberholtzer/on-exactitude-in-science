@@ -23,7 +23,6 @@ async def get_locality(
     limit=200,
     offset=0,
     roles=None,
-    show_secondary_entities=False,
     styles=None,
     years=None,
     vertex_label=None,
@@ -37,7 +36,7 @@ async def get_locality(
         roles=roles,
         styles=styles,
         years=years,
-        show_secondary_entities=show_secondary_entities,
+        show_secondary_entities=True,
     )
     root_vertex = await get_vertex(
         goblin_app,
