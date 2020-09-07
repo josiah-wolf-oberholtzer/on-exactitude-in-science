@@ -2,7 +2,7 @@ import random
 from collections import deque
 
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Order, P, Scope
+from gremlin_python.process.traversal import Order, P, Pick, Scope
 
 from maps.graphutils import (
     cleanup_edge,
@@ -23,11 +23,22 @@ async def get_locality(
     limit=200,
     offset=0,
     roles=None,
+    show_secondary_entities=False,
     styles=None,
     years=None,
     vertex_label=None,
 ):
     session = await goblin_app.session()
+    edge_filters = build_locality_edge_filter(
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        roles=roles,
+        styles=styles,
+        years=years,
+        show_secondary_entities=show_secondary_entities,
+    )
     root_vertex = await get_vertex(
         goblin_app,
         vertex_id,
@@ -38,15 +49,9 @@ async def get_locality(
     edge_result = await get_locality_query(
         session,
         root_vertex["id"],
-        countries=countries,
-        formats=formats,
-        genres=genres,
-        labels=labels,
+        edge_filters=edge_filters,
         limit=limit,
         offset=offset,
-        roles=roles,
-        styles=styles,
-        years=years,
     )
     vertices, edges = get_locality_cleanup(goblin_app, edge_result, root_vertex["id"])
     root_vertex.update(depth=0, edge_count=0, maximum_depth=1)
@@ -62,25 +67,11 @@ async def get_locality(
 async def get_locality_query(
     session,
     vertex_id,
-    countries=None,
-    formats=None,
-    genres=None,
-    labels=None,
     limit=200,
     offset=0,
-    roles=None,
-    styles=None,
-    years=None,
+    edge_filters=None,
 ):
-    edge_filters = build_locality_edge_filter(
-        countries=countries,
-        formats=formats,
-        genres=genres,
-        labels=labels,
-        roles=roles,
-        styles=styles,
-        years=years,
-    )
+    edge_filters = edge_filters or [__.identity()]
     center_traversal = session.g.V(vertex_id)
     traversal = (
         center_traversal.repeat(
@@ -97,8 +88,8 @@ async def get_locality_query(
             .dedup()
             .aggregate("edges")
             .otherV()
-            .dedup()
-            .where(__.local(__.bothE().count().is_(P.lt(100))))
+            # .dedup()
+            # .where(__.local(__.bothE().count().is_(P.lt(100))))
         )
         .until(__.cap("edges").unfold().count().is_(P.gt(limit)))
         .cap("edges")
@@ -203,10 +194,12 @@ def build_locality_edge_filter(
     roles=None,
     styles=None,
     years=None,
+    show_secondary_entities=None,
 ):
-    traversals = [
+    return [
         traversal
         for traversal in (
+            build_locality_secondary_entity_filter(show_secondary_entities),
             build_locality_label_filter(labels),
             build_locality_release_filter(
                 countries=countries,
@@ -219,9 +212,30 @@ def build_locality_edge_filter(
         )
         if traversal is not None
     ]
-    if not traversals:
-        return [__.identity()]
-    return traversals
+
+
+def build_locality_secondary_entity_filter(show_secondary_entities):
+    if show_secondary_entities:
+        return None
+    return (
+        __.otherV()
+        .choose(__.label())
+        .option(
+            "release",
+            __.or_(
+                __.has("is_main_release", True),
+                __.in_("subrelease_of").count().is_(P.gt(0)),
+            ),
+        )
+        .option(
+            "track",
+            __.in_("includes").or_(
+                __.has("is_main_release", True),
+                __.in_("subrelease_of").count().is_(P.gt(0)),
+            ),
+        )
+        .option(Pick.none, __.identity())
+    )
 
 
 def build_locality_label_filter(labels):

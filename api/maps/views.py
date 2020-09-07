@@ -13,6 +13,13 @@ def validate_filters(request):
     return filters
 
 
+def validate_boolean(request, key, default=False):
+    boolean = request.query.get(key, default)
+    if boolean in (True, "true", "1"):
+        return True
+    return False
+
+
 def validate_limit(request, default=20, minimum=1, maximum=100):
     limit = request.query.get("limit", default)
     try:
@@ -59,6 +66,7 @@ async def get_health(request):
 @routes.get("/locality/{vertex_id}")
 @routes.get("/locality/{vertex_label}/{vertex_id}")
 async def get_locality(request):
+    show_secondary_entities = validate_boolean(request, "secondary", False)
     limit = validate_limit(request, default=250, minimum=0, maximum=500)
     offset = validate_offset(request)
     vertex_label = validate_vertex_label(request)
@@ -69,22 +77,20 @@ async def get_locality(request):
     # cache_key = str(request.rel_url).encode()
     # if (cached := await cache.get(cache_key)) is not None:
     #    return aiohttp.web.json_response(cached)
-    query = dict(
+    locality = await queries.get_locality(
+        request.app["goblin"],
+        vertex_id,
         countries=request.query.getall("countries[]", []),
         formats=request.query.getall("formats[]", []),
         genres=request.query.getall("genres[]", []),
         labels=request.query.getall("labels[]", []),
-        roles=request.query.getall("roles[]", []),
-        styles=request.query.getall("styles[]", []),
-        years=request.query.getall("years[]", []),
-    )
-    locality = await queries.get_locality(
-        request.app["goblin"],
-        vertex_id,
         limit=limit,
         offset=offset,
+        roles=request.query.getall("roles[]", []),
+        show_secondary_entities=show_secondary_entities,
+        styles=request.query.getall("styles[]", []),
         vertex_label=vertex_label,
-        **query,
+        years=request.query.getall("years[]", []),
     )
     if locality is None:
         raise aiohttp.web.HTTPNotFound()
