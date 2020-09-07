@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.countriesOpen,
     highlightedNames: state.highlighted.countries,
     names: state.graph.verticesByCountry,
-    pinnedNames: state.pinned.countries,
+    filteredNames: state.filtered.countries,
   }
 }
 
@@ -19,7 +19,7 @@ const SidebarSectionCountries = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
       title="Countries"
     />
   )

@@ -5,8 +5,8 @@ import {
 
 const categories = [COUNTRIES, FORMATS, GENRES, LABELS, ROLES, STYLES, YEARS];
 
-const pinnedSlice = createSlice({
-  name: 'pinned',
+const filteredSlice = createSlice({
+  name: 'filtered',
   initialState: {
     limit: 250,
     showSecondaryReleases: false,
@@ -19,7 +19,7 @@ const pinnedSlice = createSlice({
     years: [],
   },
   reducers: {
-    setPinned(state, action) {
+    setFiltered(state, action) {
       categories.forEach((category) => {
         const names = new Set(action.payload[category] || []);
         state[category] = Array.from(names).sort();
@@ -28,8 +28,8 @@ const pinnedSlice = createSlice({
   },
 });
 
-const { setPinned } = pinnedSlice.actions;
+const { setFiltered } = filteredSlice.actions;
 
-export { setPinned };
+export { setFiltered };
 
-export default pinnedSlice.reducer;
+export default filteredSlice.reducer;

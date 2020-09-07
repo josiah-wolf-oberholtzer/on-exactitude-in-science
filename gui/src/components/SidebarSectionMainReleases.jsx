@@ -10,7 +10,7 @@ import { queryObjectToString, queryStringToObject } from '../utils';
 
 const mapStateToProps = state => {
   return {
-    checked: state.pinned.showSecondaryReleases,
+    checked: state.filtered.showSecondaryReleases,
   }
 }
 

@@ -11,7 +11,7 @@ import { queryObjectToString, queryStringToObject } from '../utils';
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.edgeLimitsOpen,
-    limit: state.pinned.limit,
+    limit: state.filtered.limit,
   }
 }
 

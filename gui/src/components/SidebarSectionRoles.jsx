@@ -8,7 +8,7 @@ const mapStateToProps = state => {
     open: state.layout.sidebar.rolesOpen,
     highlightedNames: state.highlighted.roles,
     names: state.graph.edgesByRole,
-    pinnedNames: state.pinned.roles,
+    filteredNames: state.filtered.roles,
     suggestedNames: state.graph.centerRoles,
   }
 }
@@ -20,7 +20,7 @@ const SidebarSectionRoles = (props) => {
       highlightedNames={props.highlighedNames}
       names={props.names}
       open={props.open}
-      pinnedNames={props.pinnedNames}
+      filteredNames={props.filteredNames}
       suggestedNames={props.suggestedNames}
       title="Roles"
     />
