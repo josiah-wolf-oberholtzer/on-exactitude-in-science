@@ -127,6 +127,7 @@ def format_schema(goblin_app, graph_name="graph"):
             f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
+            f"mgmt.buildEdgeIndex(credited_with, '{graph_name}_credited_with_edges_by_role', Direction.BOTH, Order.asc, role)",
         ]
     )
     lines.extend(["", "mgmt.commit()"])
