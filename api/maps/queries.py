@@ -73,7 +73,9 @@ async def get_locality_root_query(
 ):
     edge_filters = edge_filters or [__.identity()]
     if vertex_label:
-        center_traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
     else:
         center_traversal = session.g.V(vertex_id)
     traversal = (
@@ -121,7 +123,9 @@ async def get_locality_query(
 ):
     edge_filters = edge_filters or [__.identity()]
     if vertex_label:
-        center_traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
     else:
         center_traversal = session.g.V(vertex_id)
     traversal = (
