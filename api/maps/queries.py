@@ -145,8 +145,14 @@ async def get_locality_query(
             .otherV()
             .dedup()
             .where(__.local(__.bothE().count().is_(P.lt(100))))
+            .timeLimit(500)
         )
-        .until(__.cap("edges").unfold().count().is_(P.gt(limit)))
+        .until(
+            __.or_(
+                __.cap("edges").unfold().count().is_(P.gt(limit)),
+                __.loops().is_(10),
+            )
+        )
         .cap("edges")
         .unfold()
         .limit(limit)

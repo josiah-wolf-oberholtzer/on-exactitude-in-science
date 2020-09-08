@@ -3,13 +3,10 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-
-import PinDropIcon from '@material-ui/icons/PinDrop';
-import StarIcon from '@material-ui/icons/Star';
+import MoreIcon from '@material-ui/icons/More';
 import StarRateIcon from '@material-ui/icons/StarRate';
-
 import { connect } from 'react-redux';
-import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemText, makeStyles, } from '@material-ui/core';
+import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
 import { toggleSidebarSection } from '../slices/layoutSlice';
 import { useLocation } from "react-router-dom";
 import { push } from 'connected-react-router';
@@ -130,7 +127,17 @@ const SidebarSection = (props) => {
   });
   return (
     <React.Fragment>
-      <ListItem button key={title} onClick={() => { props.toggleOpen(category) }}>
+      <ListItem
+        button
+        key={title}
+        onClick={() => { props.toggleOpen(category) }}
+        style={{textDecoration: (filteredChips.length > 0 || unfilteredChips.length > 0 || props.children) ? 'none' : 'line-through' }}
+      >
+        {filteredChips.length > 0 &&
+          <ListItemIcon>
+            <MoreIcon />
+          </ListItemIcon>
+        }
         <ListItemText primary={title} />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
@@ -143,7 +150,7 @@ const SidebarSection = (props) => {
             </div>
           </React.Fragment>
         }
-        { filteredChips.length > 0 && 
+        { filteredChips.length > 0 &&
           <React.Fragment>
             <Divider />
             <div className={classes.chips}>
@@ -156,7 +163,7 @@ const SidebarSection = (props) => {
             </div>
           </React.Fragment>
         }
-        { unfilteredChips.length > 0 && 
+        { unfilteredChips.length > 0 &&
           <React.Fragment>
             <Divider />
             <div className={classes.chips}>
