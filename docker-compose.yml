@@ -2,7 +2,8 @@ version: "3.7"
 services:
   api:
     build:
-      cache_from: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+      cache_from:
+      - josiahwolfoberholtzer/on-exactitude-in-science-api:latest
       context: api
     command: gunicorn --conf gunicorn.conf.py maps.app:app
     environment:
