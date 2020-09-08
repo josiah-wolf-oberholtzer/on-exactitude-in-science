@@ -6,6 +6,7 @@ import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
 import { deselectEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
+import { queryObjectToString, queryStringToObject } from '../utils';
 
 const mapStateToProps = state => {
   return {
@@ -19,7 +20,11 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    push: (location, label, id) => dispatch(push(`/${label}/${id}` + location.search)),
+    push: (location, label, id) => {
+      const parsedQuery = queryStringToObject(location.search);
+      delete parsedQuery.page;
+      dispatch(push(`/${label}/${id}` + queryObjectToString(parsedQuery)));
+    },
     selectEntity: (eid, label, name) => dispatch(selectEntity({eid, label, name})),
     deselectEntity: () => dispatch(deselectEntity()),
   }

@@ -7,6 +7,7 @@ import SidebarSectionFormats from './SidebarSectionFormats';
 import SidebarSectionGenres from './SidebarSectionGenres';
 import SidebarSectionLabels from './SidebarSectionLabels';
 import SidebarSectionMainReleases from './SidebarSectionMainReleases';
+import SidebarPagination from './SidebarPagination';
 import SidebarSectionRoles from './SidebarSectionRoles';
 import SidebarSectionStyles from './SidebarSectionStyles';
 import SidebarSectionYears from './SidebarSectionYears';
@@ -47,6 +48,7 @@ const Sidebar = (props) => {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
+          <SidebarPagination />
           <SidebarSectionLabels />
           <SidebarSectionRoles />
           <SidebarSectionYears />

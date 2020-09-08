@@ -24,7 +24,7 @@ const mapDispatchToProps = dispatch => {
       } else {
         parsedQuery.limit = limit;
       }
-      dispatch(push(location.pathname + "?" + queryObjectToString(parsedQuery)));
+      dispatch(push(location.pathname + queryObjectToString(parsedQuery)));
     }
   }
 }

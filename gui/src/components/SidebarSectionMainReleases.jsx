@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => {
       } else {
         delete parsedQuery.secondary;
       }
-      dispatch(push(location.pathname + "?" + queryObjectToString(parsedQuery)));
+      dispatch(push(location.pathname + queryObjectToString(parsedQuery)));
     }
   }
 }

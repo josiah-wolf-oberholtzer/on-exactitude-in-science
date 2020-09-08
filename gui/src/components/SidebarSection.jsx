@@ -50,8 +50,9 @@ const pinQuery = (location, category, name) => {
   const parsedQuery = queryStringToObject(location.search);
   const names = new Set(parsedQuery[category]);
   names.add(name);
+  delete parsedQuery.page;
   parsedQuery[category] = Array.from(names).sort()
-  return location.pathname + "?" + queryObjectToString(parsedQuery);
+  return location.pathname + queryObjectToString(parsedQuery);
 
 }
 
@@ -59,14 +60,16 @@ const unpinQuery = (location, category, name) => {
   const parsedQuery = queryStringToObject(location.search);
   const names = new Set(parsedQuery[category]);
   names.delete(name);
+  delete parsedQuery.page;
   parsedQuery[category] = Array.from(names).sort()
-  return location.pathname + "?" + queryObjectToString( parsedQuery);
+  return location.pathname + queryObjectToString( parsedQuery);
 }
 
 const clearQuery = (location, category) => {
   const parsedQuery = queryStringToObject(location.search);
   parsedQuery[category] = [];
-  return location.pathname + "?" + queryObjectToString(parsedQuery);
+  delete parsedQuery.page;
+  return location.pathname + queryObjectToString(parsedQuery);
 }
 
 const SidebarSection = (props) => {

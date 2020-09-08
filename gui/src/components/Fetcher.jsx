@@ -8,7 +8,7 @@ import { setFiltered } from "../slices/filteredSlice";
 const mapDispatchToProps = dispatch => {
   return {
     fetchByEntity: (label, id, filters) => dispatch(fetchByEntity({label, id, filters})),
-    fetchRandom: (label) => dispatch(fetchRandom({label})),
+    fetchRandom: (location, label) => dispatch(fetchRandom({label, location})),
     setFiltered: (pins) => dispatch(setFiltered(pins)),
   }
 }
@@ -16,8 +16,8 @@ const mapDispatchToProps = dispatch => {
 class Fetcher extends React.Component {
   match() {
     const { label, id } = this.props.match.params;
-    const { search } = this.props.location;
-    const filters = queryStringToObject(search);
+    const { location } = this.props;
+    const filters = queryStringToObject(location.search);
     this.props.setFiltered(filters);
     switch (this.props.match.path) {
       case "/":
@@ -25,11 +25,11 @@ class Fetcher extends React.Component {
         break;
       case "/random/:label(artist|company|master|release|track)":
         document.title = "Random | On Exactitude In Science"
-        this.props.fetchRandom(label);
+        this.props.fetchRandom(location, label);
         break;
       case "/random":
         document.title = "Random | On Exactitude In Science"
-        this.props.fetchRandom();
+        this.props.fetchRandom(location);
         break;
       case "/:label(artist|company|master|release|track)/:id":
         this.props.fetchByEntity(label, id, filters);

@@ -38,13 +38,15 @@ async def get_locality(
         years=years,
         show_secondary_entities=True,
     )
-    root_vertex = await get_vertex(
-        goblin_app,
+    root_vertex = await get_locality_root_query(
+        session,
         vertex_id,
         vertex_label=vertex_label,
+        edge_filters=edge_filters,
     )
     if not root_vertex:
         return None
+    cleanup_vertex(root_vertex, goblin_app)
     edge_result = await get_locality_query(
         session,
         root_vertex["id"],
@@ -63,15 +65,69 @@ async def get_locality(
     )
 
 
+async def get_locality_root_query(
+    session,
+    vertex_id,
+    vertex_label=None,
+    edge_filters=None,
+):
+    edge_filters = edge_filters or [__.identity()]
+    if vertex_label:
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
+    else:
+        center_traversal = session.g.V(vertex_id)
+    traversal = (
+        center_traversal.project(
+            "id",
+            "label",
+            "values",
+            "total_edge_count",
+            "pageable_edge_count",
+            "child_count",
+            "extra",
+            "in_labels",
+            "in_roles",
+            "out_labels",
+            "out_roles",
+        )
+        .by(__.id())
+        .by(__.label())
+        .by(__.valueMap())
+        .by(__.bothE().count())
+        .by(__.bothE().and_(*edge_filters).count())
+        .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
+        .by(
+            __.choose(
+                __.inE("includes").count().is_(P.gt(0)),
+                __.in_("includes").valueMap(),
+                __.constant(False),
+            )
+        )
+        .by(__.inE().groupCount().by(__.label()))
+        .by(__.inE("credited_with").groupCount().by("role"))
+        .by(__.outE().groupCount().by(__.label()))
+        .by(__.outE("credited_with").groupCount().by("role"))
+    )
+    return await traversal.next()
+
+
 async def get_locality_query(
     session,
     vertex_id,
+    vertex_label=None,
     limit=200,
     offset=0,
     edge_filters=None,
 ):
     edge_filters = edge_filters or [__.identity()]
-    center_traversal = session.g.V(vertex_id)
+    if vertex_label:
+        center_traversal = session.g.V().has(
+            vertex_label, f"{vertex_label}_id", vertex_id
+        )
+    else:
+        center_traversal = session.g.V(vertex_id)
     traversal = (
         center_traversal.repeat(
             __.local(
