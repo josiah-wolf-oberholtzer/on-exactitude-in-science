@@ -43,3 +43,14 @@ docker-compose up -d gui
 ```
 
 Now you can visit localhost:8080 to see.
+
+## Debugging
+
+```
+docker exec -it $(docker-compose ps --quiet janusgraph) ./bin/gremlin.sh
+```
+
+```
+gremlin> :remote connect tinkerpop.server conf/remote.yaml session
+gremlin> :remote console
+```
