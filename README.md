@@ -51,6 +51,10 @@ docker exec -it $(docker-compose ps --quiet janusgraph) ./bin/gremlin.sh
 ```
 
 ```
-gremlin> :remote connect tinkerpop.server conf/remote.yaml session
-gremlin> :remote console
+kubectl exec -tic janusgraph $(kubectl get pods --selector=app=janusgraph -o jsonpath="{.items[0].metadata.name}") -- ./bin/gremlin.sh
+```
+
+```
+:remote connect tinkerpop.server conf/remote.yaml session
+:remote console
 ```
