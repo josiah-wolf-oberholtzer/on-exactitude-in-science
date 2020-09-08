@@ -101,7 +101,7 @@ const graphSlice = createSlice({
       // Refactor objByCategory logic into separate functions
       const { center, edges, vertices } = action.payload;
       document.title = `${center.name} | On Exactitude In Science`;
-      state.pageCount = Math.ceil((center.total_edge_count || 0) / 50) || 1;
+      state.pageCount = Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
       state.centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
       state.edges = edges;
       state.loading = false;
