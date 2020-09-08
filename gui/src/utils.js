@@ -14,7 +14,6 @@ const queryStringToObject = (queryString) => {
       queryObject[key] = [value];
     }
   });
-  console.log('queryStringToObject', queryString, queryObject);
   return queryObject;
 };
 
@@ -23,8 +22,7 @@ const queryObjectToString = (queryObject) => {
     queryObject,
     { arrayFormat: 'bracket' },
   ).replace(/%2B/g, '+').replace(/%20/g, '+');
-  console.log('queryObjectToString', queryObject, queryString);
-  return queryString;
+  return (queryString.length > 0) ? `?${queryString}` : '';
 };
 
 function union(setA, setB) {

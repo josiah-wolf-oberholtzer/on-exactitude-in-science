@@ -6,6 +6,7 @@ import React from "react";
 import { Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, makeStyles } from '@material-ui/core';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router'
+import { queryObjectToString, queryStringToObject } from '../utils';
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
@@ -23,8 +24,18 @@ const useStyles = makeStyles((theme) => ({
 
 const mapDispatchToProps = dispatch => {
   return {
-    pushEntity: (label, id) => dispatch(push(`/${label}/${id}`)),
-    pushRandom: (label) => label === "any" ? dispatch(push("/random")) : dispatch(push(`/random/${label}`)),
+    pushEntity: (label, id) => {
+      const parsedQuery = queryStringToObject(location.search);
+      const baseUrl = `/${label}/${id}`;
+      delete parsedQuery.page;
+      dispatch(push(baseUrl + queryObjectToString(parsedQuery)));
+    },
+    pushRandom: (label) => {
+      const parsedQuery = queryStringToObject(location.search);
+      const baseUrl = label === "any" ? "/random" : `/random/${label}`;
+      delete parsedQuery.page;
+      dispatch(push(baseUrl + queryObjectToString(parsedQuery)));
+    },
   }
 }
 

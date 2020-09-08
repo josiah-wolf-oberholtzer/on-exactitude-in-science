@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => {
       } else {
         parsedQuery.page = page;
       }
-      dispatch(push(location.pathname + "?" + queryObjectToString(parsedQuery)));
+      dispatch(push(location.pathname + queryObjectToString(parsedQuery)));
     }
   }
 }
