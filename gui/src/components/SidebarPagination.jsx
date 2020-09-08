@@ -8,7 +8,10 @@ import { queryObjectToString, queryStringToObject } from '../utils';
 import { useLocation } from "react-router-dom";
 
 const mapStateToProps = state => {
-  return { }
+  return {
+    page: state.filtered.page,
+    pageCount: state.graph.pageCount,
+  }
 }
 
 const mapDispatchToProps = dispatch => {
@@ -38,8 +41,10 @@ const SidebarPagination = (props) => {
           pb={1}
         >
           <Pagination
-            count={10}
+            count={props.pageCount}
+            disabled={props.pageCount == 1}
             onChange={(event, value) => { props.pushPage(location, value) }}
+            page={props.page <= props.pageCount ? props.page : props.pageCount }
           />
         </Box>
       </ListItem>

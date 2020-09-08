@@ -44,6 +44,17 @@ def validate_offset(request):
     return offset
 
 
+def validate_page(request):
+    page = request.query.get("page", 1)
+    try:
+        page = int(page)
+    except Exception:
+        page = 1
+    if page < 1:
+        page = 1
+    return page
+
+
 def validate_vertex_label(request):
     vertex_label = request.match_info.get("vertex_label")
     if vertex_label and vertex_label not in request.app["goblin"].vertices:
@@ -68,7 +79,9 @@ async def get_health(request):
 async def get_locality(request):
     # show_secondary_entities = validate_boolean(request, "secondary", False)
     limit = validate_limit(request, default=250, minimum=0, maximum=500)
-    offset = validate_offset(request)
+    # offset = validate_offset(request)
+    page = validate_page(request)
+    offset = (page - 1) * 50
     vertex_label = validate_vertex_label(request)
     vertex_id = request.match_info.get("vertex_id")
     if vertex_label != "track":
