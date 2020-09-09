@@ -85,7 +85,7 @@ class GraphManager {
 
   onEdgeEnter(data) {
     const threeEdge = new Edge();
-    threeEdge.enter(data, this.controls, this.lineManager);
+    threeEdge.enter(data, this.group, this.controls, this.lineManager);
     this.envelopes.set(data.id, threeEdge);
   }
 

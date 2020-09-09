@@ -4,6 +4,7 @@ class Edge {
   constructor() {
     this.controls = null;
     this.data = {};
+    this.parent = null;
     this.curve = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(),
       new THREE.Vector3(),
@@ -37,8 +38,9 @@ class Edge {
     return color;
   }
 
-  enter(newData, newControls, newLineManager) {
+  enter(newData, newParent, newControls, newLineManager) {
     this.controls = newControls;
+    this.parent = newParent;
     this.lineManager = newLineManager;
     this.lineManager.add(this);
     this.update(newData);
@@ -51,6 +53,7 @@ class Edge {
   exit() {
     this.lineManager.remove(this);
     this.data = {};
+    this.parent = null;
     this.controls = null;
     this.lineManager = null;
   }

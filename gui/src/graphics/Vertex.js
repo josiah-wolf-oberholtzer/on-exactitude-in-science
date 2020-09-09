@@ -5,7 +5,7 @@ class Vertex {
   constructor() {
     this.controls = null;
     this.data = {};
-    this.scene = null;
+    this.parent = null;
     this.textA = null;
     this.textB = null;
     this.radii = {
@@ -93,10 +93,10 @@ class Vertex {
     };
   }
 
-  enter(newData, newScene, newControls, textLoader) {
+  enter(newData, newParent, newControls, textLoader) {
     this.controls = newControls;
-    this.scene = newScene;
-    this.scene.add(this.group);
+    this.parent = newParent;
+    this.parent.add(this.group);
     this.controls.add(this.coreMesh);
     this.textA = textLoader.loadMesh(newData.name);
     this.textB = this.textA.clone(false);
@@ -145,11 +145,11 @@ class Vertex {
   }
 
   exit() {
-    this.scene.remove(this.group);
+    this.parent.remove(this.group);
     this.controls.remove(this.coreMesh);
     this.group.remove(this.textA);
     this.group.remove(this.textB);
-    this.scene = null;
+    this.parent = null;
     this.data = {};
     this.controls = null;
   }
