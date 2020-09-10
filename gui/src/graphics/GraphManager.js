@@ -40,7 +40,7 @@ class GraphManager {
   }
 
   onDeselect(event) {
-    console.log('deselect', event);
+    //console.log('deselect', event);
     const { replaced } = event;
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
@@ -52,7 +52,7 @@ class GraphManager {
   }
 
   onDrag(event) {
-    console.log('drag', event);
+    //console.log('drag', event);
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
     const { position } = event;
@@ -61,12 +61,12 @@ class GraphManager {
   }
 
   onDragEnd(event) {
-    console.log('dragend', event);
+    //console.log('dragend', event);
     this.sceneManager.controls.enabled = true;
   }
 
   onDragStart(event) {
-    console.log('dragstart', event);
+    //console.log('dragstart', event);
     this.sceneManager.controls.enabled = false;
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
@@ -76,7 +76,7 @@ class GraphManager {
       (currentClickObject === this.previousClickObject)
       && ((currentClickTime - this.previousClickTime) < 250)
     ) {
-      console.log('doubleclick');
+      //console.log('doubleclick');
       this.dispatcher.call('doubleclick', vertex, vertex);
     }
     this.previousClickObject = currentClickObject;
@@ -116,13 +116,13 @@ class GraphManager {
   }
 
   onMouseOut(event) {
-    console.log('mouseout', event);
+    //console.log('mouseout', event);
     const { envelope } = event.object.parent;
     envelope.mouseout();
   }
 
   onMouseOver(event) {
-    console.log('mouseover', event);
+    //console.log('mouseover', event);
     const { envelope } = event.object.parent;
     envelope.mouseover();
   }
@@ -134,7 +134,7 @@ class GraphManager {
   }
 
   onSelect(event) {
-    console.log('select', event);
+    //console.log('select', event);
     const { envelope } = event.object.parent;
     const vertex = envelope.data;
     envelope.select();
