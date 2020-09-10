@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 
 class LineManager {
   constructor(scene, parent) {
@@ -41,11 +41,11 @@ class LineManager {
     this.edges.forEach((_, edge) => {
       const startColor = new THREE.Color(0x401010);
       const endColor = new THREE.Color(0x15385c);
-      if (edge.data.label === "alias_of") {
+      if (edge.data.label === 'alias_of') {
         startColor.set(0x3a4a18);
         endColor.set(0x3a4a18);
       }
-      const length = edge.points.length;
+      const { length } = edge.points;
       for (let i = 1; i < length; i++) {
         const startPosition = (i - 1) / (length - 1);
         const endPosition = i / (length - 1);
@@ -69,12 +69,12 @@ class LineManager {
         );
       }
     });
-    this.mesh.geometry = new LineSegmentsGeometry()
+    this.mesh.geometry = new LineSegmentsGeometry();
     this.mesh.geometry.setPositions(positions);
     this.mesh.geometry.setColors(colors);
   }
 
-  updateColor(edge) { }
+  updateColor() { }
 }
 
 export default LineManager;

@@ -51,7 +51,7 @@ class ForceGraph {
   }
 
   pin(nodeID, x, y, z) {
-    //console.log('pin', nodeID, x, y, z);
+    // console.log('pin', nodeID, x, y, z);
     const node = this.nodeMap.get(nodeID);
     if (node) {
       node.fx = x;
@@ -87,7 +87,7 @@ class ForceGraph {
   }
 
   unpin(nodeID) {
-    //console.log('unpin', nodeID);
+    // console.log('unpin', nodeID);
     const node = this.nodeMap.get(nodeID);
     if (node) {
       node.fx = null;
