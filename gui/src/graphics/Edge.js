@@ -10,15 +10,8 @@ class Edge {
       new THREE.Vector3(),
       new THREE.Vector3(),
     );
-    this.group = new THREE.Group();
-    // this.lineManager = null;
-    this.lineMesh = new THREE.Line(
-      new THREE.BufferGeometry(),
-      new THREE.LineBasicMaterial({ color: 0x336699 }),
-    );
+    this.lineManager = null;
     this.points = [];
-    this.group.add(this.lineMesh);
-    this.group.envelope = this;
     this.hovered = false;
     this.selected = false;
   }
@@ -41,8 +34,8 @@ class Edge {
   enter(newData, newParent, newControls, newLineManager) {
     this.controls = newControls;
     this.parent = newParent;
-    // this.lineManager = newLineManager;
-    // this.lineManager.add(this);
+    this.lineManager = newLineManager;
+    this.lineManager.add(this);
     this.update(newData);
   }
 
@@ -51,11 +44,11 @@ class Edge {
   }
 
   exit() {
-    // this.lineManager.remove(this);
-    this.data = {};
+    this.lineManager.remove(this);
+    this.lineManager = null;
     this.parent = null;
     this.controls = null;
-    // this.lineManager = null;
+    this.data = {};
   }
 
   frameTick() { }
@@ -73,7 +66,6 @@ class Edge {
         newData.targetPosition,
       );
     }
-    this.lineMesh.geometry.setFromPoints(this.points);
     Object.assign(this.data, newData);
   }
 

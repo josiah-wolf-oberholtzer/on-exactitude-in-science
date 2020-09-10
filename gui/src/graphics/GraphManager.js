@@ -12,7 +12,7 @@ class GraphManager {
     this.sceneManager = sceneManager;
     this.textLoader = new TextLoader();
     this.group = new THREE.Group();
-    this.lineManager = new LineManager(this.group);
+    this.lineManager = new LineManager(this.sceneManager.scene, this.group);
     this.controls = new DragControls([], this.sceneManager.camera, this.sceneManager.canvas);
     this.envelopes = new Map();
     this.dispatcher = dispatch('deselect', 'doubleclick', 'select');
