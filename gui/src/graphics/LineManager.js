@@ -95,9 +95,7 @@ class LineManager {
     } else {
       this.edges.forEach((_, edge) => {
         this.setEdgePositions(edge);
-        this.setEdgeColors(edge);
       })
-      this.mesh.geometry.attributes.instanceStart.data.needsUpdate = true;
     }
   }
 
@@ -113,6 +111,7 @@ class LineManager {
       instanceColorStart.setXYZ(baseIndex + i, start.r, start.g, start.b);
       instanceColorEnd.setXYZ(baseIndex + i, end.r, end.g, end.b);
     }
+    instanceColorStart.data.needsUpdate = true;
   }
 
   setEdgePositions(edge) {
@@ -125,6 +124,7 @@ class LineManager {
       instanceStart.setXYZ(baseIndex + i, start.x, start.y, start.z);
       instanceEnd.setXYZ(baseIndex + i, end.x, end.y, end.z);
     }
+    instanceStart.data.needsUpdate = true;
   }
 
   updateColor(edge) {

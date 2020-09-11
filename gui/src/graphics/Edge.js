@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 class Edge {
   constructor() {
+    this.isEdge = true;
     this.controls = null;
     this.data = {};
     this.parent = null;
@@ -10,6 +11,10 @@ class Edge {
       new THREE.Vector3(),
       new THREE.Vector3(),
     );
+    this.line = new THREE.Line();
+    this.group = new THREE.Group();
+    this.group.envelope = this;
+    this.group.add(this.line);
     this.lineManager = null;
     this.points = [];
     this.hovered = false;
@@ -23,10 +28,11 @@ class Edge {
       startColor.set(0x3a4a18);
       endColor.set(0x3a4a18);
     }
-    if (this.selected) {
+    if (this.selected === true) {
       startColor.setHex(0xffff00);
       endColor.setHex(0xffff00);
-    } else if (this.hovererd) {
+    }
+    if (this.hovered === true) {
       startColor.setHex(0xff0000);
       endColor.setHex(0xff0000);
     }
@@ -38,6 +44,7 @@ class Edge {
     this.parent = newParent;
     this.lineManager = newLineManager;
     this.lineManager.add(this);
+    this.controls.add(this.line);
     this.update(newData);
   }
 
@@ -46,6 +53,7 @@ class Edge {
   }
 
   exit() {
+    this.controls.remove(this.line);
     this.lineManager.remove(this);
     this.lineManager = null;
     this.parent = null;
@@ -69,24 +77,35 @@ class Edge {
       );
     }
     Object.assign(this.data, newData);
+    const pointArray = [];
+    for (let i = 0; i < this.points.length; i++) {
+      pointArray.push(this.points[i].x, this.points[i].y, this.points[i].z);
+    }
+    this.line.geometry.setAttribute('position', new THREE.Float32BufferAttribute(pointArray, 3));
+    this.line.geometry.computeBoundingSphere();
   }
 
   mouseout() {
+    console.log("edge/mouseout", this.data.id);
     this.hovered = false;
     this.lineManager.updateColor(this);
   }
 
   mouseover() {
+    console.log("edge/mouseover", this.data.id);
     this.hovered = true;
     this.lineManager.updateColor(this);
   }
 
   select() {
+    console.log("edge/select", this.data.id);
     this.selected = true;
+    this.hovered = false;
     this.lineManager.updateColor(this);
   }
 
   deselect() {
+    console.log("edge/deselect", this.data.id);
     this.selected = false;
     this.lineManager.updateColor(this);
   }

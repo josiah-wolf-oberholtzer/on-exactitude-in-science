@@ -43,21 +43,25 @@ class GraphManager {
     // console.log('deselect', event);
     const { replaced } = event;
     const { envelope } = event.object.parent;
-    const vertex = envelope.data;
     envelope.deselect();
-    this.forceGraph.unpin(vertex.id);
-    if (!replaced) {
-      this.dispatcher.call('deselect', vertex, vertex);
+    if (envelope.isVertex) {
+      const vertex = envelope.data;
+      this.forceGraph.unpin(vertex.id);
+      if (!replaced) {
+        this.dispatcher.call('deselect', vertex, vertex);
+      }
     }
   }
 
   onDrag(event) {
     // console.log('drag', event);
     const { envelope } = event.object.parent;
-    const vertex = envelope.data;
-    const { position } = event;
-    this.forceGraph.pin(vertex.id, position.x, position.y, position.z);
-    this.forceGraph.reheat();
+    if (envelope.isVertex) {
+      const vertex = envelope.data;
+      const { position } = event;
+      this.forceGraph.pin(vertex.id, position.x, position.y, position.z);
+      this.forceGraph.reheat();
+    }
   }
 
   onDragEnd() {
@@ -69,18 +73,20 @@ class GraphManager {
     // console.log('dragstart', event);
     this.sceneManager.controls.enabled = false;
     const { envelope } = event.object.parent;
-    const vertex = envelope.data;
-    const currentClickObject = envelope;
-    const currentClickTime = Date.now();
-    if (
-      (currentClickObject === this.previousClickObject)
-      && ((currentClickTime - this.previousClickTime) < 250)
-    ) {
-      // console.log('doubleclick');
-      this.dispatcher.call('doubleclick', vertex, vertex);
+    if (envelope.isVertex) {
+      const vertex = envelope.data;
+      const currentClickObject = envelope;
+      const currentClickTime = Date.now();
+      if (
+        (currentClickObject === this.previousClickObject)
+        && ((currentClickTime - this.previousClickTime) < 250)
+      ) {
+        // console.log('doubleclick');
+        this.dispatcher.call('doubleclick', vertex, vertex);
+      }
+      this.previousClickObject = currentClickObject;
+      this.previousClickTime = currentClickTime;
     }
-    this.previousClickObject = currentClickObject;
-    this.previousClickTime = currentClickTime;
   }
 
   onEdgeEnter(data) {
@@ -136,11 +142,13 @@ class GraphManager {
   onSelect(event) {
     // console.log('select', event);
     const { envelope } = event.object.parent;
-    const vertex = envelope.data;
     envelope.select();
-    this.forceGraph.reheat();
-    this.forceGraph.pin(vertex.id, vertex.position.x, vertex.position.y, vertex.position.z);
-    this.dispatcher.call('select', vertex, vertex);
+    if (envelope.isVertex) {
+      const vertex = envelope.data;
+      this.forceGraph.reheat();
+      this.forceGraph.pin(vertex.id, vertex.position.x, vertex.position.y, vertex.position.z);
+      this.dispatcher.call('select', vertex, vertex);
+    }
   }
 
   onVertexEnter(data) {
