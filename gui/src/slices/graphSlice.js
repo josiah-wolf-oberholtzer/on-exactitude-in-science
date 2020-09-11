@@ -6,7 +6,6 @@ import { union } from '../utils';
 const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
   async (spec, { rejectWithValue }) => {
-    console.log('fetch', spec);
     try {
       const response = await graphAPI.fetchLocalityByEntity(
         spec.label, spec.id, spec.filters,
@@ -58,11 +57,7 @@ const graphSlice = createSlice({
     error: null,
     loading: false,
     pageCount: 1,
-    selected: {
-      eid: null,
-      label: null,
-      name: null,
-    },
+    selected: null,
     vertices: [],
     verticesByCountry: {},
     verticesByFormat: {
@@ -83,14 +78,10 @@ const graphSlice = createSlice({
   },
   reducers: {
     deselectEntity(state) {
-      state.selected.eid = null;
-      state.selected.label = null;
-      state.selected.name = null;
+      state.selected = null;
     },
     selectEntity(state, action) {
-      state.selected.eid = action.payload.eid;
-      state.selected.label = action.payload.label;
-      state.selected.name = action.payload.name;
+      state.selected = action.payload;
     },
   },
   extraReducers: {

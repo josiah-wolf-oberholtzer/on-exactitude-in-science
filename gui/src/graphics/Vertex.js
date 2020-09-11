@@ -3,9 +3,10 @@ import * as d3 from 'd3-scale-chromatic';
 
 class Vertex {
   constructor() {
+    this.isVertex = true;
     this.controls = null;
     this.data = {};
-    this.scene = null;
+    this.parent = null;
     this.textA = null;
     this.textB = null;
     this.radii = {
@@ -45,11 +46,11 @@ class Vertex {
 
   calculateColor() {
     if (this.hovered) {
-      this.coreMesh.material.color.setHex(0xffff00);
-      this.childRingMesh.material.color.setHex(0xffff00);
-    } else if (this.selected) {
       this.coreMesh.material.color.setHex(0xff0000);
       this.childRingMesh.material.color.setHex(0xff0000);
+    } else if (this.selected) {
+      this.coreMesh.material.color.setHex(0xffff00);
+      this.childRingMesh.material.color.setHex(0xffff00);
     } else {
       const color = d3.interpolateSpectral(this.data.depth / this.data.maximum_depth);
       this.coreMesh.material.color.set(color);
@@ -93,10 +94,10 @@ class Vertex {
     };
   }
 
-  enter(newData, newScene, newControls, textLoader) {
+  enter(newData, newParent, newControls, textLoader) {
     this.controls = newControls;
-    this.scene = newScene;
-    this.scene.add(this.group);
+    this.parent = newParent;
+    this.parent.add(this.group);
     this.controls.add(this.coreMesh);
     this.textA = textLoader.loadMesh(newData.name);
     this.textB = this.textA.clone(false);
@@ -145,11 +146,11 @@ class Vertex {
   }
 
   exit() {
-    this.scene.remove(this.group);
+    this.parent.remove(this.group);
     this.controls.remove(this.coreMesh);
     this.group.remove(this.textA);
     this.group.remove(this.textB);
-    this.scene = null;
+    this.parent = null;
     this.data = {};
     this.controls = null;
   }
@@ -157,6 +158,7 @@ class Vertex {
   select() {
     this.group.add(this.pointLight);
     this.selected = true;
+    this.hovered = false;
   }
 
   deselect() {

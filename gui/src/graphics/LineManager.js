@@ -1,16 +1,25 @@
 import * as THREE from 'three';
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 
 class LineManager {
-  constructor(parent) {
+  constructor(scene, parent) {
+    this.scene = scene;
+    this.parent = parent;
     this.edges = new Map();
-    this.geometry = new THREE.BufferGeometry();
-    this.material = new THREE.LineBasicMaterial({ vertexColors: true });
-    this.geometry.setAttribute('color', new THREE.Float32BufferAttribute([], 3));
-    this.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3));
-    this.geometry.setIndex(new THREE.Uint16BufferAttribute([], 1));
-    this.line = new THREE.LineSegments(this.geometry, this.material);
+    this.mesh = new LineSegments2(
+      new LineSegmentsGeometry(),
+      new LineMaterial({
+        fog: this.scene.fog,
+        linewidth: 2,
+        vertexColors: true,
+      }),
+    );
     this.dirty = true;
-    parent.add(this.line);
+    this.parent.add(this.mesh);
+    this.colors = [];
+    this.positions = [];
   }
 
   add(edge) {
@@ -23,52 +32,103 @@ class LineManager {
     this.dirty = true;
   }
 
-  frameTick() { }
+  frameTick() {
+    this.mesh.material.resolution.set(window.innerWidth, window.innerHeight);
+  }
+
+  buildColorArray(startColor, endColor, length) {
+    const colors = [];
+    for (let i = 0; i < length; i++) {
+      colors.push(new THREE.Color(startColor).lerp(endColor, i / (length - 1)));
+    }
+    return colors;
+  }
+
+  buildFlattenedColorSegment(startColor, endColor, length) {
+    const segment = [];
+    const colors = this.buildColorArray(startColor, endColor, length);
+    for (let i = 1; i < length; i++) {
+      segment.push(
+        colors[i - 1].r,
+        colors[i - 1].g,
+        colors[i - 1].b,
+        colors[i].r,
+        colors[i].g,
+        colors[i].b,
+      );
+    }
+    return segment;
+  }
+
+  buildFlattenedPositionSegment(points) {
+    const segment = [];
+    const { length } = points;
+    for (let i = 1; i < length; i++) {
+      segment.push(
+        points[i - 1].x,
+        points[i - 1].y,
+        points[i - 1].z,
+        points[i].x,
+        points[i].y,
+        points[i].z,
+      );
+    }
+    return segment;
+  }
 
   graphTick() {
-    const positions = [];
+    let baseIndex = 0;
     if (this.dirty) {
-      const colors = [];
-      const indices = [];
-      let baseIndex = 0;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const edge of this.edges.keys()) {
-        const color = edge.calculateColor();
+      this.colors.length = 0;
+      this.positions.length = 0;
+      this.edges.forEach((_, edge) => {
+        const { startColor, endColor } = edge.calculateColors();
         this.edges.set(edge, baseIndex);
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [index, point] of edge.points.entries()) {
-          colors.push(color.r, color.g, color.b);
-          positions.push(point.x, point.y, point.z);
-          if (index > 0) {
-            indices.push(baseIndex + index - 1, baseIndex + index);
-          }
-        }
-        baseIndex += edge.points.length;
-      }
-      this.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-      this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      this.geometry.setIndex(new THREE.Uint16BufferAttribute(indices, 1));
+        this.positions.push(...this.buildFlattenedPositionSegment(edge.points));
+        this.colors.push(...this.buildFlattenedColorSegment(startColor, endColor, edge.points.length));
+        baseIndex += edge.points.length - 1;
+      });
       this.dirty = false;
+      this.mesh.geometry = new LineSegmentsGeometry();
+      this.mesh.geometry.setPositions(this.positions);
+      this.mesh.geometry.setColors(this.colors);
     } else {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const edge of this.edges.keys()) {
-        // eslint-disable-next-line no-restricted-syntax,no-unused-vars
-        for (const [index, point] of edge.points.entries()) {
-          positions.push(point.x, point.y, point.z);
-        }
-      }
-      this.geometry.getAttribute('position').copyArray(positions).needsUpdate = true;
+      this.edges.forEach((_, edge) => {
+        this.setEdgePositions(edge);
+      })
     }
   }
 
-  updateColor(edge) {
-    const index = this.edges.get(edge);
-    const color = edge.calculateColor();
-    const attribute = this.geometry.getAttribute('color');
-    for (let i = 0; i < edge.points.length; i++) {
-      attribute.setXYZ(index + (i * 3), color.r, color.g, color.b);
+  setEdgeColors(edge) {
+    const { instanceColorStart, instanceColorEnd } = this.mesh.geometry.attributes;
+    const baseIndex = this.edges.get(edge);
+    const { length } = edge.points;
+    const { startColor, endColor } = edge.calculateColors();
+    const colors = this.buildColorArray(startColor, endColor, length);
+    for (let i = 0; i < (length - 1); i++) {
+      const start = colors[i];
+      const end = colors[i + 1]
+      instanceColorStart.setXYZ(baseIndex + i, start.r, start.g, start.b);
+      instanceColorEnd.setXYZ(baseIndex + i, end.r, end.g, end.b);
     }
-    attribute.needsUpdate = true;
+    instanceColorStart.data.needsUpdate = true;
+  }
+
+  setEdgePositions(edge) {
+    const { instanceStart, instanceEnd } = this.mesh.geometry.attributes;
+    const baseIndex = this.edges.get(edge);
+    const { length } = edge.points;
+    for (let i = 0; i < (length - 1); i++) {
+      const start = edge.points[i];
+      const end = edge.points[i + 1]
+      instanceStart.setXYZ(baseIndex + i, start.x, start.y, start.z);
+      instanceEnd.setXYZ(baseIndex + i, end.x, end.y, end.z);
+    }
+    instanceStart.data.needsUpdate = true;
+  }
+
+  updateColor(edge) {
+    this.setEdgeColors(edge);
   }
 }
 

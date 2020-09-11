@@ -19,6 +19,7 @@ class DragControls {
     this.objects = objects || [];
     this.plane = new Plane();
     this.raycaster = new Raycaster();
+    this.raycaster.params.Line.threshold = 0.25;
     this.selected = null;
     this.transformGroup = false;
     this.worldPosition = new Vector3();

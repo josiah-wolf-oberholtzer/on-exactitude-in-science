@@ -19,39 +19,35 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const mapStateToProps = state => {
-  const discogsPrefix = "https://discogs.com",
-    eid = state.graph.selected.eid,
-    name = state.graph.selected.name,
-    label = state.graph.selected.label;
-  let discogsUrl = null;
-  if (label !== null) {
-    if (label === "track") {
-      const releaseEid = eid.split("-")[0];
-      discogsUrl = `${discogsPrefix}/release/${releaseEid}`;
-    } else if (label === "company") {
-      discogsUrl = `${discogsPrefix}/label/${eid}`;
-    } else {
-      discogsUrl = `${discogsPrefix}/${label}/${eid}`;
-    }
+  return { 
+    selected: state.graph.selected,
   }
-  return { discogsUrl, eid, label, name }
 }
 
-const mapDispatchToProps = dispatch => ({
-  refocusCamera: () => dispatch(refocusCamera()),
-});
+const mapDispatchToProps = dispatch => {
+  return {
+    refocusCamera: () => dispatch(refocusCamera()),
+  }
+}
+
+const buildDiscogsUrl = (label, eid) => {
+  const discogsPrefix = "https://discogs.com";
+  if (label === "track") {
+    const releaseEid = eid.split("-")[0];
+    return `${discogsPrefix}/release/${releaseEid}`;
+  } else if (label === "company") {
+    return `${discogsPrefix}/label/${eid}`;
+  } else {
+    return `${discogsPrefix}/${label}/${eid}`;
+  }
+}
 
 const EntityDial = (props) => {
   const classes = useStyles();
+  const { selected } = props;
   const [open, setOpen] = React.useState(false);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const handleClose = () => { setOpen(false); };
+  const handleOpen = () => { setOpen(true); };
 
   return (
     <SpeedDial
@@ -63,13 +59,13 @@ const EntityDial = (props) => {
       onOpen={handleOpen}
       open={open}
     >
-      { props.label !== null &&
+      { (selected !== null && selected.kind === "vertex") &&
         <SpeedDialAction
           className={classes.speedDialAction}
           key="discogs"
           icon={<AlbumIcon />}
           onClick={() => {
-            window.open(props.discogsUrl, "_blank");
+            window.open(buildDiscogsUrl(selected.label, selected.eid), "_blank");
             handleClose();
           }}
           tooltipOpen
@@ -77,28 +73,17 @@ const EntityDial = (props) => {
           tooltipTitle="Discogs"
         />
       }
-      { props.label !== null &&
-        <SpeedDialAction
-          className={classes.speedDialAction}
-          key="connections"
-          icon={<AssessmentIcon />}
-          onClick={handleClose}
-          tooltipOpen
-          tooltipPlacement="left"
-          tooltipTitle="Connections"
-        />
-      }
       <SpeedDialAction
         className={classes.speedDialAction}
         key="focus"
         icon={<CenterFocusStrongIcon />}
         onClick={() => {
-            props.refocusCamera();
-            handleClose();
+          props.refocusCamera();
+          handleClose();
         }}
         tooltipOpen
         tooltipPlacement="left"
-        tooltipTitle="Focus"
+        tooltipTitle="Refocus Camera"
       />
     </SpeedDial>
   )

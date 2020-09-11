@@ -2,45 +2,49 @@ import * as THREE from 'three';
 
 class Edge {
   constructor() {
+    this.isEdge = true;
     this.controls = null;
     this.data = {};
+    this.parent = null;
     this.curve = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(),
       new THREE.Vector3(),
       new THREE.Vector3(),
     );
+    this.line = new THREE.Line();
     this.group = new THREE.Group();
-    this.lineManager = null;
-    this.lineMesh = new THREE.Line(
-      new THREE.BufferGeometry(),
-      new THREE.LineBasicMaterial({ color: 0x336699 }),
-    );
-    this.points = [];
-    this.group.add(this.lineMesh);
     this.group.envelope = this;
+    this.group.add(this.line);
+    this.lineManager = null;
+    this.points = [];
     this.hovered = false;
     this.selected = false;
   }
 
-  calculateColor() {
-    const color = new THREE.Color(0xffffff);
+  calculateColors() {
+    const startColor = new THREE.Color(0x401010);
+    const endColor = new THREE.Color(0x15385c);
     if (this.data.label === 'alias_of') {
-      color.setHex(0xd0ff00);
-    } else {
-      color.setHex(0x336699);
+      startColor.set(0x3a4a18);
+      endColor.set(0x3a4a18);
     }
-    if (this.selected) {
-      color.setHex(0xffff00);
-    } else if (this.hovererd) {
-      color.setHex(0xff0000);
+    if (this.selected === true) {
+      startColor.setHex(0xffff00);
+      endColor.setHex(0xffff00);
     }
-    return color;
+    if (this.hovered === true) {
+      startColor.setHex(0xff0000);
+      endColor.setHex(0xff0000);
+    }
+    return {startColor, endColor};
   }
 
-  enter(newData, newControls, newLineManager) {
+  enter(newData, newParent, newControls, newLineManager) {
     this.controls = newControls;
+    this.parent = newParent;
     this.lineManager = newLineManager;
     this.lineManager.add(this);
+    this.controls.add(this.line);
     this.update(newData);
   }
 
@@ -49,10 +53,12 @@ class Edge {
   }
 
   exit() {
+    this.controls.remove(this.line);
     this.lineManager.remove(this);
-    this.data = {};
-    this.controls = null;
     this.lineManager = null;
+    this.parent = null;
+    this.controls = null;
+    this.data = {};
   }
 
   frameTick() { }
@@ -70,8 +76,13 @@ class Edge {
         newData.targetPosition,
       );
     }
-    this.lineMesh.geometry.setFromPoints(this.points);
     Object.assign(this.data, newData);
+    const pointArray = [];
+    for (let i = 0; i < this.points.length; i++) {
+      pointArray.push(this.points[i].x, this.points[i].y, this.points[i].z);
+    }
+    this.line.geometry.setAttribute('position', new THREE.Float32BufferAttribute(pointArray, 3));
+    this.line.geometry.computeBoundingSphere();
   }
 
   mouseout() {
@@ -86,6 +97,7 @@ class Edge {
 
   select() {
     this.selected = true;
+    this.hovered = false;
     this.lineManager.updateColor(this);
   }
 

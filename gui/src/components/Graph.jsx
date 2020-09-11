@@ -25,7 +25,12 @@ const mapDispatchToProps = dispatch => {
       delete parsedQuery.page;
       dispatch(push(`/${label}/${id}` + queryObjectToString(parsedQuery)));
     },
-    selectEntity: (eid, label, name) => dispatch(selectEntity({eid, label, name})),
+    selectVertex: (eid, label, name) => {
+      dispatch(selectEntity({eid, label, name, kind: "vertex"}))
+    },
+    selectEdge: (label, role, sourceLabel, sourceName, targetLabel, targetName) => {
+      dispatch(selectEntity({label, role, sourceLabel, sourceName, targetLabel, targetName, kind: "edge"}))
+    },
     deselectEntity: () => dispatch(deselectEntity()),
   }
 }
@@ -58,14 +63,18 @@ class Graph extends React.Component {
     this.forceGraph = new ForceGraph();
     this.sceneManager = new SceneManager(this.mount);
     this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
+    this.threeGraph.on("deselect", (vertex) => {
+      this.props.deselectEntity();
+    });
     this.threeGraph.on("doubleclick", (vertex) => {
       this.props.push(this.props.location, vertex.label, vertex.eid);
     });
-    this.threeGraph.on("select", (vertex) => {
-      this.props.selectEntity(vertex.eid, vertex.label, vertex.name);
+    this.threeGraph.on("selectEdge", (payload) => {
+      const {edge, source, target} = payload;
+      this.props.selectEdge(edge.label, edge.role, source.label, source.name, target.label, target.name);
     });
-    this.threeGraph.on("deselect", (vertex) => {
-      this.props.deselectEntity();
+    this.threeGraph.on("selectVertex", (vertex) => {
+      this.props.selectVertex(vertex.eid, vertex.label, vertex.name);
     });
     this.updateGraph({}, this.props);
     this.start();
