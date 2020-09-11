@@ -95,8 +95,23 @@ class LineManager {
     } else {
       this.edges.forEach((_, edge) => {
         this.setEdgePositions(edge);
+        this.setEdgeColors(edge);
       })
       this.mesh.geometry.attributes.instanceStart.data.needsUpdate = true;
+    }
+  }
+
+  setEdgeColors(edge) {
+    const { instanceColorStart, instanceColorEnd } = this.mesh.geometry.attributes;
+    const baseIndex = this.edges.get(edge);
+    const { length } = edge.points;
+    const { startColor, endColor } = edge.calculateColors();
+    const colors = this.buildColorArray(startColor, endColor, length);
+    for (let i = 0; i < (length - 1); i++) {
+      const start = colors[i];
+      const end = colors[i + 1]
+      instanceColorStart.setXYZ(baseIndex + i, start.r, start.g, start.b);
+      instanceColorEnd.setXYZ(baseIndex + i, end.r, end.g, end.b);
     }
   }
 
@@ -112,7 +127,9 @@ class LineManager {
     }
   }
 
-  updateColor() {}
+  updateColor(edge) {
+    this.setEdgeColors(edge);
+  }
 }
 
 export default LineManager;
