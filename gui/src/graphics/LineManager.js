@@ -36,30 +36,35 @@ class LineManager {
     this.mesh.material.resolution.set(window.innerWidth, window.innerHeight);
   }
 
-  buildColorSegment(startColor, endColor, length) {
+  buildColorArray(startColor, endColor, length) {
     const colors = [];
-    for (let i = 1; i < length; i++) {
-      const startPosition = (i - 1) / (length - 1);
-      const endPosition = i / (length - 1);
-      const segmentStartColor = new THREE.Color(startColor).lerp(endColor, startPosition);
-      const segmentEndColor = new THREE.Color(startColor).lerp(endColor, endPosition);
-      colors.push(
-        segmentStartColor.r,
-        segmentStartColor.g,
-        segmentStartColor.b,
-        segmentEndColor.r,
-        segmentEndColor.g,
-        segmentEndColor.b,
-      );
+    for (let i = 0; i < length; i++) {
+      colors.push(new THREE.Color(startColor).lerp(endColor, i / (length - 1)));
     }
     return colors;
   }
 
-  buildPositionSegment(points) {
-    const positions = [];
+  buildFlattenedColorSegment(startColor, endColor, length) {
+    const segment = [];
+    const colors = this.buildColorArray(startColor, endColor, length);
+    for (let i = 1; i < length; i++) {
+      segment.push(
+        colors[i - 1].r,
+        colors[i - 1].g,
+        colors[i - 1].b,
+        colors[i].r,
+        colors[i].g,
+        colors[i].b,
+      );
+    }
+    return segment;
+  }
+
+  buildFlattenedPositionSegment(points) {
+    const segment = [];
     const { length } = points;
     for (let i = 1; i < length; i++) {
-      positions.push(
+      segment.push(
         points[i - 1].x,
         points[i - 1].y,
         points[i - 1].z,
@@ -68,11 +73,10 @@ class LineManager {
         points[i].z,
       );
     }
-    return positions;
+    return segment;
   }
 
   graphTick() {
-
     let baseIndex = 0;
     if (this.dirty) {
       this.colors.length = 0;
@@ -80,27 +84,31 @@ class LineManager {
       this.edges.forEach((_, edge) => {
         const { startColor, endColor } = edge.calculateColors();
         this.edges.set(edge, baseIndex);
-        this.positions.push(...this.buildPositionSegment(edge.points));
-        this.colors.push(...this.buildColorSegment(startColor, endColor, edge.points.length));
-        baseIndex += ((edge.points.length - 1) * 2);
+        this.positions.push(...this.buildFlattenedPositionSegment(edge.points));
+        this.colors.push(...this.buildFlattenedColorSegment(startColor, endColor, edge.points.length));
+        baseIndex += edge.points.length - 1;
       });
       this.dirty = false;
       this.mesh.geometry = new LineSegmentsGeometry();
       this.mesh.geometry.setPositions(this.positions);
       this.mesh.geometry.setColors(this.colors);
     } else {
-      const { instanceStart, instanceEnd } = this.mesh.geometry.attributes;
       this.edges.forEach((_, edge) => {
-        const { length } = edge.points;
-        for (let i = 0; i < (length - 1); i++) {
-          const start = edge.points[i];
-          const end = edge.points[i + 1]
-          instanceStart.setXYZ(baseIndex + i, start.x, start.y, start.z);
-          instanceEnd.setXYZ(baseIndex + i, end.x, end.y, end.z);
-        }
-        baseIndex += length - 1;
+        this.setEdgePositions(edge);
       })
-      instanceStart.data.needsUpdate = true;
+      this.mesh.geometry.attributes.instanceStart.data.needsUpdate = true;
+    }
+  }
+
+  setEdgePositions(edge) {
+    const { instanceStart, instanceEnd } = this.mesh.geometry.attributes;
+    const baseIndex = this.edges.get(edge);
+    const { length } = edge.points;
+    for (let i = 0; i < (length - 1); i++) {
+      const start = edge.points[i];
+      const end = edge.points[i + 1]
+      instanceStart.setXYZ(baseIndex + i, start.x, start.y, start.z);
+      instanceEnd.setXYZ(baseIndex + i, end.x, end.y, end.z);
     }
   }
 
