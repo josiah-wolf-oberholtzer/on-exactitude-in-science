@@ -16,19 +16,21 @@ class Edge {
     this.selected = false;
   }
 
-  calculateColor() {
-    const color = new THREE.Color(0xffffff);
+  calculateColors() {
+    const startColor = new THREE.Color(0x401010);
+    const endColor = new THREE.Color(0x15385c);
     if (this.data.label === 'alias_of') {
-      color.setHex(0xd0ff00);
-    } else {
-      color.setHex(0x336699);
+      startColor.set(0x3a4a18);
+      endColor.set(0x3a4a18);
     }
     if (this.selected) {
-      color.setHex(0xffff00);
+      startColor.setHex(0xffff00);
+      endColor.setHex(0xffff00);
     } else if (this.hovererd) {
-      color.setHex(0xff0000);
+      startColor.setHex(0xff0000);
+      endColor.setHex(0xff0000);
     }
-    return color;
+    return {startColor, endColor};
   }
 
   enter(newData, newParent, newControls, newLineManager) {
@@ -71,22 +73,22 @@ class Edge {
 
   mouseout() {
     this.hovered = false;
-    // this.lineManager.updateColor(this);
+    this.lineManager.updateColor(this);
   }
 
   mouseover() {
     this.hovered = true;
-    // this.lineManager.updateColor(this);
+    this.lineManager.updateColor(this);
   }
 
   select() {
     this.selected = true;
-    // this.lineManager.updateColor(this);
+    this.lineManager.updateColor(this);
   }
 
   deselect() {
     this.selected = false;
-    // this.lineManager.updateColor(this);
+    this.lineManager.updateColor(this);
   }
 }
 
