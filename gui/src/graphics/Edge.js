@@ -86,26 +86,22 @@ class Edge {
   }
 
   mouseout() {
-    console.log("edge/mouseout", this.data.id);
     this.hovered = false;
     this.lineManager.updateColor(this);
   }
 
   mouseover() {
-    console.log("edge/mouseover", this.data.id);
     this.hovered = true;
     this.lineManager.updateColor(this);
   }
 
   select() {
-    console.log("edge/select", this.data.id);
     this.selected = true;
     this.hovered = false;
     this.lineManager.updateColor(this);
   }
 
   deselect() {
-    console.log("edge/deselect", this.data.id);
     this.selected = false;
     this.lineManager.updateColor(this);
   }

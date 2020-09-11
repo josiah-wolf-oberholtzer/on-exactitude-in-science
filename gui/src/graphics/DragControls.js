@@ -120,7 +120,6 @@ class DragControls {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
-      console.log("intersections", Array.from(this.intersections));
       const { object } = this.intersections[0];
       this.plane.setFromNormalAndCoplanarPoint(
         this.camera.getWorldDirection(this.plane.normal),

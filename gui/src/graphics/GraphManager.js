@@ -15,7 +15,7 @@ class GraphManager {
     this.lineManager = new LineManager(this.sceneManager.scene, this.group);
     this.controls = new DragControls([], this.sceneManager.camera, this.sceneManager.canvas);
     this.envelopes = new Map();
-    this.dispatcher = dispatch('deselect', 'doubleclick', 'select');
+    this.dispatcher = dispatch('deselect', 'doubleclick', 'selectEdge', 'selectVertex');
     this.previousClickObject = null;
     this.previousClickTime = Date.now();
     this.sceneManager.scene.add(this.group);
@@ -43,13 +43,13 @@ class GraphManager {
     // console.log('deselect', event);
     const { replaced } = event;
     const { envelope } = event.object.parent;
+    const graphObject = envelope.data;
     envelope.deselect();
     if (envelope.isVertex) {
-      const vertex = envelope.data;
-      this.forceGraph.unpin(vertex.id);
-      if (!replaced) {
-        this.dispatcher.call('deselect', vertex, vertex);
-      }
+      this.forceGraph.unpin(graphObject.id);
+    }
+    if (!replaced) {
+      this.dispatcher.call('deselect', graphObject, graphObject);
     }
   }
 
@@ -143,11 +143,16 @@ class GraphManager {
     // console.log('select', event);
     const { envelope } = event.object.parent;
     envelope.select();
+    this.forceGraph.reheat();
     if (envelope.isVertex) {
       const vertex = envelope.data;
-      this.forceGraph.reheat();
       this.forceGraph.pin(vertex.id, vertex.position.x, vertex.position.y, vertex.position.z);
-      this.dispatcher.call('select', vertex, vertex);
+      this.dispatcher.call('selectVertex', vertex, vertex);
+    } else if (envelope.isEdge) {
+      const edge = envelope.data;
+      const source = this.envelopes.get(edge.source).data;
+      const target = this.envelopes.get(edge.target).data;
+      this.dispatcher.call('selectEdge', edge, {edge, source, target});
     }
   }
 
