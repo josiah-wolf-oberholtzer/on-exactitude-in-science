@@ -28,8 +28,10 @@ const mapDispatchToProps = dispatch => {
     selectVertex: (eid, label, name) => {
       dispatch(selectEntity({eid, label, name, kind: "vertex"}))
     },
-    selectEdge: (label, role, sourceLabel, sourceName, targetLabel, targetName) => {
-      dispatch(selectEntity({label, role, sourceLabel, sourceName, targetLabel, targetName, kind: "edge"}))
+    selectEdge: (label, role, sourceLabel, sourceEID, sourceName, targetLabel, targetEID, targetName) => {
+      dispatch(selectEntity({
+        label, role, sourceLabel, sourceEID, sourceName, targetLabel, targetEID, targetName, kind: "edge",
+      }))
     },
     deselectEntity: () => dispatch(deselectEntity()),
   }
@@ -71,7 +73,9 @@ class Graph extends React.Component {
     });
     this.threeGraph.on("selectEdge", (payload) => {
       const {edge, source, target} = payload;
-      this.props.selectEdge(edge.label, edge.role, source.label, source.name, target.label, target.name);
+      this.props.selectEdge(
+        edge.label, edge.role, source.label, source.eid, source.name, target.label, target.eid, target.name
+      );
     });
     this.threeGraph.on("selectVertex", (vertex) => {
       this.props.selectVertex(vertex.eid, vertex.label, vertex.name);

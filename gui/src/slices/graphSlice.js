@@ -107,7 +107,7 @@ const graphSlice = createSlice({
       state.loading = false;
       state.pageCount = Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
       state.selected = {
-        kind: "vertex",
+        kind: 'vertex',
         label: center.label,
         eid: center.eid,
         name: center.name,

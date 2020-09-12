@@ -2,12 +2,15 @@ import React from 'react';
 import AlbumIcon from '@material-ui/icons/Album';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import CenterFocusStrongIcon from '@material-ui/icons/CenterFocusStrong';
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { refocusCamera } from '../slices/cameraSlice';
+import { buildDiscogsURL } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
   speedDial: {
@@ -30,15 +33,13 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const buildDiscogsUrl = (label, eid) => {
-  const discogsPrefix = "https://discogs.com";
-  if (label === "track") {
-    const releaseEid = eid.split("-")[0];
-    return `${discogsPrefix}/release/${releaseEid}`;
-  } else if (label === "company") {
-    return `${discogsPrefix}/label/${eid}`;
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
   } else {
-    return `${discogsPrefix}/${label}/${eid}`;
+    if (document.exitFullscreen) {
+      document.exitFullscreen(); 
+    }
   }
 }
 
@@ -59,20 +60,6 @@ const EntityDial = (props) => {
       onOpen={handleOpen}
       open={open}
     >
-      { (selected !== null && selected.kind === "vertex") &&
-        <SpeedDialAction
-          className={classes.speedDialAction}
-          key="discogs"
-          icon={<AlbumIcon />}
-          onClick={() => {
-            window.open(buildDiscogsUrl(selected.label, selected.eid), "_blank");
-            handleClose();
-          }}
-          tooltipOpen
-          tooltipPlacement="left"
-          tooltipTitle="Discogs"
-        />
-      }
       <SpeedDialAction
         className={classes.speedDialAction}
         key="focus"
@@ -81,10 +68,39 @@ const EntityDial = (props) => {
           props.refocusCamera();
           handleClose();
         }}
+        style={{ whiteSpace: "nowrap" }}
         tooltipOpen
         tooltipPlacement="left"
         tooltipTitle="Refocus Camera"
       />
+      <SpeedDialAction
+        className={classes.speedDialAction}
+        key="fullscreen"
+        icon={ document.fullscreenElement ? <FullscreenExitIcon /> : <FullscreenIcon /> }
+        onClick={() => {
+          toggleFullscreen();
+          handleClose();
+        }}
+        style={{ whiteSpace: "nowrap" }}
+        tooltipOpen
+        tooltipPlacement="left"
+        tooltipTitle={ document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen" }
+      />
+      { (selected !== null && selected.kind === "vertex") &&
+        <SpeedDialAction
+          className={classes.speedDialAction}
+          key="discogs"
+          icon={<AlbumIcon />}
+          onClick={() => {
+            window.open(buildDiscogsURL(selected.label, selected.eid), "_blank");
+            handleClose();
+          }}
+          style={{ whiteSpace: "nowrap" }}
+          tooltipOpen
+          tooltipPlacement="left"
+          tooltipTitle="See on Discogs"
+        />
+      }
     </SpeedDial>
   )
 }
