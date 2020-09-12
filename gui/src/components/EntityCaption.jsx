@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
   caption: {
     position: 'fixed',
     bottom: theme.spacing(2),
-    right: theme.spacing(10),
+    right: theme.spacing(12),
   },
 }));
 
@@ -26,6 +26,56 @@ const roleCaptions = {
   "subrelease_of": "is a",
 }
 
+const VertexCaption = (props) => {
+  const { vertex } = props;
+  const href = buildDiscogsURL(vertex.label, vertex.eid);
+  return (
+    <Grid item>
+      <Typography variant="overline" display="block">
+        {vertex.label}{vertex.year !== undefined ? ` (${vertex.year})` : ""}
+      </Typography>
+      <Typography variant="h5" display="block">
+        <Link
+          href={href}
+          rel="noopener"
+          target="_blank"
+        >
+          {vertex.name}
+        </Link>
+      </Typography>
+    </Grid>
+  )
+}
+
+const EdgeCaption = (props) => {
+  const { edge } = props;
+  return (
+    <Grid item>
+      { (roleCaptions[edge.label] !== undefined)
+        ? <Typography variant="overline" display="block">{roleCaptions[edge.label]}</Typography>
+        : <Typography variant="overline" display="block">&nbsp;</Typography>
+      }
+      <Typography variant="h5" display="block">{edge.role}</Typography>
+    </Grid>
+  )
+}
+
+const EdgeIcon = (props) => {
+  const { edge } = props;
+  return (
+    <Grid item>
+      <Box px={1}>
+        <Typography variant="overline" display="block">&nbsp;</Typography>
+        { 
+          edge.label === "alias_of"
+          ? <SwapHorizIcon />
+          : <ArrowForwardIosIcon />
+        }
+      </Box>
+    </Grid>
+  )
+}
+
 const EntityCaption = (props) => {
   const classes = useStyles();
   const { selected } = props;
@@ -34,82 +84,24 @@ const EntityCaption = (props) => {
   }
   switch (selected.kind) {
     case "vertex":
-      const vertexHREF = buildDiscogsURL(selected.label, selected.eid);
+      const { vertex } = selected;
       return (
         <div className={classes.caption}>
           <Grid container>
-            <Grid item>
-              <Typography variant="overline" display="block">{selected.label}</Typography>
-              <Typography variant="h5" display="block">
-                <Link
-                  href={vertexHREF}
-                  rel="noopener"
-                  target="_blank"
-                >
-                  {selected.name}
-                </Link>
-              </Typography>
-            </Grid>
+            <VertexCaption vertex={vertex} />
           </Grid>
         </div>
       )
     case "edge":
-      const sourceHREF = buildDiscogsURL(selected.sourceLabel, selected.sourceEID);
-      const targetHREF = buildDiscogsURL(selected.targetLabel, selected.targetEID);
+      const { edge, source, target } = selected;
       return (
         <div className={classes.caption}>
           <Grid container>
-            <Grid item>
-              <Typography variant="overline" display="block">{selected.sourceLabel}</Typography>
-              <Typography variant="h5" display="block">
-                <Link
-                  href={sourceHREF}
-                  rel="noopener"
-                  target="_blank"
-                >
-                  {selected.sourceName}
-                </Link>
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Box px={1}>
-                <Typography variant="overline" display="block">&nbsp;</Typography>
-                { 
-                  selected.label === "alias_of"
-                  ? <SwapHorizIcon />
-                  : <ArrowForwardIosIcon />
-                }
-              </Box>
-            </Grid>
-            <Grid item>
-              { (roleCaptions[selected.label] !== undefined)
-                ? <Typography variant="overline" display="block">{roleCaptions[selected.label]}</Typography>
-                : <Typography variant="overline" display="block">&nbsp;</Typography>
-              }
-              <Typography variant="h5" display="block">{selected.role}</Typography>
-            </Grid>
-            <Grid item>
-              <Box px={1}>
-                <Typography variant="overline" display="block">&nbsp;</Typography>
-                { 
-                  selected.label === "alias_of"
-                  ? <SwapHorizIcon />
-                  : <ArrowForwardIosIcon />
-                }
-              </Box>
-            </Grid>
-            <Grid item>
-              <Typography variant="overline" display="block">{selected.targetLabel}</Typography>
-              <Typography variant="h5" display="block">
-                <Link
-                  href={targetHREF}
-                  rel="noopener"
-                  target="_blank"
-                >
-                  {selected.targetName}
-                </Link>
-              </Typography>
-            </Grid>
+            <VertexCaption vertex={source} />
+            <EdgeIcon edge={edge} />
+            <EdgeCaption edge={edge} />
+            <EdgeIcon edge={edge} />
+            <VertexCaption vertex={target} />
           </Grid>
         </div>
       );

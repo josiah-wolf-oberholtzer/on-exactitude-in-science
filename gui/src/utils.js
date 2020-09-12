@@ -12,6 +12,21 @@ const buildDiscogsURL = (label, eid) => {
   return `${discogsPrefix}/${label}/${eid}`;
 };
 
+const freezeEdge = (edge) => {
+  const frozen = { ...edge };
+  delete frozen.controlPosition;
+  delete frozen.sourcePosition;
+  delete frozen.targetPosition;
+  return frozen;
+};
+
+const freezeVertex = (vertex) => {
+  const frozen = { ...vertex };
+  delete frozen.position;
+  delete frozen.rudderPosition;
+  return frozen;
+};
+
 const queryStringToObject = (queryString) => {
   const queryObject = {
     ...QueryString.parse(
@@ -43,5 +58,5 @@ function union(setA, setB) {
 }
 
 export {
-  buildDiscogsURL, queryStringToObject, queryObjectToString, union,
+  buildDiscogsURL, freezeEdge, freezeVertex, queryStringToObject, queryObjectToString, union,
 };

@@ -6,7 +6,7 @@ import SceneManager from '../graphics/SceneManager';
 import { connect } from 'react-redux';
 import { deselectEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
-import { queryObjectToString, queryStringToObject } from '../utils';
+import { freezeVertex, freezeEdge, queryObjectToString, queryStringToObject } from '../utils';
 
 const mapStateToProps = state => {
   return {
@@ -25,13 +25,19 @@ const mapDispatchToProps = dispatch => {
       delete parsedQuery.page;
       dispatch(push(`/${label}/${id}` + queryObjectToString(parsedQuery)));
     },
-    selectVertex: (eid, label, name) => {
-      dispatch(selectEntity({eid, label, name, kind: "vertex"}))
-    },
-    selectEdge: (label, role, sourceLabel, sourceEID, sourceName, targetLabel, targetEID, targetName) => {
+    selectVertex: (vertex) => {
       dispatch(selectEntity({
-        label, role, sourceLabel, sourceEID, sourceName, targetLabel, targetEID, targetName, kind: "edge",
-      }))
+        kind: "vertex",
+        vertex: freezeVertex(vertex),
+      }));
+    },
+    selectEdge: (edge, source, target) => {
+      dispatch(selectEntity({
+        kind: "edge",
+        edge: freezeEdge(edge),
+        source: freezeVertex(source),
+        target: freezeVertex(target),
+      }));
     },
     deselectEntity: () => dispatch(deselectEntity()),
   }
@@ -73,12 +79,10 @@ class Graph extends React.Component {
     });
     this.threeGraph.on("selectEdge", (payload) => {
       const {edge, source, target} = payload;
-      this.props.selectEdge(
-        edge.label, edge.role, source.label, source.eid, source.name, target.label, target.eid, target.name
-      );
+      this.props.selectEdge(edge, source, target);
     });
     this.threeGraph.on("selectVertex", (vertex) => {
-      this.props.selectVertex(vertex.eid, vertex.label, vertex.name);
+      this.props.selectVertex(vertex);
     });
     this.updateGraph({}, this.props);
     this.start();

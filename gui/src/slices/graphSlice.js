@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from 'connected-react-router';
 import * as graphAPI from '../api/graphAPI';
-import { union } from '../utils';
+import { freezeVertex, union } from '../utils';
 
 const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
@@ -108,9 +108,7 @@ const graphSlice = createSlice({
       state.pageCount = Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
       state.selected = {
         kind: 'vertex',
-        label: center.label,
-        eid: center.eid,
-        name: center.name,
+        vertex: freezeVertex(center),
       };
       state.vertices = vertices;
       state.verticesByCountry = {};

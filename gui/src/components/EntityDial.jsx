@@ -21,12 +21,6 @@ const useStyles = makeStyles((theme) => ({
   speedDialAction: {},
 }));
 
-const mapStateToProps = state => {
-  return { 
-    selected: state.graph.selected,
-  }
-}
-
 const mapDispatchToProps = dispatch => {
   return {
     refocusCamera: () => dispatch(refocusCamera()),
@@ -45,7 +39,6 @@ const toggleFullscreen = () => {
 
 const EntityDial = (props) => {
   const classes = useStyles();
-  const { selected } = props;
   const [open, setOpen] = React.useState(false);
   const handleClose = () => { setOpen(false); };
   const handleOpen = () => { setOpen(true); };
@@ -86,23 +79,8 @@ const EntityDial = (props) => {
         tooltipPlacement="left"
         tooltipTitle={ document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen" }
       />
-      { (selected !== null && selected.kind === "vertex") &&
-        <SpeedDialAction
-          className={classes.speedDialAction}
-          key="discogs"
-          icon={<AlbumIcon />}
-          onClick={() => {
-            window.open(buildDiscogsURL(selected.label, selected.eid), "_blank");
-            handleClose();
-          }}
-          style={{ whiteSpace: "nowrap" }}
-          tooltipOpen
-          tooltipPlacement="left"
-          tooltipTitle="See on Discogs"
-        />
-      }
     </SpeedDial>
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EntityDial);
+export default connect(null, mapDispatchToProps)(EntityDial);

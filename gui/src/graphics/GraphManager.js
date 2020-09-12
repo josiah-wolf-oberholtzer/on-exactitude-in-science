@@ -143,9 +143,9 @@ class GraphManager {
     // console.log('select', event);
     const { envelope } = event.object.parent;
     envelope.select();
-    this.forceGraph.reheat();
     if (envelope.isVertex) {
       const vertex = envelope.data;
+      this.forceGraph.reheat();
       this.forceGraph.pin(vertex.id, vertex.position.x, vertex.position.y, vertex.position.z);
       this.dispatcher.call('selectVertex', vertex, vertex);
     } else if (envelope.isEdge) {
