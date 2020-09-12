@@ -34,7 +34,7 @@ const SidebarSectionEdgeLimits = (props) => {
   return (
     <SidebarSection
       category="edgeLimits"
-      title="Edge Limits"
+      title="Graph Size"
       open={props.open}
     >
       <Slider
