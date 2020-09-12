@@ -1,6 +1,17 @@
 import * as QueryString from 'query-string';
 import { CATEGORIES } from './constants';
 
+const buildDiscogsURL = (label, eid) => {
+  const discogsPrefix = 'https://discogs.com';
+  if (label === 'track') {
+    const releaseEid = eid.split('-')[0];
+    return `${discogsPrefix}/release/${releaseEid}`;
+  } if (label === 'company') {
+    return `${discogsPrefix}/label/${eid}`;
+  }
+  return `${discogsPrefix}/${label}/${eid}`;
+};
+
 const queryStringToObject = (queryString) => {
   const queryObject = {
     ...QueryString.parse(
@@ -31,4 +42,6 @@ function union(setA, setB) {
   return result;
 }
 
-export { queryStringToObject, queryObjectToString, union };
+export {
+  buildDiscogsURL, queryStringToObject, queryObjectToString, union,
+};
