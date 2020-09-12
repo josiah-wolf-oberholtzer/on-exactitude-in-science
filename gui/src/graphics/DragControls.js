@@ -197,6 +197,15 @@ class DragControls {
     const index = this.objects.indexOf(_);
     if (index > -1) {
       this.objects.splice(index, 1);
+      if (_ === this.selected) {
+        this.selected = null;
+      }
+      if (_ === this.hovered) {
+        this.hovered = null;
+      }
+      if (_ === this.dragged) {
+        this.dragged = null;
+      }
     }
   }
 
