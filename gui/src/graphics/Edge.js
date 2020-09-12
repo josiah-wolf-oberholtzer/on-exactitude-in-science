@@ -36,7 +36,7 @@ class Edge {
       startColor.setHex(0xff0000);
       endColor.setHex(0xff0000);
     }
-    return {startColor, endColor};
+    return { startColor, endColor };
   }
 
   enter(newData, newParent, newControls, newLineManager) {

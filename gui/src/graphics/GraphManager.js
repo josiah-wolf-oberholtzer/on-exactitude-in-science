@@ -152,7 +152,7 @@ class GraphManager {
       const edge = envelope.data;
       const source = this.envelopes.get(edge.source).data;
       const target = this.envelopes.get(edge.target).data;
-      this.dispatcher.call('selectEdge', edge, {edge, source, target});
+      this.dispatcher.call('selectEdge', edge, { edge, source, target });
     }
   }
 
