@@ -1,7 +1,9 @@
+import 'fullscreen-polyfill';
+import './offscreencanvas-polyfill';
+
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from 'react-redux';
-import './offscreencanvas-polyfill';
 
 import './index.css';
 import App from './app/App';

@@ -24,6 +24,7 @@
     "d3-dispatch": "^1.0.6",
     "d3-force-3d": "^2.1.0",
     "d3-scale-chromatic": "^2.0.0",
+    "fullscreen-polyfill": "^1.0.3",
     "history": "^4.7.2",
     "immutable": "^4.0.0-rc.1",
     "lodash": "^4.17.19",
