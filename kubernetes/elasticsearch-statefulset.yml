@@ -15,6 +15,16 @@ spec:
       labels:
         app: elasticsearch
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - elasticsearch
+            topologyKey: kubernetes.io/hostname
       containers:
       - name: elasticsearch
         env:
@@ -43,7 +53,7 @@ spec:
             scheme: HTTP
             path: /_cluster/health?local=true
             port: 9200
-          initialDelaySeconds: 5
+          initialDelaySeconds: 15
         volumeMounts:
         - name: elasticsearch-data
           mountPath: /usr/share/elasticsearch/data
