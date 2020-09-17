@@ -61,6 +61,7 @@ async def test_format_schema(goblin_app):
         mgmt.buildIndex('foo_by_track_id', Vertex.class).addKey(track_id).indexOnly(track).unique().buildCompositeIndex()
         mgmt.buildIndex('foo_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_page_rank', Vertex.class).addKey(page_rank).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_random', Vertex.class).addKey(random).buildMixedIndex('search')
 
         mgmt.commit()
