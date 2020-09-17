@@ -37,6 +37,12 @@ async def test_format_schema(goblin_app):
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
 
+        // PageRank property keys
+        mgmt.makePropertyKey('gremlin.pageRankVertexProgram.edgeCount').dataType(Integer.class).make();
+        mgmt.makePropertyKey('gremlin.traversalVertexProgram.activeTraversers').dataType(Integer.class).make();
+        mgmt.makePropertyKey('gremlin.traversalVertexProgram.haltedTraversers').dataType(Integer.class).make();
+        page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();
+
         // Edge labels
         alias_of = mgmt.makeEdgeLabel('alias_of').multiplicity(MULTI).make()
         credited_with = mgmt.makeEdgeLabel('credited_with').multiplicity(MULTI).make()
