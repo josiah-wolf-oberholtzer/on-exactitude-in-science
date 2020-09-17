@@ -37,6 +37,12 @@ async def test_format_schema(goblin_app):
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
 
+        // PageRank property keys
+        mgmt.makePropertyKey('gremlin.pageRankVertexProgram.edgeCount').dataType(Integer.class).make();
+        mgmt.makePropertyKey('gremlin.traversalVertexProgram.activeTraversers').dataType(Integer.class).make();
+        mgmt.makePropertyKey('gremlin.traversalVertexProgram.haltedTraversers').dataType(Integer.class).make();
+        page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();
+
         // Edge labels
         alias_of = mgmt.makeEdgeLabel('alias_of').multiplicity(MULTI).make()
         credited_with = mgmt.makeEdgeLabel('credited_with').multiplicity(MULTI).make()
@@ -55,6 +61,7 @@ async def test_format_schema(goblin_app):
         mgmt.buildIndex('foo_by_track_id', Vertex.class).addKey(track_id).indexOnly(track).unique().buildCompositeIndex()
         mgmt.buildIndex('foo_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_page_rank', Vertex.class).addKey(page_rank).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_random', Vertex.class).addKey(random).buildMixedIndex('search')
 
         mgmt.commit()

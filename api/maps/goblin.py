@@ -109,6 +109,16 @@ def format_schema(goblin_app, graph_name="graph"):
                 f"{prop_key.data_type}).cardinality({prop_key.card}).make()"
             )
     lines.extend(sorted(property_keys))
+    lines.extend(
+        [
+            "",
+            "// PageRank property keys",
+            "mgmt.makePropertyKey('gremlin.pageRankVertexProgram.edgeCount').dataType(Integer.class).make();",
+            "mgmt.makePropertyKey('gremlin.traversalVertexProgram.activeTraversers').dataType(Integer.class).make();",
+            "mgmt.makePropertyKey('gremlin.traversalVertexProgram.haltedTraversers').dataType(Integer.class).make();",
+            "page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();",
+        ]
+    )
     lines.extend(["", "// Edge labels"])
     for label, edge in sorted(goblin_app.edges.items()):
         if label == "edge":
@@ -126,6 +136,7 @@ def format_schema(goblin_app, graph_name="graph"):
         [
             f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_page_rank', Vertex.class).addKey(page_rank).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
         ]
     )

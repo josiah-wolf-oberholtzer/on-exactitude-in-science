@@ -43,3 +43,28 @@ docker-compose up -d gui
 ```
 
 Now you can visit localhost:8080 to see.
+
+## Debugging
+
+Pull up a Gremlin console in Docker:
+
+```
+docker exec -it $(docker-compose ps --quiet janusgraph) ./bin/gremlin.sh
+```
+
+... or in Kubernetes:
+
+```
+kubectl exec -tic janusgraph $(kubectl get pods --selector=app=janusgraph -o jsonpath="{.items[0].metadata.name}") -- ./bin/gremlin.sh
+```
+
+... then run the following:
+
+```
+:remote connect tinkerpop.server conf/remote.yaml session
+:remote console
+```
+
+```
+job = graph.compute().program(PageRankVertexProgram.build().property("page_rank").create()).result(GraphComputer.ResultGraph.ORIGINAL).persist(GraphComputer.Persist.VERTEX_PROPERTIES).submit()
+```
