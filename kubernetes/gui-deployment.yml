@@ -14,6 +14,16 @@ spec:
       labels:
         app: gui
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - gui
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: gui
         image: josiahwolfoberholtzer/on-exactitude-in-science-gui:latest
