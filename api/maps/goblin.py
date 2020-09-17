@@ -109,13 +109,16 @@ def format_schema(goblin_app, graph_name="graph"):
                 f"{prop_key.data_type}).cardinality({prop_key.card}).make()"
             )
     lines.extend(sorted(property_keys))
-    lines.extend([
-        "", "// PageRank property keys",
-        "mgmt.makePropertyKey('gremlin.pageRankVertexProgram.edgeCount').dataType(Integer.class).make();",
-        "mgmt.makePropertyKey('gremlin.traversalVertexProgram.activeTraversers').dataType(Integer.class).make();",
-        "mgmt.makePropertyKey('gremlin.traversalVertexProgram.haltedTraversers').dataType(Integer.class).make();",
-        "page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();",
-    ])
+    lines.extend(
+        [
+            "",
+            "// PageRank property keys",
+            "mgmt.makePropertyKey('gremlin.pageRankVertexProgram.edgeCount').dataType(Integer.class).make();",
+            "mgmt.makePropertyKey('gremlin.traversalVertexProgram.activeTraversers').dataType(Integer.class).make();",
+            "mgmt.makePropertyKey('gremlin.traversalVertexProgram.haltedTraversers').dataType(Integer.class).make();",
+            "page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();",
+        ]
+    )
     lines.extend(["", "// Edge labels"])
     for label, edge in sorted(goblin_app.edges.items()):
         if label == "edge":
