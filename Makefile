@@ -2,7 +2,7 @@ DATASET_YEAR ?= 2020
 DATASET_MONTH ?= 06
 DATASET_DAY ?= 01
 DATASET_TIMESTAMP := ${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}
-LIMIT ?= 10000
+LIMIT ?= 200
 WORKERS ?= 8
 
 fetch-dataset:
@@ -33,3 +33,9 @@ load-from-scratch: reset-janusgraph wait-for-janusgraph load-schema load-schema-
 
 build-gui:
 	cd gui && yarn install && yarn build
+
+gremlin-docker:
+	docker exec -it $$(docker-compose ps --quiet janusgraph) ./bin/gremlin.sh
+
+gremlin-kubectl:
+	kubectl exec -tic janusgraph $$(kubectl get pods --selector=app=janusgraph -o jsonpath="{.items[0].metadata.name}") -- ./bin/gremlin.sh
