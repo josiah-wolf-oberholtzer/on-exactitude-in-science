@@ -9,6 +9,11 @@ spec:
   selector:
     matchLabels:
       app: gui
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -23,7 +28,7 @@ spec:
                 operator: In
                 values:
                 - gui
-            topologyKey: "kubernetes.io/hostname"
+            topologyKey: kubernetes.io/hostname
       containers:
       - name: gui
         image: josiahwolfoberholtzer/on-exactitude-in-science-gui:latest

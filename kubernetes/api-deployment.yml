@@ -9,6 +9,11 @@ spec:
   selector:
     matchLabels:
       app: api
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -23,7 +28,7 @@ spec:
                 operator: In
                 values:
                 - api
-            topologyKey: "kubernetes.io/hostname"
+            topologyKey: kubernetes.io/hostname
       containers:
       - name: api
         command: ["gunicorn", "--conf", "gunicorn.conf.py", "maps.app:app"]
