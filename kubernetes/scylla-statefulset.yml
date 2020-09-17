@@ -15,6 +15,16 @@ spec:
       labels:
         app: scylla
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - scylla
+            topologyKey: kubernetes.io/hostname
       containers:
       - name: scylla
         env:
