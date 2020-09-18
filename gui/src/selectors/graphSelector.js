@@ -1,4 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { union } from '../utils';
+
+const getCenter = (state) => state.graph.center;
 
 const getEdges = (state) => state.graph.edges;
 
@@ -19,8 +22,8 @@ const categorizeObjects = (mapping, objects, labeler) => {
 }
 
 export const getEdgesByRole = createSelector(
-  [getEdges],
-  (edges) => {
+  [getCenter, getEdges],
+  (center, edges) => {
     const mapping = {
       'Alias Of': [],
       'Includes': [],
@@ -30,6 +33,10 @@ export const getEdgesByRole = createSelector(
       'Subsidiary Of': [],
       'Subrelease Of': [],
     };
+    if (center) {
+      const centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
+      centerRoles.forEach((role) => { mapping[role] = [] });
+    }
     categorizeObjects(mapping, edges, edge => [edge.role]);
     return mapping;
   },

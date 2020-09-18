@@ -42,18 +42,8 @@ const fetchRandom = createAsyncThunk(
 const graphSlice = createSlice({
   name: 'graph',
   initialState: {
-    centerRoles: [],
+    center: null,
     edges: [],
-    edgesByRole: {
-      'Alias Of': [],
-      Includes: [],
-      'Member Of': [],
-      Released: [],
-      'Released On': [],
-      'Subsidiary Of': [],
-      'Subrelease Of': [],
-    },
-    edgesByVertex: {},
     error: null,
     loading: false,
     pageCount: 1,
@@ -76,18 +66,8 @@ const graphSlice = createSlice({
       // Refactor objByCategory logic into separate functions
       const { center, edges, vertices } = action.payload;
       document.title = `${center.name} | On Exactitude In Science`;
-      state.centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
+      state.center = center;
       state.edges = edges;
-      state.edgesByRole = {
-        'Alias Of': [],
-        Includes: [],
-        'Member Of': [],
-        Released: [],
-        'Released On': [],
-        'Subsidiary Of': [],
-        'Subrelease Of': [],
-      };
-      state.edgesByVertex = {};
       state.loading = false;
       state.pageCount = Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
       state.selected = {
@@ -95,24 +75,6 @@ const graphSlice = createSlice({
         vertex: freezeVertex(center),
       };
       state.vertices = vertices;
-      state.centerRoles.forEach((role) => {
-        state.edgesByRole[role] = [];
-      });
-      edges.forEach((edge) => {
-        const items = [
-          [state.edgesByVertex, edge.source],
-          [state.edgesByVertex, edge.target],
-          [state.edgesByRole, edge.role],
-        ];
-        items.forEach((item) => {
-          const [map, label] = item;
-          if (map[label] === undefined) {
-            map[label] = [edge.id];
-          } else {
-            map[label].push(edge.id);
-          }
-        });
-      });
     },
     [fetchByEntity.rejected]: (state, action) => {
       state.error = action.error;

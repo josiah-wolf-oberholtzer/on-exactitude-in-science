@@ -2,12 +2,13 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { ROLES } from '../constants';
 import { connect } from 'react-redux';
+import { getEdgesByRole } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.rolesOpen,
     highlightedNames: state.highlighted.roles,
-    names: state.graph.edgesByRole,
+    names: getEdgesByRole(state),
     filteredNames: state.filtered.roles,
     suggestedNames: state.graph.centerRoles,
   }
