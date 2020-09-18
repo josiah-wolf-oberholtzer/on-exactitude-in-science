@@ -111,3 +111,14 @@ export const getVerticesByYear = createSelector(
     return categorizeObjects({}, vertices, labeler);
   },
 );
+
+export const getPageCount = createSelector(
+  [getCenter],
+  (center) => {
+    if (center) {
+      return Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
+    } else {
+      return 1;
+    }
+  },
+);

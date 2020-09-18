@@ -6,11 +6,12 @@ import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import { queryObjectToString, queryStringToObject } from '../utils';
 import { useLocation } from "react-router-dom";
+import { getPageCount } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     page: state.filtered.page,
-    pageCount: state.graph.pageCount,
+    pageCount: getPageCount(state),
   }
 }
 

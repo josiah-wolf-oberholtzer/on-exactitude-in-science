@@ -46,7 +46,6 @@ const graphSlice = createSlice({
     edges: [],
     error: null,
     loading: false,
-    pageCount: 1,
     selected: null,
     vertices: [],
   },
@@ -63,17 +62,12 @@ const graphSlice = createSlice({
       state.loading = true;
     },
     [fetchByEntity.fulfilled]: (state, action) => {
-      // Refactor objByCategory logic into separate functions
       const { center, edges, vertices } = action.payload;
       document.title = `${center.name} | On Exactitude In Science`;
       state.center = center;
       state.edges = edges;
       state.loading = false;
-      state.pageCount = Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
-      state.selected = {
-        kind: 'vertex',
-        vertex: freezeVertex(center),
-      };
+      state.selected = {kind: 'vertex', vertex: freezeVertex(center)};
       state.vertices = vertices;
     },
     [fetchByEntity.rejected]: (state, action) => {
