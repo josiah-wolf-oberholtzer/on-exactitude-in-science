@@ -34,11 +34,11 @@ def cleanup_edge(result):
 def cleanup_values(label, values, goblin_app):
     vertex = goblin_app.vertices[label]
     for key, value in values.items():
-        prop = vertex.__properties__[key]
-        if (
-            value
-            and getattr(prop, "cardinality", Cardinality.single) == Cardinality.single
-        ):
+        cardinality = Cardinality.single
+        prop = vertex.__properties__.get(key)
+        if prop is not None:
+            cardinality = getattr(prop, "cardinality", Cardinality.single)
+        if value and cardinality == Cardinality.single:
             values[key] = value[0]
 
 
