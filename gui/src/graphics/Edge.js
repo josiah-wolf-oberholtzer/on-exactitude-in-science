@@ -19,6 +19,7 @@ class Edge {
     this.points = [];
     this.hovered = false;
     this.selected = false;
+    this.highlighted = false;
   }
 
   calculateColors() {
@@ -104,6 +105,16 @@ class Edge {
   deselect() {
     this.selected = false;
     this.lineManager.updateColor(this);
+  }
+
+  highlight() {
+    console.log("edge/highlight", this);
+    this.highlighted = true;
+  }
+
+  unhighlight() {
+    console.log("edge/unhighlight", this);
+    this.highlighted = false;
   }
 }
 

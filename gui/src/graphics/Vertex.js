@@ -42,6 +42,7 @@ class Vertex {
     this.group.add(this.coreMesh);
     this.hovered = false;
     this.selected = false;
+    this.highlighted = false;
   }
 
   calculateColor() {
@@ -164,6 +165,16 @@ class Vertex {
   deselect() {
     this.group.remove(this.pointLight);
     this.selected = false;
+  }
+
+  highlight() {
+    console.log("vertex/highlight", this);
+    this.highlighted = true;
+  }
+
+  unhighlight() {
+    console.log("vertex/unhighlight", this);
+    this.highlighted = false;
   }
 
   frameTick() {

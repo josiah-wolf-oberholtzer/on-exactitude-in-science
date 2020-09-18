@@ -42,8 +42,7 @@ export const getHighlightedEdges = createSelector(
     const pairs = [
       [highlightedRoles, edgesByRole],
     ];
-    const result = highlightObjects(pairs);
-    return Array.from(result.keys()).sort();
+    return highlightObjects(pairs);
   },
 );
 
@@ -84,7 +83,6 @@ export const getHighlightedVertices = createSelector(
       [highlightedStyles, verticesByStyle],
       [highlightedYears, verticesByYear],
     ];
-    const result = highlightObjects(pairs);
-    return Array.from(result.keys()).sort();
+    return highlightObjects(pairs);
   },
 );

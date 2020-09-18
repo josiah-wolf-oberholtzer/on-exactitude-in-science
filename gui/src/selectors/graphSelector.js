@@ -28,7 +28,7 @@ export const getCenterRoles = createSelector(
       return [];
     }
     return Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
-  }
+  },
 );
 
 export const getEdgesByRole = createSelector(
