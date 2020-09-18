@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { deselectEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
 import { freezeVertex, freezeEdge, queryObjectToString, queryStringToObject } from '../utils';
+import { getHighlightedEdges, getHighlightedVertices } from '../selectors/highlightedSelector';
 
 const mapStateToProps = state => {
   return {
@@ -14,6 +15,8 @@ const mapStateToProps = state => {
     center: state.graph.center,
     edges: state.graph.edges,
     location: state.router.location,
+    highlightedEdges: getHighlightedEdges(state),
+    highlightedVertices: getHighlightedVertices(state),
     vertices: state.graph.vertices,
   } 
 }
