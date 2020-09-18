@@ -18,7 +18,7 @@ const Roles = (props) => {
   return (
     <SidebarSection
       category={ROLES}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}

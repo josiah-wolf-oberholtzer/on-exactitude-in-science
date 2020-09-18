@@ -17,7 +17,7 @@ const Genres = (props) => {
   return (
     <SidebarSection
       category={GENRES}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}

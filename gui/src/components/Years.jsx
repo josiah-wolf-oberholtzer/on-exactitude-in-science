@@ -17,7 +17,7 @@ const Years = (props) => {
   return (
     <SidebarSection
       category={YEARS}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}

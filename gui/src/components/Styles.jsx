@@ -17,7 +17,7 @@ const Styles = (props) => {
   return (
     <SidebarSection
       category={STYLES}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}

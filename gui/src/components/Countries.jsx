@@ -17,7 +17,7 @@ const Countries = (props) => {
   return (
     <SidebarSection
       category={COUNTRIES}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}
