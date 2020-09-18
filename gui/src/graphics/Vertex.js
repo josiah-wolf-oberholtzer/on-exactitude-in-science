@@ -52,6 +52,9 @@ class Vertex {
     } else if (this.selected) {
       this.coreMesh.material.color.setHex(0xffff00);
       this.childRingMesh.material.color.setHex(0xffff00);
+    } else if (this.highlighted) {
+      this.coreMesh.material.color.setHex(0xff00ff);
+      this.childRingMesh.material.color.setHex(0xff00ff);
     } else {
       const color = d3.interpolateSpectral(this.data.depth / this.data.maximum_depth);
       this.coreMesh.material.color.set(color);
@@ -168,12 +171,12 @@ class Vertex {
   }
 
   highlight() {
-    console.log("vertex/highlight", this);
+    console.log('vertex/highlight', this);
     this.highlighted = true;
   }
 
   unhighlight() {
-    console.log("vertex/unhighlight", this);
+    console.log('vertex/unhighlight', this);
     this.highlighted = false;
   }
 

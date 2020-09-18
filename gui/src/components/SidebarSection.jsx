@@ -148,7 +148,7 @@ const SidebarSection = (props) => {
         onClick={() => { props.toggleOpen(category) }}
         style={{textDecoration: (filteredChips.length > 0 || unfilteredChips.length > 0 || props.children) ? 'none' : 'line-through' }}
       >
-        {filteredChips.length > 0 &&
+        {(filteredChips.length > 0 || highlightedNames.size > 0) &&
           <ListItemIcon>
             <MoreIcon />
           </ListItemIcon>
