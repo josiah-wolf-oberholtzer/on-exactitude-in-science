@@ -1,5 +1,5 @@
 import React from 'react';
-import { Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
+import { Divider, Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
 import SidebarSectionCountries from './SidebarSectionCountries';
 import SidebarSectionEdgeLimits from './SidebarSectionEdgeLimits';
@@ -48,7 +48,6 @@ const Sidebar = (props) => {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
-          <SidebarPagination />
           <SidebarSectionLabels />
           <SidebarSectionRoles />
           <SidebarSectionYears />
@@ -58,6 +57,8 @@ const Sidebar = (props) => {
           <SidebarSectionCountries />
           <SidebarSectionEdgeLimits />
           { /* <SidebarSectionMainReleases /> */ }
+          <Divider />
+          <SidebarPagination />
         </List>
       </div>
     </Drawer>

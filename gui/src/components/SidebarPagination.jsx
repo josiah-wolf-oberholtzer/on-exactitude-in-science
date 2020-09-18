@@ -1,6 +1,6 @@
 import React from 'react';
 import * as QueryString from 'query-string';
-import { Box, Divider, ListItem } from '@material-ui/core';
+import { Box, ListItem } from '@material-ui/core';
 import Pagination from '@material-ui/lab/Pagination';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -39,7 +39,7 @@ const SidebarPagination = (props) => {
           width="100%"
           alignItems="center"
           justifyContent="center"
-          pb={1}
+          pt={1}
         >
           <Pagination
             count={props.pageCount}
@@ -49,7 +49,6 @@ const SidebarPagination = (props) => {
           />
         </Box>
       </ListItem>
-      <Divider />
     </React.Fragment>
   )
 }
