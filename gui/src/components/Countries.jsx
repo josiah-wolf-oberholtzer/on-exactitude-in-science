@@ -13,7 +13,7 @@ const mapStateToProps = state => {
   }
 }
 
-const SidebarSectionCountries = (props) => {
+const Countries = (props) => {
   return (
     <SidebarSection
       category={COUNTRIES}
@@ -26,4 +26,4 @@ const SidebarSectionCountries = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionCountries);
+export default connect(mapStateToProps)(Countries);

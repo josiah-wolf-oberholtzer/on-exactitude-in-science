@@ -1,7 +1,7 @@
 import React from 'react';
 import * as QueryString from 'query-string';
 import { Box, ListItem } from '@material-ui/core';
-import Pagination from '@material-ui/lab/Pagination';
+import MUIPagination from '@material-ui/lab/Pagination';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import { queryObjectToString, queryStringToObject } from '../utils';
@@ -29,7 +29,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const SidebarPagination = (props) => {
+const Pagination = (props) => {
   const location = useLocation();
   return (
     <React.Fragment>
@@ -41,7 +41,7 @@ const SidebarPagination = (props) => {
           justifyContent="center"
           pt={1}
         >
-          <Pagination
+          <MUIPagination
             count={props.pageCount}
             disabled={props.pageCount == 1}
             onChange={(event, value) => { props.pushPage(location, value) }}
@@ -53,4 +53,4 @@ const SidebarPagination = (props) => {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SidebarPagination);
+export default connect(mapStateToProps, mapDispatchToProps)(Pagination);

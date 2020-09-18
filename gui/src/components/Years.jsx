@@ -13,7 +13,7 @@ const mapStateToProps = state => {
   }
 }
 
-const SidebarSectionYears = (props) => {
+const Years = (props) => {
   return (
     <SidebarSection
       category={YEARS}
@@ -26,4 +26,4 @@ const SidebarSectionYears = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionYears);
+export default connect(mapStateToProps)(Years);

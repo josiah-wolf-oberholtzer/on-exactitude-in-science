@@ -13,7 +13,7 @@ const mapStateToProps = state => {
   }
 }
 
-const SidebarSectionGenres = (props) => {
+const Genres = (props) => {
   return (
     <SidebarSection
       category={GENRES}
@@ -26,4 +26,4 @@ const SidebarSectionGenres = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionGenres);
+export default connect(mapStateToProps)(Genres);

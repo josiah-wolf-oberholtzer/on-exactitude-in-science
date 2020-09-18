@@ -13,7 +13,7 @@ const mapStateToProps = state => {
   }
 }
 
-const SidebarSectionLabels = (props) => {
+const Labels = (props) => {
   return (
     <SidebarSection
       category={LABELS}
@@ -26,4 +26,4 @@ const SidebarSectionLabels = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionLabels);
+export default connect(mapStateToProps)(Labels);

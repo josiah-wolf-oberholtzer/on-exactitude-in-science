@@ -13,7 +13,7 @@ const mapStateToProps = state => {
   }
 }
 
-const SidebarSectionFormats = (props) => {
+const Formats = (props) => {
   return (
     <SidebarSection
       category={FORMATS}
@@ -26,4 +26,4 @@ const SidebarSectionFormats = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionFormats);
+export default connect(mapStateToProps)(Formats);

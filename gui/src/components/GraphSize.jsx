@@ -29,7 +29,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const SidebarSectionEdgeLimits = (props) => {
+const GraphSize = (props) => {
   const location = useLocation();
   return (
     <SidebarSection
@@ -65,4 +65,4 @@ const SidebarSectionEdgeLimits = (props) => {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SidebarSectionEdgeLimits);
+export default connect(mapStateToProps, mapDispatchToProps)(GraphSize);

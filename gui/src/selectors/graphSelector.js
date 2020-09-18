@@ -21,9 +21,19 @@ const categorizeObjects = (mapping, objects, labeler) => {
   return mapping;
 };
 
+export const getCenterRoles = createSelector(
+  [getCenter],
+  (center) => {
+    if (!center) {
+      return [];
+    }
+    return Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
+  }
+);
+
 export const getEdgesByRole = createSelector(
-  [getCenter, getEdges],
-  (center, edges) => {
+  [getCenterRoles, getEdges],
+  (centerRoles, edges) => {
     const mapping = {
       'Alias Of': [],
       Includes: [],
@@ -33,10 +43,7 @@ export const getEdgesByRole = createSelector(
       'Subsidiary Of': [],
       'Subrelease Of': [],
     };
-    if (center) {
-      const centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
-      centerRoles.forEach((role) => { mapping[role] = []; });
-    }
+    centerRoles.forEach((role) => { mapping[role] = []; });
     categorizeObjects(mapping, edges, (edge) => [edge.role]);
     return mapping;
   },

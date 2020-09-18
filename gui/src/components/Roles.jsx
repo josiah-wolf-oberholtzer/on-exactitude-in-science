@@ -2,7 +2,7 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { ROLES } from '../constants';
 import { connect } from 'react-redux';
-import { getEdgesByRole } from '../selectors/graphSelector';
+import { getCenterRoles, getEdgesByRole } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
@@ -10,11 +10,11 @@ const mapStateToProps = state => {
     highlightedNames: state.highlighted.roles,
     names: getEdgesByRole(state),
     filteredNames: state.filtered.roles,
-    suggestedNames: state.graph.centerRoles,
+    suggestedNames: getCenterRoles(state),
   }
 }
 
-const SidebarSectionRoles = (props) => {
+const Roles = (props) => {
   return (
     <SidebarSection
       category={ROLES}
@@ -28,4 +28,4 @@ const SidebarSectionRoles = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionRoles);
+export default connect(mapStateToProps)(Roles);
