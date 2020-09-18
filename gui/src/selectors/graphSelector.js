@@ -10,7 +10,7 @@ const getVertices = (state) => state.graph.vertices;
 const categorizeObjects = (mapping, objects, labeler) => {
   objects.forEach((object) => {
     const labels = labeler(object);
-    labels.forEach(label => {
+    labels.forEach((label) => {
       if (mapping[label] === undefined) {
         mapping[label] = [object.id];
       } else {
@@ -19,25 +19,25 @@ const categorizeObjects = (mapping, objects, labeler) => {
     });
   });
   return mapping;
-}
+};
 
 export const getEdgesByRole = createSelector(
   [getCenter, getEdges],
   (center, edges) => {
     const mapping = {
       'Alias Of': [],
-      'Includes': [],
+      Includes: [],
       'Member Of': [],
-      'Released': [],
+      Released: [],
       'Released On': [],
       'Subsidiary Of': [],
       'Subrelease Of': [],
     };
     if (center) {
       const centerRoles = Array.from(union(center.in_roles || [], center.out_roles || [])).sort();
-      centerRoles.forEach((role) => { mapping[role] = [] });
+      centerRoles.forEach((role) => { mapping[role] = []; });
     }
-    categorizeObjects(mapping, edges, edge => [edge.role]);
+    categorizeObjects(mapping, edges, (edge) => [edge.role]);
     return mapping;
   },
 );
@@ -46,8 +46,8 @@ export const getEdgesByVertex = createSelector(
   [getEdges],
   (edges) => {
     const mapping = {};
-    categorizeObjects(mapping, edges, edge => [edge.source]);
-    categorizeObjects(mapping, edges, edge => [edge.target]);
+    categorizeObjects(mapping, edges, (edge) => [edge.source]);
+    categorizeObjects(mapping, edges, (edge) => [edge.target]);
     return mapping;
   },
 );
@@ -55,7 +55,7 @@ export const getEdgesByVertex = createSelector(
 export const getVerticesByCountry = createSelector(
   [getVertices],
   (vertices) => {
-    const labeler = vertex => vertex.country !== undefined ? [vertex.country] : [];
+    const labeler = (vertex) => (vertex.country !== undefined ? [vertex.country] : []);
     return categorizeObjects({}, vertices, labeler);
   },
 );
@@ -63,7 +63,7 @@ export const getVerticesByCountry = createSelector(
 export const getVerticesByFormat = createSelector(
   [getVertices],
   (vertices) => {
-    const labeler = vertex => vertex.formats || [];
+    const labeler = (vertex) => vertex.formats || [];
     const mapping = {
       CD: [],
       File: [],
@@ -76,7 +76,7 @@ export const getVerticesByFormat = createSelector(
 export const getVerticesByGenre = createSelector(
   [getVertices],
   (vertices) => {
-    const labeler = vertex => vertex.genres || [];
+    const labeler = (vertex) => vertex.genres || [];
     return categorizeObjects({}, vertices, labeler);
   },
 );
@@ -99,7 +99,7 @@ export const getVerticesByLabel = createSelector(
 export const getVerticesByStyle = createSelector(
   [getVertices],
   (vertices) => {
-    const labeler = vertex => vertex.styles || [];
+    const labeler = (vertex) => vertex.styles || [];
     return categorizeObjects({}, vertices, labeler);
   },
 );
@@ -107,7 +107,7 @@ export const getVerticesByStyle = createSelector(
 export const getVerticesByYear = createSelector(
   [getVertices],
   (vertices) => {
-    const labeler = vertex => vertex.year !== undefined ? [vertex.year] : [];
+    const labeler = (vertex) => (vertex.year !== undefined ? [vertex.year] : []);
     return categorizeObjects({}, vertices, labeler);
   },
 );
@@ -117,8 +117,7 @@ export const getPageCount = createSelector(
   (center) => {
     if (center) {
       return Math.ceil((center.pageable_edge_count || 0) / 50) || 1;
-    } else {
-      return 1;
     }
+    return 1;
   },
 );

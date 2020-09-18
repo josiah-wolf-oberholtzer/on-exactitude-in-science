@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { replace } from 'connected-react-router';
 import * as graphAPI from '../api/graphAPI';
-import { freezeVertex, union } from '../utils';
+import { freezeVertex } from '../utils';
 
 const fetchByEntity = createAsyncThunk(
   'graph/fetchByEntity',
@@ -67,7 +67,7 @@ const graphSlice = createSlice({
       state.center = center;
       state.edges = edges;
       state.loading = false;
-      state.selected = {kind: 'vertex', vertex: freezeVertex(center)};
+      state.selected = { kind: 'vertex', vertex: freezeVertex(center) };
       state.vertices = vertices;
     },
     [fetchByEntity.rejected]: (state, action) => {
