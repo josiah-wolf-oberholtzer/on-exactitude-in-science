@@ -2,12 +2,13 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { GENRES } from '../constants';
 import { connect } from 'react-redux';
+import { getVerticesByGenre } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.genresOpen,
     highlightedNames: state.highlighted.genres,
-    names: state.graph.verticesByGenre,
+    names: getVerticesByGenre(state),
     filteredNames: state.filtered.genres,
   }
 }

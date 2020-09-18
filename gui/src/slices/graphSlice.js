@@ -59,22 +59,6 @@ const graphSlice = createSlice({
     pageCount: 1,
     selected: null,
     vertices: [],
-    verticesByCountry: {},
-    verticesByFormat: {
-      CD: [],
-      File: [],
-      Vinyl: [],
-    },
-    verticesByGenre: {},
-    verticesByLabel: {
-      Artist: [],
-      Company: [],
-      Master: [],
-      Release: [],
-      Track: [],
-    },
-    verticesByStyle: {},
-    verticesByYear: {},
   },
   reducers: {
     deselectEntity(state) {
@@ -111,48 +95,8 @@ const graphSlice = createSlice({
         vertex: freezeVertex(center),
       };
       state.vertices = vertices;
-      state.verticesByCountry = {};
-      state.verticesByFormat = {
-        CD: [],
-        File: [],
-        Vinyl: [],
-      };
-      state.verticesByGenre = {};
-      state.verticesByLabel = {
-        Artist: [],
-        Company: [],
-        Master: [],
-        Release: [],
-        Track: [],
-      };
-      state.verticesByStyle = {};
-      state.verticesByYear = {};
       state.centerRoles.forEach((role) => {
         state.edgesByRole[role] = [];
-      });
-      vertices.forEach((vertex) => {
-        const items = [
-          [state.verticesByLabel, [vertex.label[0].toUpperCase() + vertex.label.substring(1)]],
-        ];
-        if (vertex.label === 'release' || vertex.label === 'track') {
-          items.push(
-            [state.verticesByCountry, vertex.country !== undefined ? [vertex.country] : []],
-            [state.verticesByFormat, vertex.formats || []],
-            [state.verticesByGenre, vertex.genres || []],
-            [state.verticesByStyle, vertex.styles || []],
-            [state.verticesByYear, vertex.year !== undefined ? [vertex.year] : []],
-          );
-        }
-        items.forEach((item) => {
-          const [map, labels] = item;
-          labels.forEach((label) => {
-            if (map[label] === undefined) {
-              map[label] = [vertex.id];
-            } else {
-              map[label].push(vertex.id);
-            }
-          });
-        });
       });
       edges.forEach((edge) => {
         const items = [

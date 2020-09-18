@@ -2,12 +2,13 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { YEARS } from '../constants';
 import { connect } from 'react-redux';
+import { getVerticesByYear } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.yearsOpen,
     highlightedNames: state.highlighted.years,
-    names: state.graph.verticesByYear,
+    names: getVerticesByYear(state),
     filteredNames: state.filtered.years,
   }
 }
