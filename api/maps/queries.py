@@ -137,7 +137,7 @@ async def get_locality_query(
                 .choose(
                     __.loops().is_(0),
                     __.order().range(offset, offset + 50),
-                    __.limit(5),
+                    __.limit(10),
                 )
             )
             .dedup()
