@@ -104,6 +104,9 @@ const SidebarSection = (props) => {
           label={name}
           onClick={() => {props.toggleHighlight(category, name, highlightedNames)}}
           onDelete={() => {props.pushUnpin(location, category, name)}}
+          style={{
+            boxShadow: highlightedNames.has(name) ? "0px 0px 20px magenta" : null,
+          }}
         />
       </Badge>
     )
@@ -123,6 +126,9 @@ const SidebarSection = (props) => {
             label={name}
             onClick={() => {props.toggleHighlight(category, name, highlightedNames)}}
             onDelete={() => {props.pushPin(location, category, name)}}
+            style={{
+              boxShadow: highlightedNames.has(name) ? "0px 0px 20px magenta" : null,
+            }}
             variant="outlined"
           />
         </Badge>
