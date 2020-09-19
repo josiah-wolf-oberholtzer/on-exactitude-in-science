@@ -38,7 +38,7 @@ class TextLoader {
     const width = canvas.width * scale;
     const height = canvas.height * scale;
     const texture = this.loadTexture(canvas);
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshLambertMaterial({
       map: texture,
       transparent: true,
     });

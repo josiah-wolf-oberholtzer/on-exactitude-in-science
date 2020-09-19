@@ -107,6 +107,10 @@ class Vertex {
     this.textB = this.textA.clone(false);
     this.textA.rotation.set(0, Math.PI * 0.5, 0);
     this.textB.rotation.set(0, Math.PI * 1.5, 0);
+    this.textA.castShadow = true;
+    this.textB.castShadow = true;
+    this.textA.receiveShadow = true;
+    this.textB.receiveShadow = true;
     this.group.add(this.textA);
     this.group.add(this.textB);
     this.update(newData);
