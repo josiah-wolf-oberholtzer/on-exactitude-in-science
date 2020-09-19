@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from maps import xml
@@ -82,5 +83,33 @@ def test_get_release_iterator():
             xml.Track(entity_id="1-C2", name="Norrmalm", position="C2"),
             xml.Track(entity_id="1-D", name="Gamla Stan", position="D"),
         ],
+        videos=json.dumps(
+            [
+                {
+                    "title": "The Persuader - Östermalm",
+                    "url": "https://www.youtube.com/watch?v=MpmbntGDyNE",
+                },
+                {
+                    "title": "The Persuader - Vasastaden",
+                    "url": "https://www.youtube.com/watch?v=Cawyll0pOI4",
+                },
+                {
+                    "title": "The Persuader - Kungsholmen",
+                    "url": "https://www.youtube.com/watch?v=XExCZfMCXdo",
+                },
+                {
+                    "title": "The Persuader - Södermalm",
+                    "url": "https://www.youtube.com/watch?v=WDZqiENap_U",
+                },
+                {
+                    "title": "The Persuader - Norrmalm",
+                    "url": "https://www.youtube.com/watch?v=EBBHR3EMN50",
+                },
+                {
+                    "title": "The Persuader - Gamla Stan",
+                    "url": "https://www.youtube.com/watch?v=afMHNll9EVM",
+                },
+            ]
+        ),
         year=1999,
     )

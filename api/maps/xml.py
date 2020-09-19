@@ -1,5 +1,6 @@
 import datetime
 import gzip
+import json
 import re
 import traceback
 from dataclasses import dataclass, field
@@ -71,6 +72,7 @@ class Release:
     master_id: Optional[int] = field(default=None)
     styles: List[str] = field(default_factory=list)
     tracks: List[Track] = field(default_factory=list)
+    videos: Optional[str] = field(default=None)
     year: Optional[int] = field(default=None)
 
 
@@ -266,6 +268,16 @@ def get_release_iterator(xml_path: Path):
             )
         return tracks
 
+    def get_videos(element) -> Optional[str]:
+        videos: List[dict] = []
+        for video in element.find("videos") or []:
+            title = video.find("title").text
+            url = video.get("src")
+            videos.append({"title": title, "url": url})
+        if videos:
+            return json.dumps(videos)
+        return None
+
     def get_year(element) -> Optional[int]:
         element = element.find("released")
         if element is not None:
@@ -289,6 +301,7 @@ def get_release_iterator(xml_path: Path):
             name=element.find("title").text,
             styles=get_styles(element),
             tracks=get_tracks(element, int(element.get("id"))),
+            videos=get_videos(element),
             year=get_year(element),
         )
         yield release

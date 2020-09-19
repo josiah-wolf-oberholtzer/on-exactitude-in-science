@@ -35,6 +35,7 @@ async def test_format_schema(goblin_app):
         role = mgmt.makePropertyKey('role').dataType(String.class).cardinality(SINGLE).make()
         styles = mgmt.makePropertyKey('styles').dataType(String.class).cardinality(SET).make()
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
+        videos = mgmt.makePropertyKey('videos').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
 
         // PageRank property keys
