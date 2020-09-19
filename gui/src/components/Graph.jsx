@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { deselectEntity, selectEntity } from '../slices/graphSlice';
 import { push } from 'connected-react-router';
 import { freezeVertex, freezeEdge, queryObjectToString, queryStringToObject } from '../utils';
+import { getHighlightedEdges, getHighlightedVertices } from '../selectors/highlightedSelector';
 
 const mapStateToProps = state => {
   return {
@@ -14,6 +15,8 @@ const mapStateToProps = state => {
     center: state.graph.center,
     edges: state.graph.edges,
     location: state.router.location,
+    highlightedEdges: getHighlightedEdges(state),
+    highlightedVertices: getHighlightedVertices(state),
     vertices: state.graph.vertices,
   } 
 }
@@ -65,26 +68,49 @@ class Graph extends React.Component {
       this.forceGraph.update(nextProps.vertices, nextProps.edges);
       this.forceGraph.reheat();
     }
+    prevProps.highlightedEdges.forEach(id => {
+      if (!nextProps.highlightedEdges.has(id)) {
+        this.graphManager.envelopes.get(id).unhighlight();
+      };
+    });
+    nextProps.highlightedEdges.forEach(id => {
+      if (!prevProps.highlightedEdges.has(id)) {
+        this.graphManager.envelopes.get(id).highlight();
+      };
+    });
+    prevProps.highlightedVertices.forEach(id => {
+      if (!nextProps.highlightedVertices.has(id)) {
+        this.graphManager.envelopes.get(id).unhighlight();
+      }
+    });
+    nextProps.highlightedVertices.forEach(id => {
+      if (!prevProps.highlightedVertices.has(id)) {
+        this.graphManager.envelopes.get(id).highlight();
+      }
+    });
   }
 
   componentDidMount(prevProps) {
     this.forceGraph = new ForceGraph();
     this.sceneManager = new SceneManager(this.mount);
-    this.threeGraph = new GraphManager(this.forceGraph, this.sceneManager);
-    this.threeGraph.on("deselect", (vertex) => {
+    this.graphManager = new GraphManager(this.forceGraph, this.sceneManager);
+    this.graphManager.on("deselect", (vertex) => {
       this.props.deselectEntity();
     });
-    this.threeGraph.on("doubleclick", (vertex) => {
+    this.graphManager.on("doubleclick", (vertex) => {
       this.props.push(this.props.location, vertex.label, vertex.eid);
     });
-    this.threeGraph.on("selectEdge", (payload) => {
+    this.graphManager.on("selectEdge", (payload) => {
       const {edge, source, target} = payload;
       this.props.selectEdge(edge, source, target);
     });
-    this.threeGraph.on("selectVertex", (vertex) => {
+    this.graphManager.on("selectVertex", (vertex) => {
       this.props.selectVertex(vertex);
     });
-    this.updateGraph({}, this.props);
+    this.updateGraph({
+      highlightedEdges: new Set(),
+      highlightedVertices: new Set(),
+    }, this.props);
     this.start();
   }
 

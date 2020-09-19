@@ -7,6 +7,7 @@ import MoreIcon from '@material-ui/icons/More';
 import StarRateIcon from '@material-ui/icons/StarRate';
 import { connect } from 'react-redux';
 import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
+import { highlight, unhighlight } from '../slices/highlightedSlice';
 import { toggleSidebarSection } from '../slices/layoutSlice';
 import { useLocation } from "react-router-dom";
 import { push } from 'connected-react-router';
@@ -30,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
 
 const mapDispatchToProps = dispatch => {
   return {
-    toggleOpen: category => { dispatch(toggleSidebarSection({category})) },
     clear: (location, category) => {
       dispatch(push(clearQuery(location, category)));
     },
@@ -40,6 +40,14 @@ const mapDispatchToProps = dispatch => {
     pushUnpin: (location, category, name) => {
       dispatch(push(unpinQuery(location, category, name)));
     },
+    toggleOpen: category => { dispatch(toggleSidebarSection({category})) },
+    toggleHighlight: (category, name, highlightedNames) => {
+      if (highlightedNames.has(name)) {
+        dispatch(unhighlight({category, name}));
+      } else {
+        dispatch(highlight({category, name}));
+      }
+    }
   }
 }
 
@@ -70,8 +78,9 @@ const clearQuery = (location, category) => {
 }
 
 const SidebarSection = (props) => {
-  const { category, highlightedNames, names, onClick, open, filteredNames, title } = props;
+  const { category, names, open, filteredNames, title } = props;
   const sortedNames = Array.from(Object.entries(props.names || {}));
+  const highlightedNames = new Set(props.highlightedNames || []);
   const suggestedNames = new Set(props.suggestedNames || []);
   const location = useLocation();
   const classes = useStyles();
@@ -93,8 +102,11 @@ const SidebarSection = (props) => {
           deleteIcon={<CancelIcon />}
           icon={suggestedNames.has(name) ? <StarRateIcon /> : null}
           label={name}
-          onClick={() => {}}
+          onClick={() => {props.toggleHighlight(category, name, highlightedNames)}}
           onDelete={() => {props.pushUnpin(location, category, name)}}
+          style={{
+            boxShadow: highlightedNames.has(name) ? "0px 0px 20px magenta" : null,
+          }}
         />
       </Badge>
     )
@@ -112,8 +124,11 @@ const SidebarSection = (props) => {
             deleteIcon={<FilterListIcon />}
             icon={suggestedNames.has(name) ? <StarRateIcon /> : null}
             label={name}
-            onClick={() => {}}
+            onClick={() => {props.toggleHighlight(category, name, highlightedNames)}}
             onDelete={() => {props.pushPin(location, category, name)}}
+            style={{
+              boxShadow: highlightedNames.has(name) ? "0px 0px 20px magenta" : null,
+            }}
             variant="outlined"
           />
         </Badge>
@@ -133,7 +148,7 @@ const SidebarSection = (props) => {
         onClick={() => { props.toggleOpen(category) }}
         style={{textDecoration: (filteredChips.length > 0 || unfilteredChips.length > 0 || props.children) ? 'none' : 'line-through' }}
       >
-        {filteredChips.length > 0 &&
+        {(filteredChips.length > 0 || highlightedNames.size > 0) &&
           <ListItemIcon>
             <MoreIcon />
           </ListItemIcon>

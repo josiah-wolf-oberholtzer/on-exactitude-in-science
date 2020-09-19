@@ -2,21 +2,22 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { FORMATS } from '../constants';
 import { connect } from 'react-redux';
+import { getVerticesByFormat } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.formatsOpen,
     highlightedNames: state.highlighted.formats,
-    names: state.graph.verticesByFormat,
+    names: getVerticesByFormat(state),
     filteredNames: state.filtered.formats,
   }
 }
 
-const SidebarSectionFormats = (props) => {
+const Formats = (props) => {
   return (
     <SidebarSection
       category={FORMATS}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}
@@ -25,4 +26,4 @@ const SidebarSectionFormats = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionFormats);
+export default connect(mapStateToProps)(Formats);

@@ -2,21 +2,22 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { YEARS } from '../constants';
 import { connect } from 'react-redux';
+import { getVerticesByYear } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.yearsOpen,
     highlightedNames: state.highlighted.years,
-    names: state.graph.verticesByYear,
+    names: getVerticesByYear(state),
     filteredNames: state.filtered.years,
   }
 }
 
-const SidebarSectionYears = (props) => {
+const Years = (props) => {
   return (
     <SidebarSection
       category={YEARS}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}
@@ -25,4 +26,4 @@ const SidebarSectionYears = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionYears);
+export default connect(mapStateToProps)(Years);

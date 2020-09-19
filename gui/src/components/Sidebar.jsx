@@ -1,16 +1,15 @@
 import React from 'react';
-import { Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
+import { Divider, Drawer, List, Toolbar, makeStyles, } from '@material-ui/core';
 import { connect } from 'react-redux';
-import SidebarSectionCountries from './SidebarSectionCountries';
-import SidebarSectionEdgeLimits from './SidebarSectionEdgeLimits';
-import SidebarSectionFormats from './SidebarSectionFormats';
-import SidebarSectionGenres from './SidebarSectionGenres';
-import SidebarSectionLabels from './SidebarSectionLabels';
-import SidebarSectionMainReleases from './SidebarSectionMainReleases';
-import SidebarPagination from './SidebarPagination';
-import SidebarSectionRoles from './SidebarSectionRoles';
-import SidebarSectionStyles from './SidebarSectionStyles';
-import SidebarSectionYears from './SidebarSectionYears';
+import Countries from './Countries';
+import Formats from './Formats';
+import Genres from './Genres';
+import GraphSize from './GraphSize';
+import Labels from './Labels';
+import Pagination from './Pagination';
+import Roles from './Roles';
+import Styles from './Styles';
+import Years from './Years';
 
 const drawerWidth = '420px';
 
@@ -48,16 +47,16 @@ const Sidebar = (props) => {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
-          <SidebarPagination />
-          <SidebarSectionLabels />
-          <SidebarSectionRoles />
-          <SidebarSectionYears />
-          <SidebarSectionFormats />
-          <SidebarSectionStyles />
-          <SidebarSectionGenres />
-          <SidebarSectionCountries />
-          <SidebarSectionEdgeLimits />
-          { /* <SidebarSectionMainReleases /> */ }
+          <Labels />
+          <Roles />
+          <Years />
+          <Formats />
+          <Styles />
+          <Genres />
+          <Countries />
+          <GraphSize />
+          <Divider />
+          <Pagination />
         </List>
       </div>
     </Drawer>

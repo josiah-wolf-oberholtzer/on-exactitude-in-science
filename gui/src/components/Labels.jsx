@@ -2,21 +2,22 @@ import React from 'react';
 import SidebarSection from './SidebarSection';
 import { LABELS } from '../constants';
 import { connect } from 'react-redux';
+import { getVerticesByLabel } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     open: state.layout.sidebar.labelsOpen,
     highlightedNames: state.highlighted.labels,
-    names: state.graph.verticesByLabel,
+    names: getVerticesByLabel(state),
     filteredNames: state.filtered.labels,
   }
 }
 
-const SidebarSectionLabels = (props) => {
+const Labels = (props) => {
   return (
     <SidebarSection
       category={LABELS}
-      highlightedNames={props.highlighedNames}
+      highlightedNames={props.highlightedNames}
       names={props.names}
       open={props.open}
       filteredNames={props.filteredNames}
@@ -25,4 +26,4 @@ const SidebarSectionLabels = (props) => {
   )
 }
 
-export default connect(mapStateToProps)(SidebarSectionLabels);
+export default connect(mapStateToProps)(Labels);

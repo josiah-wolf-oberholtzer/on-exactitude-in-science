@@ -1,16 +1,17 @@
 import React from 'react';
 import * as QueryString from 'query-string';
-import { Box, Divider, ListItem } from '@material-ui/core';
-import Pagination from '@material-ui/lab/Pagination';
+import { Box, ListItem } from '@material-ui/core';
+import MUIPagination from '@material-ui/lab/Pagination';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import { queryObjectToString, queryStringToObject } from '../utils';
 import { useLocation } from "react-router-dom";
+import { getPageCount } from '../selectors/graphSelector';
 
 const mapStateToProps = state => {
   return {
     page: state.filtered.page,
-    pageCount: state.graph.pageCount,
+    pageCount: getPageCount(state),
   }
 }
 
@@ -28,7 +29,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const SidebarPagination = (props) => {
+const Pagination = (props) => {
   const location = useLocation();
   return (
     <React.Fragment>
@@ -38,9 +39,9 @@ const SidebarPagination = (props) => {
           width="100%"
           alignItems="center"
           justifyContent="center"
-          pb={1}
+          pt={1}
         >
-          <Pagination
+          <MUIPagination
             count={props.pageCount}
             disabled={props.pageCount == 1}
             onChange={(event, value) => { props.pushPage(location, value) }}
@@ -48,9 +49,8 @@ const SidebarPagination = (props) => {
           />
         </Box>
       </ListItem>
-      <Divider />
     </React.Fragment>
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SidebarPagination);
+export default connect(mapStateToProps, mapDispatchToProps)(Pagination);

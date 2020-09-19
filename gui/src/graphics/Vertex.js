@@ -42,6 +42,7 @@ class Vertex {
     this.group.add(this.coreMesh);
     this.hovered = false;
     this.selected = false;
+    this.highlighted = false;
   }
 
   calculateColor() {
@@ -51,6 +52,9 @@ class Vertex {
     } else if (this.selected) {
       this.coreMesh.material.color.setHex(0xffff00);
       this.childRingMesh.material.color.setHex(0xffff00);
+    } else if (this.highlighted) {
+      this.coreMesh.material.color.setHex(0xff00ff);
+      this.childRingMesh.material.color.setHex(0xff00ff);
     } else {
       const color = d3.interpolateSpectral(this.data.depth / this.data.maximum_depth);
       this.coreMesh.material.color.set(color);
@@ -164,6 +168,16 @@ class Vertex {
   deselect() {
     this.group.remove(this.pointLight);
     this.selected = false;
+  }
+
+  highlight() {
+    console.log('vertex/highlight', this);
+    this.highlighted = true;
+  }
+
+  unhighlight() {
+    console.log('vertex/unhighlight', this);
+    this.highlighted = false;
   }
 
   frameTick() {

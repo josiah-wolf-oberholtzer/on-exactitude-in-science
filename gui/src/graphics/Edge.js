@@ -19,6 +19,7 @@ class Edge {
     this.points = [];
     this.hovered = false;
     this.selected = false;
+    this.highlighted = false;
   }
 
   calculateColors() {
@@ -28,13 +29,15 @@ class Edge {
       startColor.set(0x3a4a18);
       endColor.set(0x3a4a18);
     }
-    if (this.selected === true) {
-      startColor.setHex(0xffff00);
-      endColor.setHex(0xffff00);
-    }
     if (this.hovered === true) {
       startColor.setHex(0xff0000);
       endColor.setHex(0xff0000);
+    } else if (this.selected === true) {
+      startColor.setHex(0xffff00);
+      endColor.setHex(0xffff00);
+    } else if (this.highlighted === true) {
+      startColor.setHex(0xff00ff);
+      endColor.setHex(0xff00ff);
     }
     return { startColor, endColor };
   }
@@ -103,6 +106,18 @@ class Edge {
 
   deselect() {
     this.selected = false;
+    this.lineManager.updateColor(this);
+  }
+
+  highlight() {
+    console.log('edge/highlight', this);
+    this.highlighted = true;
+    this.lineManager.updateColor(this);
+  }
+
+  unhighlight() {
+    console.log('edge/unhighlight', this);
+    this.highlighted = false;
     this.lineManager.updateColor(this);
   }
 }
