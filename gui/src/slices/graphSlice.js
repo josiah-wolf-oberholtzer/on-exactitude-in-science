@@ -10,6 +10,9 @@ const fetchByEntity = createAsyncThunk(
       const response = await graphAPI.fetchLocalityByEntity(
         spec.label, spec.id, spec.filters,
       );
+      if (response.status >= 400) {
+        return rejectWithValue(response.data);
+      }
       return response.data.result;
     } catch (err) {
       if (!err.response) {
@@ -29,6 +32,9 @@ const fetchRandom = createAsyncThunk(
       const { label, eid } = response.data.result;
       const url = `/${label}/${eid}${search.length > 0 ? search : ''}`;
       dispatch(replace(url));
+      if (response.status >= 400) {
+        return rejectWithValue(response.data);
+      }
       return response.data.result;
     } catch (err) {
       if (!err.response) {
