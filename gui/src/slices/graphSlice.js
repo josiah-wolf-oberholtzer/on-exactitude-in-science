@@ -10,15 +10,9 @@ const fetchByEntity = createAsyncThunk(
       const response = await graphAPI.fetchLocalityByEntity(
         spec.label, spec.id, spec.filters,
       );
-      if (response.status >= 400) {
-        return rejectWithValue(`${response.status}`);
-      }
       return response.data.result;
     } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      return rejectWithValue(err.response.message);
+      return rejectWithValue(err.response.data);
     }
   },
 );
@@ -33,14 +27,11 @@ const fetchRandom = createAsyncThunk(
       const url = `/${label}/${eid}${search.length > 0 ? search : ''}`;
       dispatch(replace(url));
       if (response.status >= 400) {
-        return rejectWithValue(`${response.status}`);
+        return rejectWithValue({ ...(response.data || {}), status: response.status });
       }
       return response.data.result;
     } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      return rejectWithValue(err.response.message);
+      return rejectWithValue(err.response.data);
     }
   },
 );
@@ -78,7 +69,8 @@ const graphSlice = createSlice({
       state.vertices = vertices;
     },
     [fetchByEntity.rejected]: (state, action) => {
-      state.error = action.error;
+      console.log('ACTION', action);
+      state.error = action.payload;
       state.loading = false;
     },
     [fetchRandom.pending]: (state) => {
@@ -88,7 +80,7 @@ const graphSlice = createSlice({
       state.error = null;
     },
     [fetchRandom.rejected]: (state, action) => {
-      state.error = action.error;
+      state.error = action.payload;
       state.loading = false;
     },
   },
