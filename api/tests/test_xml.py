@@ -82,5 +82,31 @@ def test_get_release_iterator():
             xml.Track(entity_id="1-C2", name="Norrmalm", position="C2"),
             xml.Track(entity_id="1-D", name="Gamla Stan", position="D"),
         ],
+        videos=[
+            xml.Video(
+                title="The Persuader - Östermalm",
+                url="https://www.youtube.com/watch?v=MpmbntGDyNE",
+            ),
+            xml.Video(
+                title="The Persuader - Vasastaden",
+                url="https://www.youtube.com/watch?v=Cawyll0pOI4",
+            ),
+            xml.Video(
+                title="The Persuader - Kungsholmen",
+                url="https://www.youtube.com/watch?v=XExCZfMCXdo",
+            ),
+            xml.Video(
+                title="The Persuader - Södermalm",
+                url="https://www.youtube.com/watch?v=WDZqiENap_U",
+            ),
+            xml.Video(
+                title="The Persuader - Norrmalm",
+                url="https://www.youtube.com/watch?v=EBBHR3EMN50",
+            ),
+            xml.Video(
+                title="The Persuader - Gamla Stan",
+                url="https://www.youtube.com/watch?v=afMHNll9EVM",
+            ),
+        ],
         year=1999,
     )

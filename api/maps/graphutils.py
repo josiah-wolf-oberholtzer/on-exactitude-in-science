@@ -1,3 +1,5 @@
+import json
+
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P
 
@@ -40,6 +42,8 @@ def cleanup_values(label, values, goblin_app):
             cardinality = getattr(prop, "cardinality", Cardinality.single)
         if value and cardinality == Cardinality.single:
             values[key] = value[0]
+        if key == "videos" and values[key]:
+            values[key] = json.loads(values[key])
 
 
 def cleanup_vertex(result, goblin_app):

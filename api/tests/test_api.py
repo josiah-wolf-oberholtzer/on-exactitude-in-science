@@ -107,6 +107,21 @@ async def test_search(api_client):
                 "release_name": "Profound Sounds Vol. 1",
                 "styles": ["Tech House", "Techno"],
                 "total_edge_count": 3,
+                "videos": [
+                    {
+                        "title": "Profound Sounds Vol. 1 - Josh Wink",
+                        "url": "https://www.youtube.com/watch?v=bqUfNGJEKlo",
+                    },
+                    {
+                        "title": "Josh Wink Profound Sounds Vol 1 Mlada "
+                        "Fronta H2O Arthur Paradiso",
+                        "url": "https://www.youtube.com/watch?v=UB_rOhpn5js",
+                    },
+                    {
+                        "title": "Profound Sounds Track 1....",
+                        "url": "https://www.youtube.com/watch?v=cpQWEQjunF4",
+                    },
+                ],
                 "year": 1999,
             },
             {
@@ -126,6 +141,24 @@ async def test_search(api_client):
                 "release_name": "World Receiver",
                 "styles": ["Ambient"],
                 "total_edge_count": 1,
+                "videos": [
+                    {
+                        "title": "World Receiver by Tetsu Inoue, 1996",
+                        "url": "https://www.youtube.com/watch?v=grlYRK1aSus",
+                    },
+                    {
+                        "title": "TETSU INOUE background story _ world " "receiver",
+                        "url": "https://www.youtube.com/watch?v=0ge7OWBJoQY",
+                    },
+                    {
+                        "title": "Tetsu Inoue - Inter Link",
+                        "url": "https://www.youtube.com/watch?v=Is1nOddoQ3s",
+                    },
+                    {
+                        "title": "Tetsu Inoue - Health Loop (World Reiceiver)",
+                        "url": "https://www.youtube.com/watch?v=cA_sOjy98Lg",
+                    },
+                ],
                 "year": 1996,
             },
         ],
@@ -191,6 +224,32 @@ async def test_vertex_by_goblin_id(api_client):
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
+            "videos": [
+                {
+                    "title": "The Persuader - Östermalm",
+                    "url": "https://www.youtube.com/watch?v=MpmbntGDyNE",
+                },
+                {
+                    "title": "The Persuader - Vasastaden",
+                    "url": "https://www.youtube.com/watch?v=Cawyll0pOI4",
+                },
+                {
+                    "title": "The Persuader - Kungsholmen",
+                    "url": "https://www.youtube.com/watch?v=XExCZfMCXdo",
+                },
+                {
+                    "title": "The Persuader - Södermalm",
+                    "url": "https://www.youtube.com/watch?v=WDZqiENap_U",
+                },
+                {
+                    "title": "The Persuader - Norrmalm",
+                    "url": "https://www.youtube.com/watch?v=EBBHR3EMN50",
+                },
+                {
+                    "title": "The Persuader - Gamla Stan",
+                    "url": "https://www.youtube.com/watch?v=afMHNll9EVM",
+                },
+            ],
             "year": 1999,
         },
     }
@@ -220,6 +279,32 @@ async def test_vertex_by_label(api_client):
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
+            "videos": [
+                {
+                    "title": "The Persuader - Östermalm",
+                    "url": "https://www.youtube.com/watch?v=MpmbntGDyNE",
+                },
+                {
+                    "title": "The Persuader - Vasastaden",
+                    "url": "https://www.youtube.com/watch?v=Cawyll0pOI4",
+                },
+                {
+                    "title": "The Persuader - Kungsholmen",
+                    "url": "https://www.youtube.com/watch?v=XExCZfMCXdo",
+                },
+                {
+                    "title": "The Persuader - Södermalm",
+                    "url": "https://www.youtube.com/watch?v=WDZqiENap_U",
+                },
+                {
+                    "title": "The Persuader - Norrmalm",
+                    "url": "https://www.youtube.com/watch?v=EBBHR3EMN50",
+                },
+                {
+                    "title": "The Persuader - Gamla Stan",
+                    "url": "https://www.youtube.com/watch?v=afMHNll9EVM",
+                },
+            ],
             "year": 1999,
         },
     }

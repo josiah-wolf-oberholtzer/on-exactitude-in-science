@@ -37,6 +37,7 @@ class Release(goblin.Vertex):
     random = goblin.Property(goblin.Float)
     release_id = goblin.Property(goblin.Integer)
     styles = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
+    videos = goblin.Property(goblin.String)
     year = goblin.Property(goblin.Integer)
 
 
