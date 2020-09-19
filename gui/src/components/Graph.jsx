@@ -70,7 +70,10 @@ class Graph extends React.Component {
     }
     prevProps.highlightedEdges.forEach(id => {
       if (!nextProps.highlightedEdges.has(id)) {
-        this.graphManager.envelopes.get(id).unhighlight();
+        const envelope = this.graphManager.envelopes.get(id);
+        if (envelope !== undefined) {
+          envelope.unhighlight();
+        }
       };
     });
     nextProps.highlightedEdges.forEach(id => {
@@ -80,7 +83,10 @@ class Graph extends React.Component {
     });
     prevProps.highlightedVertices.forEach(id => {
       if (!nextProps.highlightedVertices.has(id)) {
-        this.graphManager.envelopes.get(id).unhighlight();
+        const envelope = this.graphManager.envelopes.get(id);
+        if (envelope !== undefined) {
+          envelope.unhighlight();
+        }
       }
     });
     nextProps.highlightedVertices.forEach(id => {

@@ -5,6 +5,7 @@ import { history } from './store';
 import { theme } from './theme';
 import EntityCaption from '../components/EntityCaption';
 import EntityDial from '../components/EntityDial';
+import ErrorMessage from '../components/ErrorMessage';
 import Graph from '../components/Graph';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
@@ -28,6 +29,7 @@ const App = () => {
           <EntityCaption />
           <Header />
           <Sidebar />
+          <ErrorMessage />
           <Loading />
         </div>
       </ThemeProvider>
