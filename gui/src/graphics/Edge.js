@@ -90,35 +90,45 @@ class Edge {
 
   mouseout() {
     this.hovered = false;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 
   mouseover() {
     this.hovered = true;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 
   select() {
     this.selected = true;
     this.hovered = false;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 
   deselect() {
     this.selected = false;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 
   highlight() {
-    console.log('edge/highlight', this);
     this.highlighted = true;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 
   unhighlight() {
-    console.log('edge/unhighlight', this);
     this.highlighted = false;
-    this.lineManager.updateColor(this);
+    if (this.lineManager !== null) {
+      this.lineManager.updateColor(this);
+    }
   }
 }
 
