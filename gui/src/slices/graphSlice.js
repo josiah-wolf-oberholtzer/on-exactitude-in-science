@@ -11,7 +11,7 @@ const fetchByEntity = createAsyncThunk(
         spec.label, spec.id, spec.filters,
       );
       if (response.status >= 400) {
-        return rejectWithValue(response.data);
+        return rejectWithValue(`${response.status}`);
       }
       return response.data.result;
     } catch (err) {
@@ -33,7 +33,7 @@ const fetchRandom = createAsyncThunk(
       const url = `/${label}/${eid}${search.length > 0 ? search : ''}`;
       dispatch(replace(url));
       if (response.status >= 400) {
-        return rejectWithValue(response.data);
+        return rejectWithValue(`${response.status}`);
       }
       return response.data.result;
     } catch (err) {
@@ -72,6 +72,7 @@ const graphSlice = createSlice({
       document.title = `${center.name} | On Exactitude In Science`;
       state.center = center;
       state.edges = edges;
+      state.error = null;
       state.loading = false;
       state.selected = { kind: 'vertex', vertex: freezeVertex(center) };
       state.vertices = vertices;
@@ -83,7 +84,9 @@ const graphSlice = createSlice({
     [fetchRandom.pending]: (state) => {
       state.loading = true;
     },
-    [fetchRandom.fulfilled]: () => {},
+    [fetchRandom.fulfilled]: (state) => {
+      state.error = null;
+    },
     [fetchRandom.rejected]: (state, action) => {
       state.error = action.error;
       state.loading = false;
