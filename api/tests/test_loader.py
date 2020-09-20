@@ -22,7 +22,7 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
     )
     await asyncio.sleep(1)
     vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
-    edge_counts = await (session.traversal().E().groupCount().by(__.label())).next()
+    edge_counts = await (session.traversal().E().groupCount().by(__.values("role"))).next()
     assert vertex_counts == {
         "artist": 50,
         "company": 50,
@@ -31,11 +31,26 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
         "track": 246,
     }
     assert edge_counts == {
-        "alias_of": 5,
-        "credited_with": 91,
-        "includes": 246,
-        "member_of": 7,
-        "released": 34,
-        "released_on": 50,
-        "subsidiary_of": 1,
+        "Alias Of": 5,
+        "Arranged By": 15,
+        "Co-producer": 1,
+        "Copyright (c)": 5,
+        "DJ Mix": 1,
+        "Distributed By": 2,
+        "Includes": 246,
+        "Keyboards": 1,
+        "Manufactured By": 2,
+        "Member Of": 7,
+        "Mixed By": 1,
+        "Performer": 4,
+        "Phonographic Copyright (p)": 5,
+        "Presenter": 1,
+        "Producer": 20,
+        "Recorded By": 4,
+        "Released On": 50,
+        "Released": 34,
+        "Remix": 15,
+        "Strings": 1,
+        "Subsidiary Of": 1,
+        "Written-By": 13,
     }

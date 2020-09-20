@@ -112,7 +112,7 @@ async def load_artist_edges(xml_artist, session):
             from_id=xml_artist.entity_id,
             to_label=entities.Artist.__label__,
             to_id=xml_alias.entity_id,
-            role=entities.AliasOf.__label__,
+            role=entities.AliasOf.__label__.replace("_", " ").title(),
         )
     for xml_member in xml_artist.members:
         await upsert_edge(
@@ -122,7 +122,7 @@ async def load_artist_edges(xml_artist, session):
             from_id=xml_member.entity_id,
             to_label=entities.Artist.__label__,
             to_id=xml_artist.entity_id,
-            role=entities.MemberOf.__label__,
+            role=entities.MemberOf.__label__.replace("_", " ").title(),
         )
 
 
@@ -135,7 +135,7 @@ async def load_company_edges(xml_company, session):
             from_id=xml_subsidiary.entity_id,
             to_label=entities.Company.__label__,
             to_id=xml_company.entity_id,
-            role=entities.SubsidiaryOf.__label__,
+            role=entities.SubsidiaryOf.__label__.replace("_", " ").title(),
         )
 
 
@@ -154,7 +154,7 @@ async def load_release_edges(xml_release, session):
             to_label=entities.Release.__label__,
             to_id=xml_release.entity_id,
             primacy=primacy,
-            role=entities.Released.__label__,
+            role=entities.Released.__label__.replace("_", " ").title(),
         )
     for xml_extra_artist in xml_release.extra_artists:
         for role in xml_extra_artist.roles:
@@ -189,7 +189,7 @@ async def load_release_edges(xml_release, session):
             to_label=entities.Company.__label__,
             to_id=xml_label.entity_id,
             primacy=primacy,
-            role=entities.ReleasedOn.__label__,
+            role=entities.ReleasedOn.__label__.replace("_", " ").title(),
         )
     for xml_track in xml_release.tracks:
         await upsert_edge(
@@ -200,7 +200,7 @@ async def load_release_edges(xml_release, session):
             to_label=entities.Track.__label__,
             to_id=xml_track.entity_id,
             primacy=primacy,
-            role=entities.Includes.__label__,
+            role=entities.Includes.__label__.replace("_", " ").title(),
         )
         for xml_artist in xml_track.artists:
             await upsert_edge(
@@ -211,7 +211,7 @@ async def load_release_edges(xml_release, session):
                 to_label=entities.Track.__label__,
                 to_id=xml_track.entity_id,
                 primacy=primacy,
-                role=entities.Released.__label__,
+                role=entities.Released.__label__.replace("_", " ").title(),
             )
         for xml_extra_artist in xml_track.extra_artists:
             for role in xml_extra_artist.roles:
@@ -234,7 +234,7 @@ async def load_release_edges(xml_release, session):
             to_label=entities.Master.__label__,
             to_id=xml_release.master_id,
             primacy=primacy,
-            role=entities.SubreleaseOf.__label__,
+            role=entities.SubreleaseOf.__label__.replace("_", " ").title(),
         )
 
 
