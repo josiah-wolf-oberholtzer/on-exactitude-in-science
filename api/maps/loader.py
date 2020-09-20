@@ -107,20 +107,22 @@ async def load_artist_edges(xml_artist, session):
             continue
         await upsert_edge(
             session,
-            entities.AliasOf.__label__,
-            entities.Artist.__label__,
-            xml_artist.entity_id,
-            entities.Artist.__label__,
-            xml_alias.entity_id,
+            edge_label=entities.AliasOf.__label__,
+            from_label=entities.Artist.__label__,
+            from_id=xml_artist.entity_id,
+            to_label=entities.Artist.__label__,
+            to_id=xml_alias.entity_id,
+            role=entities.AliasOf.__label__,
         )
     for xml_member in xml_artist.members:
         await upsert_edge(
             session,
-            entities.MemberOf.__label__,
-            entities.Artist.__label__,
-            xml_member.entity_id,
-            entities.Artist.__label__,
-            xml_artist.entity_id,
+            edge_label=entities.MemberOf.__label__,
+            from_label=entities.Artist.__label__,
+            from_id=xml_member.entity_id,
+            to_label=entities.Artist.__label__,
+            to_id=xml_artist.entity_id,
+            role=entities.MemberOf.__label__,
         )
 
 
@@ -128,92 +130,111 @@ async def load_company_edges(xml_company, session):
     for xml_subsidiary in xml_company.subsidiaries:
         await upsert_edge(
             session,
-            entities.SubsidiaryOf.__label__,
-            entities.Company.__label__,
-            xml_subsidiary.entity_id,
-            entities.Company.__label__,
-            xml_company.entity_id,
+            edge_label=entities.SubsidiaryOf.__label__,
+            from_label=entities.Company.__label__,
+            from_id=xml_subsidiary.entity_id,
+            to_label=entities.Company.__label__,
+            to_id=xml_company.entity_id,
+            role=entities.SubsidiaryOf.__label__,
         )
 
 
 async def load_release_edges(xml_release, session):
+    primacy = 2
+    if xml_release.is_main_release:
+        primacy = 1
+    elif xml_release.master_id is None:
+        primacy = 1
     for xml_artist in xml_release.artists:
         await upsert_edge(
             session,
-            entities.Released.__label__,
-            entities.Artist.__label__,
-            xml_artist.entity_id,
-            entities.Release.__label__,
-            xml_release.entity_id,
+            edge_label=entities.Released.__label__,
+            from_label=entities.Artist.__label__,
+            from_id=xml_artist.entity_id,
+            to_label=entities.Release.__label__,
+            to_id=xml_release.entity_id,
+            primacy=primacy,
+            role=entities.Released.__label__,
         )
     for xml_extra_artist in xml_release.extra_artists:
         for role in xml_extra_artist.roles:
             await upsert_edge(
                 session,
-                entities.CreditedWith.__label__,
-                entities.Artist.__label__,
-                xml_extra_artist.entity_id,
-                entities.Release.__label__,
-                xml_release.entity_id,
+                edge_label=entities.CreditedWith.__label__,
+                from_label=entities.Artist.__label__,
+                from_id=xml_extra_artist.entity_id,
+                to_label=entities.Release.__label__,
+                to_id=xml_release.entity_id,
+                primacy=primacy,
                 role=role.name,
             )
     for xml_company in xml_release.companies:
         for role in xml_company.roles:
             await upsert_edge(
                 session,
-                entities.CreditedWith.__label__,
-                entities.Company.__label__,
-                xml_company.entity_id,
-                entities.Release.__label__,
-                xml_release.entity_id,
+                edge_label=entities.CreditedWith.__label__,
+                from_label=entities.Company.__label__,
+                from_id=xml_company.entity_id,
+                to_label=entities.Release.__label__,
+                to_id=xml_release.entity_id,
+                primacy=primacy,
                 role=role.name,
             )
     for xml_label in xml_release.labels:
         await upsert_edge(
             session,
-            entities.ReleasedOn.__label__,
-            entities.Release.__label__,
-            xml_release.entity_id,
-            entities.Company.__label__,
-            xml_label.entity_id,
+            edge_label=entities.ReleasedOn.__label__,
+            from_label=entities.Release.__label__,
+            from_id=xml_release.entity_id,
+            to_label=entities.Company.__label__,
+            to_id=xml_label.entity_id,
+            primacy=primacy,
+            role=entities.ReleasedOn.__label__,
         )
     for xml_track in xml_release.tracks:
         await upsert_edge(
             session,
-            entities.Includes.__label__,
-            entities.Release.__label__,
-            xml_release.entity_id,
-            entities.Track.__label__,
-            xml_track.entity_id,
+            edge_label=entities.Includes.__label__,
+            from_label=entities.Release.__label__,
+            from_id=xml_release.entity_id,
+            to_label=entities.Track.__label__,
+            to_id=xml_track.entity_id,
+            primacy=primacy,
+            role=entities.Includes.__label__,
         )
         for xml_artist in xml_track.artists:
             await upsert_edge(
                 session,
-                entities.Released.__label__,
-                entities.Artist.__label__,
-                xml_artist.entity_id,
-                entities.Track.__label__,
-                xml_track.entity_id,
+                edge_label=entities.Released.__label__,
+                from_label=entities.Artist.__label__,
+                from_id=xml_artist.entity_id,
+                to_label=entities.Track.__label__,
+                to_id=xml_track.entity_id,
+                primacy=primacy,
+                role=entities.Released.__label__,
             )
         for xml_extra_artist in xml_track.extra_artists:
             for role in xml_extra_artist.roles:
                 await upsert_edge(
                     session,
-                    entities.CreditedWith.__label__,
-                    entities.Artist.__label__,
-                    xml_extra_artist.entity_id,
-                    entities.Track.__label__,
-                    xml_track.entity_id,
+                    edge_label=entities.CreditedWith.__label__,
+                    from_label=entities.Artist.__label__,
+                    from_id=xml_extra_artist.entity_id,
+                    to_label=entities.Track.__label__,
+                    to_id=xml_track.entity_id,
+                    primacy=primacy,
                     role=role.name,
                 )
     if xml_release.master_id:
         await upsert_edge(
             session,
-            entities.SubreleaseOf.__label__,
-            entities.Release.__label__,
-            xml_release.entity_id,
-            entities.Master.__label__,
-            xml_release.master_id,
+            edge_label=entities.SubreleaseOf.__label__,
+            from_label=entities.Release.__label__,
+            from_id=xml_release.entity_id,
+            to_label=entities.Master.__label__,
+            to_id=xml_release.master_id,
+            primacy=primacy,
+            role=entities.SubreleaseOf.__label__,
         )
 
 
@@ -251,7 +272,7 @@ async def upsert_vertex(xml_entity, session):
 
 
 async def upsert_edge(
-    session, edge_label, from_label, from_id, to_label, to_id, **kwargs
+    session, *, edge_label, from_label, from_id, to_label, to_id, primacy=0, **kwargs
 ):
     traversal = (
         session.g.V()
@@ -259,6 +280,8 @@ async def upsert_edge(
         .addE(edge_label)
         .to(__.V().has(to_label, f"{to_label}_id", to_id))
         .property("last_modified", time.time())
+        .property("name", edge_label)
+        .property("primacy", primacy)
     )
     for key, value in kwargs.items():
         traversal = traversal.property(key, value)

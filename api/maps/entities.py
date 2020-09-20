@@ -99,3 +99,10 @@ class SubreleaseOf(goblin.Edge):
     __label__ = "subrelease_of"
     __valid_relations__ = frozenset([(Release, Master)])
     last_modified = goblin.Property(goblin.Float)
+
+
+class Relationship(goblin.Edge):
+    __label__ = "relationship"
+    last_modified = goblin.Property(goblin.Float)
+    primacy = goblin.Property(goblin.Integer)
+    role = goblin.Property(goblin.String)
