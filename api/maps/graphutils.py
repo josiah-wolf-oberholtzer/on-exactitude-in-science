@@ -14,17 +14,6 @@ roles_to_labels = {
 }
 
 
-labels_to_roles = {
-    "alias_of": "Alias Of",
-    "includes": "Includes",
-    "member_of": "Member Of",
-    "released": "Released",
-    "released_on": "Released On",
-    "subsidiary_of": "Subsidiary Of",
-    "subrelease_of": "Subrelease Of",
-}
-
-
 def cleanup_edge(result):
     result["id"] = result["id"]["@value"]["relationId"]
     result.update(result.pop("values", {}))
@@ -60,33 +49,15 @@ def cleanup_vertex(result, goblin_app):
             result[key] = value
     if "is_main_release" in result:
         result["main"] = result.pop("is_main_release")
-    if (
-        in_roles := sorted(
-            list(result.pop("in_roles", {}))
-            + [
-                labels_to_roles[label]
-                for label in result.pop("in_labels", [])
-                if label != "credited_with"
-            ]
-        )
-    ) :
+    if in_roles := sorted(result.pop("in_roles", {})):
         result["in_roles"] = in_roles
-    if (
-        out_roles := sorted(
-            list(result.pop("out_roles", {}))
-            + [
-                labels_to_roles[label]
-                for label in result.pop("out_labels", [])
-                if label != "credited_with"
-            ]
-        )
-    ) :
+    if out_roles := sorted(result.pop("out_roles", {})):
         result["out_roles"] = out_roles
     return result
 
 
-def project_vertex(traversal):
-    return (
+def project_vertex(traversal, **extra_traversals):
+    traversal = (
         traversal.project(
             "id",
             "label",
@@ -94,25 +65,35 @@ def project_vertex(traversal):
             "total_edge_count",
             "child_count",
             "extra",
-            "in_labels",
             "in_roles",
-            "out_labels",
             "out_roles",
+            *sorted(extra_traversals.keys()),
         )
         .by(__.id())
         .by(__.label())
         .by(__.valueMap())
         .by(__.bothE().count())
-        .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
-        .by(
-            __.choose(
-                __.inE("includes").count().is_(P.gt(0)),
-                __.in_("includes").valueMap(),
-                __.constant(False),
-            )
-        )
-        .by(__.inE().groupCount().by(__.label()))
-        .by(__.inE("credited_with").groupCount().by("role"))
-        .by(__.outE().groupCount().by(__.label()))
-        .by(__.outE("credited_with").groupCount().by("role"))
+        .by(make_child_count_traversal())
+        .by(make_track_extras_traversal())
+        .by(__.inE("relationship").groupCount().by("name"))
+        .by(__.outE("relationship").groupCount().by("name"))
+    )
+    for _, extra_traversal in sorted(extra_traversals.items()):
+        traversal = traversal.by(extra_traversal)
+    return traversal
+
+
+def make_child_count_traversal():
+    return (
+        __.inE("relationship")
+        .has("name", P.within("Member Of", "Subsidiary Of", "Subrelease Of"))
+        .count()
+    )
+
+
+def make_track_extras_traversal():
+    return __.choose(
+        __.inE("relationship").has("name", "Includes").count().is_(P.gt(0)),
+        __.inE("relationship").has("name", "Includes").otherV().valueMap(),
+        __.constant(False),
     )

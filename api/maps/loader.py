@@ -109,14 +109,14 @@ async def load_artist_edges(xml_artist, session):
             session,
             source=(entities.Artist.__label__, xml_artist.entity_id),
             target=(entities.Artist.__label__, xml_alias.entity_id),
-            name=entities.AliasOf.__label__.replace("_", " ").title(),
+            name="Alias Of",
         )
     for xml_member in xml_artist.members:
         await upsert_edge(
             session,
             source=(entities.Artist.__label__, xml_member.entity_id),
             target=(entities.Artist.__label__, xml_artist.entity_id),
-            name=entities.MemberOf.__label__.replace("_", " ").title(),
+            name="Member Of",
         )
 
 
@@ -126,7 +126,7 @@ async def load_company_edges(xml_company, session):
             session,
             source=(entities.Company.__label__, xml_subsidiary.entity_id),
             target=(entities.Company.__label__, xml_company.entity_id),
-            name=entities.SubsidiaryOf.__label__.replace("_", " ").title(),
+            name="Subsidiary Of",
         )
 
 
@@ -142,7 +142,7 @@ async def load_release_edges(xml_release, session):
             source=(entities.Artist.__label__, xml_artist.entity_id),
             target=(entities.Release.__label__, xml_release.entity_id),
             primacy=primacy,
-            name=entities.Released.__label__.replace("_", " ").title(),
+            name="Released",
         )
     for xml_extra_artist in xml_release.extra_artists:
         for role in xml_extra_artist.roles:
@@ -168,7 +168,7 @@ async def load_release_edges(xml_release, session):
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Company.__label__, xml_label.entity_id),
             primacy=primacy,
-            name=entities.ReleasedOn.__label__.replace("_", " ").title(),
+            name="Released On",
         )
     for xml_track in xml_release.tracks:
         await upsert_edge(
@@ -176,7 +176,7 @@ async def load_release_edges(xml_release, session):
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Track.__label__, xml_track.entity_id),
             primacy=primacy,
-            name=entities.Includes.__label__.replace("_", " ").title(),
+            name="Includes",
         )
         for xml_artist in xml_track.artists:
             await upsert_edge(
@@ -184,7 +184,7 @@ async def load_release_edges(xml_release, session):
                 source=(entities.Artist.__label__, xml_artist.entity_id),
                 target=(entities.Track.__label__, xml_track.entity_id),
                 primacy=primacy,
-                name=entities.Released.__label__.replace("_", " ").title(),
+                name="Released",
             )
         for xml_extra_artist in xml_track.extra_artists:
             for role in xml_extra_artist.roles:
@@ -201,7 +201,7 @@ async def load_release_edges(xml_release, session):
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Master.__label__, xml_release.master_id),
             primacy=primacy,
-            name=entities.SubreleaseOf.__label__.replace("_", " ").title(),
+            name="Subrelease Of",
         )
 
 
@@ -238,9 +238,7 @@ async def upsert_vertex(xml_entity, session):
             await backoff(attempt)
 
 
-async def upsert_edge(
-    session, *, name, source, target, primacy=0, **kwargs
-):
+async def upsert_edge(session, *, name, source, target, primacy=0, **kwargs):
     from_label, from_id = source
     to_label, to_id = target
     traversal = (

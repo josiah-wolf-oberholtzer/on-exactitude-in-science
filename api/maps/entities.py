@@ -50,57 +50,6 @@ class Track(goblin.Vertex):
     track_id = goblin.Property(goblin.String)
 
 
-class AliasOf(goblin.Edge):
-    __label__ = "alias_of"
-    __valid_relations__ = frozenset([(Artist, Artist)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class CreditedWith(goblin.Edge):
-    __label__ = "credited_with"
-    __valid_relations__ = frozenset(
-        [(Artist, Release), (Artist, Track), (Company, Release)]
-    )
-    last_modified = goblin.Property(goblin.Float)
-    role = goblin.Property(goblin.String)
-
-
-class Includes(goblin.Edge):
-    __label__ = "includes"
-    __valid_relations__ = frozenset([(Release, Track)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class MemberOf(goblin.Edge):
-    __label__ = "member_of"
-    __valid_relations__ = frozenset([(Artist, Artist)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class Released(goblin.Edge):
-    __label__ = "released"
-    __valid_relations__ = frozenset([(Artist, Release), (Artist, Track)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class ReleasedOn(goblin.Edge):
-    __label__ = "released_on"
-    __valid_relations__ = frozenset([(Release, Company)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class SubsidiaryOf(goblin.Edge):
-    __label__ = "subsidiary_of"
-    __valid_relations__ = frozenset([(Company, Company)])
-    last_modified = goblin.Property(goblin.Float)
-
-
-class SubreleaseOf(goblin.Edge):
-    __label__ = "subrelease_of"
-    __valid_relations__ = frozenset([(Release, Master)])
-    last_modified = goblin.Property(goblin.Float)
-
-
 class Relationship(goblin.Edge):
     __label__ = "relationship"
     last_modified = goblin.Property(goblin.Float)

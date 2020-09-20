@@ -46,17 +46,9 @@ async def test_format_schema(goblin_app):
         page_rank = mgmt.makePropertyKey('page_rank').dataType(Double.class).make();
 
         // Edge labels
-        alias_of = mgmt.makeEdgeLabel('alias_of').multiplicity(MULTI).make()
-        credited_with = mgmt.makeEdgeLabel('credited_with').multiplicity(MULTI).make()
-        includes = mgmt.makeEdgeLabel('includes').multiplicity(MULTI).make()
-        member_of = mgmt.makeEdgeLabel('member_of').multiplicity(MULTI).make()
         relationship = mgmt.makeEdgeLabel('relationship').multiplicity(MULTI).make()
-        released = mgmt.makeEdgeLabel('released').multiplicity(MULTI).make()
-        released_on = mgmt.makeEdgeLabel('released_on').multiplicity(MULTI).make()
-        subrelease_of = mgmt.makeEdgeLabel('subrelease_of').multiplicity(MULTI).make()
-        subsidiary_of = mgmt.makeEdgeLabel('subsidiary_of').multiplicity(MULTI).make()
 
-        // Indices
+        // Vertex Indices
         mgmt.buildIndex('foo_by_artist_id', Vertex.class).addKey(artist_id).indexOnly(artist).unique().buildCompositeIndex()
         mgmt.buildIndex('foo_by_company_id', Vertex.class).addKey(company_id).indexOnly(company).unique().buildCompositeIndex()
         mgmt.buildIndex('foo_by_master_id', Vertex.class).addKey(master_id).indexOnly(master).unique().buildCompositeIndex()
@@ -64,8 +56,16 @@ async def test_format_schema(goblin_app):
         mgmt.buildIndex('foo_by_track_id', Vertex.class).addKey(track_id).indexOnly(track).unique().buildCompositeIndex()
         mgmt.buildIndex('foo_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_artist_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(artist).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_company_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(company).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_release_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(release).buildMixedIndex('search')
+        mgmt.buildIndex('foo_by_track_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(track).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_page_rank', Vertex.class).addKey(page_rank).buildMixedIndex('search')
         mgmt.buildIndex('foo_by_random', Vertex.class).addKey(random).buildMixedIndex('search')
+
+        // Vertex-Centric Indices
+        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_name', Direction.BOTH, Order.asc, name)
+        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, name)
 
         mgmt.commit()
         """

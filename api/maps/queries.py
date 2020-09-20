@@ -7,6 +7,8 @@ from gremlin_python.process.traversal import Order, P, Pick, Scope
 from maps.graphutils import (
     cleanup_edge,
     cleanup_vertex,
+    make_child_count_traversal,
+    make_track_extras_traversal,
     project_vertex,
     roles_to_labels,
 )
@@ -78,37 +80,9 @@ async def get_locality_root_query(
         )
     else:
         center_traversal = session.g.V(vertex_id)
-    traversal = (
-        center_traversal.project(
-            "id",
-            "label",
-            "values",
-            "total_edge_count",
-            "pageable_edge_count",
-            "child_count",
-            "extra",
-            "in_labels",
-            "in_roles",
-            "out_labels",
-            "out_roles",
-        )
-        .by(__.id())
-        .by(__.label())
-        .by(__.valueMap())
-        .by(__.bothE().count())
-        .by(__.bothE().and_(*edge_filters).count())
-        .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
-        .by(
-            __.choose(
-                __.inE("includes").count().is_(P.gt(0)),
-                __.in_("includes").valueMap(),
-                __.constant(False),
-            )
-        )
-        .by(__.inE().groupCount().by(__.label()))
-        .by(__.inE("credited_with").groupCount().by("role"))
-        .by(__.outE().groupCount().by(__.label()))
-        .by(__.outE("credited_with").groupCount().by("role"))
+    traversal = project_vertex(
+        center_traversal,
+        pageable_edge_count=__.bothE().and_(*edge_filters).count(),
     )
     return await traversal.next()
 
@@ -166,14 +140,8 @@ async def get_locality_query(
             .by(__.label())
             .by(__.valueMap())
             .by(__.bothE().count())
-            .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
-            .by(
-                __.choose(
-                    __.inE("includes").count().is_(P.gt(0)),
-                    __.in_("includes").valueMap(),
-                    __.constant(False),
-                )
-            )
+            .by(make_child_count_traversal())
+            .by(make_track_extras_traversal())
         )
         .by(
             __.project("id", "label", "values")
@@ -190,14 +158,8 @@ async def get_locality_query(
             .by(__.label())
             .by(__.valueMap())
             .by(__.bothE().count())
-            .by(__.inE("member_of", "subsidiary_of", "subrelease_of").count())
-            .by(
-                __.choose(
-                    __.inE("includes").count().is_(P.gt(0)),
-                    __.in_("includes").valueMap(),
-                    __.constant(False),
-                )
-            )
+            .by(make_child_count_traversal())
+            .by(make_track_extras_traversal())
         )
     )
     return await traversal.toList()
