@@ -316,6 +316,56 @@ async def test_locality_by_label(api_client):
     response = await api_client.get("/locality/release/1")
     json = await response.json()
     assert response.status == 200, json
+    assert isinstance(json["result"]["center"].pop("id"), int)
+    assert isinstance(json["result"]["center"].pop("last_modified"), float)
+    assert isinstance(json["result"]["center"].pop("random"), float)
+    assert json["result"]["center"].pop("maximum_depth") >= 8
+    assert json["result"]["center"] == {
+        "child_count": 0,
+        "country": "Sweden",
+        "depth": 0,
+        "edge_count": 8,
+        "eid": 1,
+        "formats": ["33 ⅓ RPM", '12"', "Vinyl"],
+        "genres": ["Electronic"],
+        "in_roles": ["Released"],
+        "label": "release",
+        "main": True,
+        "name": "Stockholm",
+        "out_roles": ["Includes", "Released On"],
+        "pageable_edge_count": 8,
+        "styles": ["Deep House"],
+        "total_edge_count": 8,
+        "videos": [
+            {
+                "title": "The Persuader - Östermalm",
+                "url": "https://www.youtube.com/watch?v=MpmbntGDyNE",
+            },
+            {
+                "title": "The Persuader - Vasastaden",
+                "url": "https://www.youtube.com/watch?v=Cawyll0pOI4",
+            },
+            {
+                "title": "The Persuader - Kungsholmen",
+                "url": "https://www.youtube.com/watch?v=XExCZfMCXdo",
+            },
+            {
+                "title": "The Persuader - Södermalm",
+                "url": "https://www.youtube.com/watch?v=WDZqiENap_U",
+            },
+            {
+                "title": "The Persuader - Norrmalm",
+                "url": "https://www.youtube.com/watch?v=EBBHR3EMN50",
+            },
+            {
+                "title": "The Persuader - Gamla Stan",
+                "url": "https://www.youtube.com/watch?v=afMHNll9EVM",
+            },
+        ],
+        "year": 1999,
+    }
+    assert len(json["result"]["edges"]) == 250
+    assert 100 <= len(json["result"]["vertices"]) <= 250
 
 
 @pytest.mark.asyncio
