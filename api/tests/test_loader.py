@@ -22,7 +22,7 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
     )
     await asyncio.sleep(1)
     vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
-    edge_counts = await (session.traversal().E().groupCount().by(__.values("role"))).next()
+    edge_counts = await (session.traversal().E().groupCount().by(__.values("name"))).next()
     assert vertex_counts == {
         "artist": 50,
         "company": 50,
