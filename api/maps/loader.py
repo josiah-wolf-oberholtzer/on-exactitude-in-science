@@ -13,8 +13,6 @@ from gremlin_python.process.traversal import Cardinality, P
 
 from maps import entities, goblin, xml
 
-logging.basicConfig()
-
 logger = logging.getLogger(__name__)
 
 
@@ -109,6 +107,8 @@ async def load_artist_edges(xml_artist, session):
             session,
             source=(entities.Artist.__label__, xml_artist.entity_id),
             target=(entities.Artist.__label__, xml_alias.entity_id),
+            source_label=entities.VertexLabelEnum.ARTIST,
+            target_label=entities.VertexLabelEnum.ARTIST,
             name="Alias Of",
         )
     for xml_member in xml_artist.members:
@@ -116,6 +116,8 @@ async def load_artist_edges(xml_artist, session):
             session,
             source=(entities.Artist.__label__, xml_member.entity_id),
             target=(entities.Artist.__label__, xml_artist.entity_id),
+            source_label=entities.VertexLabelEnum.ARTIST,
+            target_label=entities.VertexLabelEnum.ARTIST,
             name="Member Of",
         )
 
@@ -126,6 +128,8 @@ async def load_company_edges(xml_company, session):
             session,
             source=(entities.Company.__label__, xml_subsidiary.entity_id),
             target=(entities.Company.__label__, xml_company.entity_id),
+            source_label=entities.VertexLabelEnum.COMPANY,
+            target_label=entities.VertexLabelEnum.COMPANY,
             name="Subsidiary Of",
         )
 
@@ -141,6 +145,8 @@ async def load_release_edges(xml_release, session):
             session,
             source=(entities.Artist.__label__, xml_artist.entity_id),
             target=(entities.Release.__label__, xml_release.entity_id),
+            source_label=entities.VertexLabelEnum.ARTIST,
+            target_label=entities.VertexLabelEnum.RELEASE,
             primacy=primacy,
             name="Released",
         )
@@ -150,6 +156,8 @@ async def load_release_edges(xml_release, session):
                 session,
                 source=(entities.Artist.__label__, xml_extra_artist.entity_id),
                 target=(entities.Release.__label__, xml_release.entity_id),
+                source_label=entities.VertexLabelEnum.ARTIST,
+                target_label=entities.VertexLabelEnum.RELEASE,
                 primacy=primacy,
                 name=role.name,
             )
@@ -159,6 +167,8 @@ async def load_release_edges(xml_release, session):
                 session,
                 source=(entities.Company.__label__, xml_company.entity_id),
                 target=(entities.Release.__label__, xml_release.entity_id),
+                source_label=entities.VertexLabelEnum.COMPANY,
+                target_label=entities.VertexLabelEnum.RELEASE,
                 primacy=primacy,
                 name=role.name,
             )
@@ -167,6 +177,8 @@ async def load_release_edges(xml_release, session):
             session,
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Company.__label__, xml_label.entity_id),
+            source_label=entities.VertexLabelEnum.RELEASE,
+            target_label=entities.VertexLabelEnum.COMPANY,
             primacy=primacy,
             name="Released On",
         )
@@ -175,6 +187,8 @@ async def load_release_edges(xml_release, session):
             session,
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Track.__label__, xml_track.entity_id),
+            source_label=entities.VertexLabelEnum.RELEASE,
+            target_label=entities.VertexLabelEnum.TRACK,
             primacy=primacy,
             name="Includes",
         )
@@ -183,6 +197,8 @@ async def load_release_edges(xml_release, session):
                 session,
                 source=(entities.Artist.__label__, xml_artist.entity_id),
                 target=(entities.Track.__label__, xml_track.entity_id),
+                source_label=entities.VertexLabelEnum.ARTIST,
+                target_label=entities.VertexLabelEnum.TRACK,
                 primacy=primacy,
                 name="Released",
             )
@@ -192,6 +208,8 @@ async def load_release_edges(xml_release, session):
                     session,
                     source=(entities.Artist.__label__, xml_extra_artist.entity_id),
                     target=(entities.Track.__label__, xml_track.entity_id),
+                    source_label=entities.VertexLabelEnum.ARTIST,
+                    target_label=entities.VertexLabelEnum.TRACK,
                     primacy=primacy,
                     name=role.name,
                 )
@@ -200,6 +218,8 @@ async def load_release_edges(xml_release, session):
             session,
             source=(entities.Release.__label__, xml_release.entity_id),
             target=(entities.Master.__label__, xml_release.master_id),
+            source_label=entities.VertexLabelEnum.RELEASE,
+            target_label=entities.VertexLabelEnum.MASTER,
             primacy=primacy,
             name="Subrelease Of",
         )
@@ -238,7 +258,9 @@ async def upsert_vertex(xml_entity, session):
             await backoff(attempt)
 
 
-async def upsert_edge(session, *, name, source, target, primacy=0, **kwargs):
+async def upsert_edge(
+    session, *, name, source, target, primacy=0, source_label=0, target_label=0
+):
     from_label, from_id = source
     to_label, to_id = target
     traversal = (
@@ -249,9 +271,9 @@ async def upsert_edge(session, *, name, source, target, primacy=0, **kwargs):
         .property("last_modified", time.time())
         .property("name", name)
         .property("primacy", primacy)
+        .property("source_label", source_label)
+        .property("target_label", target_label)
     )
-    for key, value in kwargs.items():
-        traversal = traversal.property(key, value)
     for attempt in range(10):
         try:
             await traversal.fold().toList()

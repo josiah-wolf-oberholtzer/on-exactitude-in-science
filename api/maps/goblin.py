@@ -147,7 +147,7 @@ def format_schema(goblin_app, graph_name="graph"):
     lines.extend(
         [
             f"mgmt.buildEdgeIndex(relationship, '{graph_name}_by_relationship_name', Direction.BOTH, Order.asc, name)",
-            f"mgmt.buildEdgeIndex(relationship, '{graph_name}_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, name)",
+            f"mgmt.buildEdgeIndex(relationship, '{graph_name}_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, source_label, target_label, name)",
         ]
     )
     lines.extend(["", "mgmt.commit()"])

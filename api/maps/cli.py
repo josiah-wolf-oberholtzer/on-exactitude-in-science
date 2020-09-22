@@ -10,7 +10,10 @@ from maps import goblin, loader
 @click.pass_context
 def cli(ctx):
     ctx.ensure_object(dict)
-    logging.basicConfig()
+    logging.basicConfig(
+        format="%(asctime)s %(name)s %(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    )
     logging.getLogger("maps").setLevel(logging.INFO)
 
 

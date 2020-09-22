@@ -1,3 +1,5 @@
+import enum
+
 import goblin
 from gremlin_python.process.traversal import Cardinality
 
@@ -50,8 +52,18 @@ class Track(goblin.Vertex):
     track_id = goblin.Property(goblin.String)
 
 
+class VertexLabelEnum(enum.IntEnum):
+    ARTIST = 1
+    COMPANY = 2
+    MASTER = 3
+    RELEASE = 4
+    TRACK = 5
+
+
 class Relationship(goblin.Edge):
     __label__ = "relationship"
     last_modified = goblin.Property(goblin.Float)
+    name = goblin.Property(goblin.String)
     primacy = goblin.Property(goblin.Integer)
-    role = goblin.Property(goblin.String)
+    source_label = goblin.Property(goblin.Integer)
+    target_label = goblin.Property(goblin.Integer)
