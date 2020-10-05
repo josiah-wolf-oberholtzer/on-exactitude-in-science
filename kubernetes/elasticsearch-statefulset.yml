@@ -40,7 +40,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        image: elasticsearch:7.6.2
+        image: elasticsearch:7.9.2
         ports:
         - containerPort: 9200
           name: rest
