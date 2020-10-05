@@ -33,7 +33,7 @@ class Release(goblin.Vertex):
     country = goblin.Property(goblin.String)
     formats = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     genres = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
-    is_main_release = goblin.Property(goblin.Boolean)
+    primacy = goblin.Property(goblin.Boolean)
     last_modified = goblin.Property(goblin.Float)
     name = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
@@ -45,11 +45,18 @@ class Release(goblin.Vertex):
 
 class Track(goblin.Vertex):
     __label__ = "track"
+    country = goblin.Property(goblin.String)
+    formats = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
+    genres = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     last_modified = goblin.Property(goblin.Float)
+    primacy = goblin.Property(goblin.Boolean)
     name = goblin.Property(goblin.String)
     position = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
+    release_name = goblin.Property(goblin.String)
+    styles = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     track_id = goblin.Property(goblin.String)
+    year = goblin.Property(goblin.Integer)
 
 
 class VertexLabelEnum(enum.IntEnum):
@@ -62,8 +69,10 @@ class VertexLabelEnum(enum.IntEnum):
 
 class Relationship(goblin.Edge):
     __label__ = "relationship"
+    country = goblin.Property(goblin.String)
     last_modified = goblin.Property(goblin.Float)
     name = goblin.Property(goblin.String)
     primacy = goblin.Property(goblin.Integer)
     source_label = goblin.Property(goblin.Integer)
     target_label = goblin.Property(goblin.Integer)
+    year = goblin.Property(goblin.Integer)
