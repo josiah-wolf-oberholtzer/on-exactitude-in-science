@@ -25,7 +25,6 @@ async def test_format_schema(goblin_app):
         dirty = mgmt.makePropertyKey('dirty').dataType(String.class).cardinality(SINGLE).make()
         formats = mgmt.makePropertyKey('formats').dataType(String.class).cardinality(SET).make()
         genres = mgmt.makePropertyKey('genres').dataType(String.class).cardinality(SET).make()
-        is_main_release = mgmt.makePropertyKey('is_main_release').dataType(Boolean.class).cardinality(SINGLE).make()
         last_modified = mgmt.makePropertyKey('last_modified').dataType(Float.class).cardinality(SINGLE).make()
         master_id = mgmt.makePropertyKey('master_id').dataType(Integer.class).cardinality(SINGLE).make()
         name = mgmt.makePropertyKey('name').dataType(String.class).cardinality(SINGLE).make()
@@ -33,8 +32,10 @@ async def test_format_schema(goblin_app):
         primacy = mgmt.makePropertyKey('primacy').dataType(Integer.class).cardinality(SINGLE).make()
         random = mgmt.makePropertyKey('random').dataType(Float.class).cardinality(SINGLE).make()
         release_id = mgmt.makePropertyKey('release_id').dataType(Integer.class).cardinality(SINGLE).make()
-        role = mgmt.makePropertyKey('role').dataType(String.class).cardinality(SINGLE).make()
+        release_name = mgmt.makePropertyKey('release_name').dataType(String.class).cardinality(SINGLE).make()
+        source_label = mgmt.makePropertyKey('source_label').dataType(Integer.class).cardinality(SINGLE).make()
         styles = mgmt.makePropertyKey('styles').dataType(String.class).cardinality(SET).make()
+        target_label = mgmt.makePropertyKey('target_label').dataType(Integer.class).cardinality(SINGLE).make()
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
         videos = mgmt.makePropertyKey('videos').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
@@ -65,7 +66,7 @@ async def test_format_schema(goblin_app):
 
         // Vertex-Centric Indices
         mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_name', Direction.BOTH, Order.asc, name)
-        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, name)
+        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, source_label, target_label, name)
 
         mgmt.commit()
         """
