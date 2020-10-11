@@ -6,6 +6,7 @@ import random
 import time
 import traceback
 from pathlib import Path
+from typing import Any, Generator, List
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
@@ -37,7 +38,7 @@ async def consume_edges(goblin_app, iterator, consumer_id=1, timestamp=0.0):
         await (
             session.g.V()
             .has(label, f"{label}_id", xml_entity.entity_id)
-            .bothE()
+            .outE()
             .has("last_modified", P.lt(timestamp))
             .drop()
             .toList()
@@ -76,18 +77,66 @@ async def drop():
 
 
 async def load(goblin_app, path, consumer_count=1, limit=None):
+    """
+    Update graph from Discogs .xml.gz files.
+
+    Upsert vertices and edges
+
+    Delete stale vertices and edges.
+
+    New process:
+    - load artist vertices
+    - load company vertices
+    - load master vertices
+    - artist edges:
+      - delete old artist outgoing edges
+      - load artist outgoing edges
+    - company edges:
+      - load company outgoing edges
+      - delete old company outgoing edges
+    - load release vertices
+        - delete old release edges
+        - load new release edges
+        - load track vertices
+            - delete old track edges
+            - load new track edges
+    """
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
     start_time = time.time()
-    iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
+    # Load artist, company, and master vertices.
+    iterator = producer(
+        Path(path), consumer_count=consumer_count, limit=limit, releases=False
+    )
     tasks = [
         consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_time)
         for i in range(consumer_count)
     ]
     await asyncio.gather(*tasks)
-    iterator = producer(Path(path), consumer_count=consumer_count, limit=limit)
+    # Load artist and company edges (alias-of, member-of, subsidiary-of).
+    iterator = producer(
+        Path(path),
+        consumer_count=consumer_count,
+        limit=limit,
+        masters=False,
+        releases=False,
+    )
     tasks = [
         consume_edges(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        for i in range(consumer_count)
+    ]
+    await asyncio.gather(*tasks)
+    # Load release (and track) vertices, and populate edges simultaneously.
+    iterator = producer(
+        Path(path),
+        consumer_count=consumer_count,
+        limit=limit,
+        artists=False,
+        companies=False,
+        masters=False,
+    )
+    tasks = [
+        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_time)
         for i in range(consumer_count)
     ]
     await asyncio.gather(*tasks)
@@ -244,13 +293,25 @@ async def load_track_vertex(session, xml_track):
     await upsert_vertex(session, xml_track)
 
 
-def producer(path: Path, consumer_count=1, limit=None):
-    for iterator in [
-        xml.get_artist_iterator(xml.get_xml_path(path, "artist")),
-        xml.get_company_iterator(xml.get_xml_path(path, "label")),
-        xml.get_master_iterator(xml.get_xml_path(path, "master")),
-        xml.get_release_iterator(xml.get_xml_path(path, "release")),
-    ]:
+def producer(
+    path: Path,
+    consumer_count=1,
+    limit=None,
+    artists=True,
+    companies=True,
+    masters=True,
+    releases=True,
+):
+    iterators: List[Generator[Any, None, None]] = []
+    if artists:
+        iterators.append(xml.get_artist_iterator(xml.get_xml_path(path, "artist")))
+    if companies:
+        iterators.append(xml.get_company_iterator(xml.get_xml_path(path, "label")))
+    if masters:
+        iterators.append(xml.get_master_iterator(xml.get_xml_path(path, "master")))
+    if releases:
+        iterators.append(xml.get_release_iterator(xml.get_xml_path(path, "release")))
+    for iterator in iterators:
         for i, entity in enumerate(iterator):
             if i == limit:
                 break
@@ -260,24 +321,35 @@ def producer(path: Path, consumer_count=1, limit=None):
 
 
 async def upsert_vertex(session, xml_entity):
+    # TODO: Return entity map, so we can purge stale properties
     kind = type(xml_entity).__name__
     goblin_entity = getattr(entities, kind)()
-    label = kind.lower()
+    return await upsert_one_vertex(
+        session,
+        label=kind.lower(),
+        entity_id=xml_entity.entity_id,
+        **{
+            key: value
+            for key, value in dataclasses.asdict(xml_entity).items()
+            if hasattr(goblin_entity, key) and value is not None
+        },
+    )
+
+
+async def upsert_one_vertex(session, label, entity_id, **kwargs):
     entity_key = f"{label}_id"
     traversal = (
         session.g.V()
-        .has(label, entity_key, xml_entity.entity_id)
+        .has(label, entity_key, entity_id)
         .fold()
         .coalesce(
             __.unfold(),
-            __.addV(label).property(entity_key, xml_entity.entity_id),
+            __.addV(label).property(f"{label}_id", entity_id),
         )
         .property("last_modified", time.time())
         .property("random", random.random())
     )
-    for key, value in dataclasses.asdict(xml_entity).items():
-        if value is None or key == entity_key or not hasattr(goblin_entity, key):
-            continue
+    for key, value in sorted(kwargs.items()):
         if isinstance(value, (set, list)):
             for subvalue in value:
                 traversal = traversal.property(Cardinality.set_, key, subvalue)
@@ -290,7 +362,7 @@ async def upsert_vertex(session, xml_entity):
         except GremlinServerError as e:
             logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
-    # TODO: Return entity map, so we can purge stale properties
+    return None
 
 
 async def upsert_edge(
