@@ -81,6 +81,33 @@ async def drop_edges(session, label, entity_id, timestamp, both=False):
             await backoff(attempt)
 
 
+async def drop_properties(session, xml_entity, entity_map):
+    to_drop = {}
+    for key, desired in dataclasses.asdict(xml_entity).items():
+        if key not in entity_map:
+            continue
+        elif not isinstance(desired, (list, set)):
+            continue
+        elif sorted(desired) == sorted(entity_map[key]):
+            continue
+        to_drop[key] = desired
+    if not to_drop:
+        return
+    label = type(xml_entity).__name__.lower()
+    traversal = session.g.V().has(label, f"{label}_id", xml_entity.entity_id)
+    for key, desired in sorted(to_drop.items()):
+        traversal = traversal.sideEffect(
+            __.properties(key).values(P.without(desired)).drop()
+        )
+    traversal = traversal.next()
+    for attempt in range(10):
+        try:
+            return await traversal
+        except GremlinServerError as e:
+            logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
+            await backoff(attempt)
+
+
 async def load(goblin_app, path, consumer_count=1, limit=None):
     """
     Update graph from Discogs .xml.gz files.
@@ -175,7 +202,8 @@ async def load_artist_edges(xml_artist, session, timestamp):
 
 
 async def load_artist_vertex(session, xml_artist, timestamp):
-    await upsert_vertex(session, xml_artist)
+    entity_map = await upsert_vertex(session, xml_artist)
+    await drop_properties(session, xml_artist, entity_map)
 
 
 async def load_company_edges(xml_company, session, timestamp):
@@ -192,17 +220,21 @@ async def load_company_edges(xml_company, session, timestamp):
 
 
 async def load_company_vertex(session, xml_company, timestamp):
-    await upsert_vertex(session, xml_company)
+    entity_map = await upsert_vertex(session, xml_company)
+    await drop_properties(session, xml_company, entity_map)
 
 
 async def load_master_vertex(session, xml_master, timestamp):
-    await upsert_vertex(session, xml_master)
+    entity_map = await upsert_vertex(session, xml_master)
+    await drop_properties(session, xml_master, entity_map)
 
 
 async def load_release_vertex_and_edges(session, xml_release, timestamp):
-    await upsert_vertex(session, xml_release)
+    entity_map = await upsert_vertex(session, xml_release)
+    await drop_properties(session, xml_release, entity_map)
     for xml_track in xml_release.tracks:
-        await load_track_vertex(session, xml_track)
+        entity_map = await upsert_vertex(session, xml_track)
+        await drop_properties(session, xml_track, entity_map)
     primacy = 2
     if xml_release.is_main_release:
         primacy = 1
@@ -293,10 +325,6 @@ async def load_release_vertex_and_edges(session, xml_release, timestamp):
                     name=role.name,
                 )
         await drop_edges(session, "track", xml_track.entity_id, timestamp, both=True)
-
-
-async def load_track_vertex(session, xml_track):
-    await upsert_vertex(session, xml_track)
 
 
 def producer(
