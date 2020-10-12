@@ -25,7 +25,6 @@ async def consume_edges(goblin_app, iterator, consumer_id=1, timestamp=0.0):
     procedures = {
         xml.Artist: load_artist_edges,
         xml.Company: load_company_edges,
-        xml.Release: load_release_edges,
     }
     session = await goblin_app.session()
     while (iterator_output := next(iterator)) is not None:
@@ -33,16 +32,7 @@ async def consume_edges(goblin_app, iterator, consumer_id=1, timestamp=0.0):
         if type(xml_entity) not in procedures:
             continue
         procedure = procedures[type(xml_entity)]
-        await procedure(xml_entity, session)
-        label = type(xml_entity).__name__.lower()
-        await (
-            session.g.V()
-            .has(label, f"{label}_id", xml_entity.entity_id)
-            .outE()
-            .has("last_modified", P.lt(timestamp))
-            .drop()
-            .toList()
-        )
+        await procedure(xml_entity, session, timestamp)
         if not i % 100:
             logger.info(
                 f"[{consumer_id}] E {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}]"
@@ -54,7 +44,7 @@ async def consume_vertices(goblin_app, iterator, consumer_id=1, timestamp=0.0):
         xml.Artist: load_artist_vertex,
         xml.Company: load_company_vertex,
         xml.Master: load_master_vertex,
-        xml.Release: load_release_vertex,
+        xml.Release: load_release_vertex_and_edges,
     }
     session = await goblin_app.session()
     while (iterator_output := next(iterator)) is not None:
@@ -63,7 +53,7 @@ async def consume_vertices(goblin_app, iterator, consumer_id=1, timestamp=0.0):
         if type(xml_entity) not in procedures:
             continue
         procedure = procedures[type(xml_entity)]
-        await procedure(session, xml_entity)
+        await procedure(session, xml_entity, timestamp)
         if not i % 100:
             logger.info(
                 f"[{consumer_id}] V {type(xml_entity).__name__} {i} [eid: {xml_entity.entity_id}]"
@@ -74,6 +64,21 @@ async def drop():
     async with goblin.GoblinManager() as goblin_app:
         session = await goblin_app.session()
         await session.g.V().drop().toList()
+
+
+async def drop_edges(session, label, entity_id, timestamp, both=False):
+    traversal = session.g.V().has(label, f"{label}_id", entity_id)
+    if both:
+        traversal = traversal.bothE()
+    else:
+        traversal = traversal.outE()
+    traversal = traversal.has("last_modified", P.lt(timestamp)).drop().toList()
+    for attempt in range(10):
+        try:
+            return await traversal
+        except GremlinServerError as e:
+            logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
+            await backoff(attempt)
 
 
 async def load(goblin_app, path, consumer_count=1, limit=None):
@@ -144,7 +149,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
     # TODO: Purge vertices untouched during loading.
 
 
-async def load_artist_edges(xml_artist, session):
+async def load_artist_edges(xml_artist, session, timestamp):
     for xml_alias in xml_artist.aliases:
         # alias but only from low to high id
         if xml_artist.entity_id > xml_alias.entity_id:
@@ -166,13 +171,14 @@ async def load_artist_edges(xml_artist, session):
             target_label=entities.VertexLabelEnum.ARTIST,
             name="Member Of",
         )
+    await drop_edges(session, "artist", xml_artist.entity_id, timestamp, both=False)
 
 
-async def load_artist_vertex(session, xml_artist):
+async def load_artist_vertex(session, xml_artist, timestamp):
     await upsert_vertex(session, xml_artist)
 
 
-async def load_company_edges(xml_company, session):
+async def load_company_edges(xml_company, session, timestamp):
     for xml_subsidiary in xml_company.subsidiaries:
         await upsert_edge(
             session,
@@ -182,17 +188,21 @@ async def load_company_edges(xml_company, session):
             target_label=entities.VertexLabelEnum.COMPANY,
             name="Subsidiary Of",
         )
+    await drop_edges(session, "company", xml_company.entity_id, timestamp, both=False)
 
 
-async def load_company_vertex(session, xml_company):
+async def load_company_vertex(session, xml_company, timestamp):
     await upsert_vertex(session, xml_company)
 
 
-async def load_master_vertex(session, xml_master):
+async def load_master_vertex(session, xml_master, timestamp):
     await upsert_vertex(session, xml_master)
 
 
-async def load_release_edges(xml_release, session):
+async def load_release_vertex_and_edges(session, xml_release, timestamp):
+    await upsert_vertex(session, xml_release)
+    for xml_track in xml_release.tracks:
+        await load_track_vertex(session, xml_track)
     primacy = 2
     if xml_release.is_main_release:
         primacy = 1
@@ -240,6 +250,17 @@ async def load_release_edges(xml_release, session):
             primacy=primacy,
             name="Released On",
         )
+    if xml_release.master_id:
+        await upsert_edge(
+            session,
+            source=(entities.Release.__label__, xml_release.entity_id),
+            target=(entities.Master.__label__, xml_release.master_id),
+            source_label=entities.VertexLabelEnum.RELEASE,
+            target_label=entities.VertexLabelEnum.MASTER,
+            primacy=primacy,
+            name="Subrelease Of",
+        )
+    await drop_edges(session, "release", xml_release.entity_id, timestamp, both=True)
     for xml_track in xml_release.tracks:
         await upsert_edge(
             session,
@@ -271,22 +292,7 @@ async def load_release_edges(xml_release, session):
                     primacy=primacy,
                     name=role.name,
                 )
-    if xml_release.master_id:
-        await upsert_edge(
-            session,
-            source=(entities.Release.__label__, xml_release.entity_id),
-            target=(entities.Master.__label__, xml_release.master_id),
-            source_label=entities.VertexLabelEnum.RELEASE,
-            target_label=entities.VertexLabelEnum.MASTER,
-            primacy=primacy,
-            name="Subrelease Of",
-        )
-
-
-async def load_release_vertex(session, xml_release):
-    await upsert_vertex(session, xml_release)
-    for xml_track in xml_release.tracks:
-        await load_track_vertex(session, xml_track)
+        await drop_edges(session, "track", xml_track.entity_id, timestamp, both=True)
 
 
 async def load_track_vertex(session, xml_track):
