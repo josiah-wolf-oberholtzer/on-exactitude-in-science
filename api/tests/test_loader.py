@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,7 @@ async def session(goblin_app):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("consumer_count", [1, 8])
 async def test_loader_run(goblin_app, session, consumer_count, caplog):
-    caplog.set_level(logging.DEBUG, logger="maps")
+    caplog.set_level(logging.INFO, logger="maps")
     expected_vertex_counts = {
         "artist": 50,
         "company": 50,
@@ -48,7 +49,7 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
         "Subsidiary Of": 1,
         "Written-By": 13,
     }
-    for _ in range(1):
+    for _ in range(2):
         await loader.load(
             goblin_app, Path(__file__).parent, consumer_count=consumer_count, limit=50
         )
@@ -57,19 +58,30 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
         actual_edge_counts = await (
             session.traversal().E().groupCount().by(__.values("name"))
         ).next()
-    assert actual_vertex_counts == expected_vertex_counts
-    assert actual_edge_counts == expected_edge_counts
+        assert actual_vertex_counts == expected_vertex_counts
+        assert actual_edge_counts == expected_edge_counts
 
 
 @pytest.mark.asyncio
 async def test_load_artist_vertex(session):
     xml_artist = xml.Artist(entity_id=666, name="Foo")
     # verify non existence
-    await loader.load_artist_vertex(session, xml_artist, 0)
+    assert (await session.g.V().has("artist", "artist_id", 666).count().next()) == 0
     # verify existence
+    await loader.load_artist_vertex(session, xml_artist, timestamp=time.time())
+    values_a = await session.g.V().has("artist", "artist_id", 666).valueMap().next()
+    last_modified_a = values_a.pop("last_modified")[0]
+    random_a = values_a.pop("random")[0]
+    assert values_a == {"artist_id": [666], "name": ["Foo"]}
     # modify xml artist
-    await loader.load_artist_vertex(session, xml_artist, 0)
-    # verify modifications (including properties and timestamp)
+    xml_artist.name = "Foo 2"
+    await loader.load_artist_vertex(session, xml_artist, timestamp=time.time())
+    values_b = await session.g.V().has("artist", "artist_id", 666).valueMap().next()
+    last_modified_b = values_b.pop("last_modified")[0]
+    random_b = values_b.pop("random")[0]
+    assert values_b == {"artist_id": [666], "name": ["Foo 2"]}
+    assert random_b != random_a
+    assert last_modified_b > last_modified_a
 
 
 @pytest.mark.asyncio

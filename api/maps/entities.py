@@ -7,7 +7,7 @@ from gremlin_python.process.traversal import Cardinality
 class Artist(goblin.Vertex):
     __label__ = "artist"
     artist_id = goblin.Property(goblin.Integer)
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
 
@@ -15,14 +15,14 @@ class Artist(goblin.Vertex):
 class Company(goblin.Vertex):
     __label__ = "company"
     company_id = goblin.Property(goblin.Integer)
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
 
 
 class Master(goblin.Vertex):
     __label__ = "master"
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     master_id = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
@@ -34,7 +34,7 @@ class Release(goblin.Vertex):
     formats = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     genres = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     primacy = goblin.Property(goblin.Integer)
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     random = goblin.Property(goblin.Float)
     release_id = goblin.Property(goblin.Integer)
@@ -48,7 +48,7 @@ class Track(goblin.Vertex):
     country = goblin.Property(goblin.String)
     formats = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
     genres = goblin.VertexProperty(goblin.String, card=Cardinality.set_)
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     primacy = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     position = goblin.Property(goblin.String)
@@ -70,7 +70,7 @@ class VertexLabelEnum(enum.IntEnum):
 class Relationship(goblin.Edge):
     __label__ = "relationship"
     country = goblin.Property(goblin.String)
-    last_modified = goblin.Property(goblin.Float)
+    last_modified = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     primacy = goblin.Property(goblin.Integer)
     source_label = goblin.Property(goblin.Integer)

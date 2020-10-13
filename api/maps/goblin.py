@@ -104,10 +104,15 @@ def format_schema(goblin_app, graph_name="graph"):
             # Get data type
             mapped_data_type = DATA_TYPE_MAPPING[type(prop.data_type)]
             prop_key = PropertyKey(db_name, mapped_data_type, mapped_card)
+            if prop_key.name == "last_modified":
+                continue
             property_keys.add(
                 f"{prop_key.name} = mgmt.makePropertyKey('{prop_key.name}').dataType("
                 f"{prop_key.data_type}).cardinality({prop_key.card}).make()"
             )
+    property_keys.add(
+        "last_modified = mgmt.makePropertyKey('last_modified').dataType(Date.class).make()"
+    )
     lines.extend(sorted(property_keys))
     lines.extend(
         [
@@ -133,7 +138,7 @@ def format_schema(goblin_app, graph_name="graph"):
         )
     lines.extend(
         [
-            f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(last_modified).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_artist_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(artist).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_company_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(company).buildMixedIndex('search')",

@@ -66,16 +66,17 @@ async def drop():
         await session.g.V().drop().toList()
 
 
-async def drop_edges(session, label, entity_id, timestamp=0.0, both=False, names=None):
+async def drop_edges(session, label, entity_id, timestamp=None, both=False, names=None):
     for attempt in range(10):
         traversal = session.g.V().has(label, f"{label}_id", entity_id)
         if both:
             traversal = traversal.bothE("relationship")
         else:
             traversal = traversal.outE("relationship")
-        #if names:
-        #    traversal = traversal.where(__.values("name"), P.within(*names))
-        traversal = traversal.where(__.values("last_modified").is_(P.lt(timestamp))).drop()
+        if names:
+            traversal = traversal.has("name", P.within(*names))
+        traversal = traversal.has("last_modified", P.lt(timestamp))
+        traversal = traversal.drop()
         try:
             return await traversal.toList()
         except GremlinServerError as e:
@@ -142,7 +143,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         Path(path), consumer_count=consumer_count, limit=limit, releases=False
     )
     tasks = [
-        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_date)
         for i in range(consumer_count)
     ]
     await asyncio.gather(*tasks)
@@ -155,7 +156,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         releases=False,
     )
     tasks = [
-        consume_edges(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        consume_edges(goblin_app, iterator, consumer_id=i, timestamp=start_date)
         for i in range(consumer_count)
     ]
     await asyncio.gather(*tasks)
@@ -169,7 +170,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         masters=False,
     )
     tasks = [
-        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_time)
+        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_date)
         for i in range(consumer_count)
     ]
     await asyncio.gather(*tasks)
@@ -177,7 +178,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
     # TODO: Purge vertices untouched during loading.
 
 
-async def load_artist_edges(xml_artist, session, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_artist_edges(xml_artist, session, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] E Artist {entity_index} [eid: {xml_artist.entity_id}] Loading...")
     for xml_alias in xml_artist.aliases:
         # alias but only from low to high id
@@ -203,13 +204,13 @@ async def load_artist_edges(xml_artist, session, timestamp=0.0, consumer_id=0, e
     await drop_edges(session, "artist", xml_artist.entity_id, timestamp=timestamp, both=False, names=["Alias Of", "Member Of"])
 
 
-async def load_artist_vertex(session, xml_artist, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_artist_vertex(session, xml_artist, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] V Artist {entity_index} [eid: {xml_artist.entity_id}] Loading...")
     entity_map = await upsert_vertex(session, xml_artist)
     await drop_properties(session, xml_artist, entity_map)
 
 
-async def load_company_edges(xml_company, session, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_company_edges(xml_company, session, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] E Company {entity_index} [eid: {xml_company.entity_id}] Loading...")
     for xml_subsidiary in xml_company.subsidiaries:
         await upsert_edge(
@@ -223,19 +224,19 @@ async def load_company_edges(xml_company, session, timestamp=0.0, consumer_id=0,
     await drop_edges(session, "company", xml_company.entity_id, timestamp=timestamp, both=False, names=["Subsidiary Of"])
 
 
-async def load_company_vertex(session, xml_company, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_company_vertex(session, xml_company, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] V Company {entity_index} [eid: {xml_company.entity_id}] Loading...")
     entity_map = await upsert_vertex(session, xml_company)
     await drop_properties(session, xml_company, entity_map)
 
 
-async def load_master_vertex(session, xml_master, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_master_vertex(session, xml_master, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] V Master {entity_index} [eid: {xml_master.entity_id}] Loading...")
     entity_map = await upsert_vertex(session, xml_master)
     await drop_properties(session, xml_master, entity_map)
 
 
-async def load_release_vertex_and_edges(session, xml_release, timestamp=0.0, consumer_id=0, entity_index=0):
+async def load_release_vertex_and_edges(session, xml_release, timestamp=None, consumer_id=0, entity_index=0):
     logger.debug(f"[{consumer_id}] V Release {entity_index} [eid: {xml_release.entity_id}] Loading...")
     entity_map = await upsert_vertex(session, xml_release)
     await drop_properties(session, xml_release, entity_map)
@@ -379,25 +380,25 @@ async def upsert_vertex(session, xml_entity):
 
 async def upsert_one_vertex(session, label, entity_id, **kwargs):
     entity_key = f"{label}_id"
-    traversal = (
-        session.g.V()
-        .has(label, entity_key, entity_id)
-        .fold()
-        .coalesce(
-            __.unfold(),
-            __.addV(label).property(f"{label}_id", entity_id),
-        )
-        .property("last_modified", time.time())
-        .property("random", random.random())
-    )
-    for key, value in sorted(kwargs.items()):
-        if isinstance(value, (set, list)):
-            for subvalue in value:
-                traversal = traversal.property(Cardinality.set_, key, subvalue)
-        else:
-            traversal = traversal.property(Cardinality.single, key, value)
-    traversal = traversal.valueMap().with_(WithOptions.tokens)
     for attempt in range(10):
+        traversal = (
+            session.g.V()
+            .has(label, entity_key, entity_id)
+            .fold()
+            .coalesce(
+                __.unfold(),
+                __.addV(label).property(f"{label}_id", entity_id),
+            )
+            .property("last_modified", datetime.datetime.now())
+            .property("random", random.random())
+        )
+        for key, value in sorted(kwargs.items()):
+            if isinstance(value, (set, list)):
+                for subvalue in value:
+                    traversal = traversal.property(Cardinality.set_, key, subvalue)
+            else:
+                traversal = traversal.property(Cardinality.single, key, value)
+        traversal = traversal.valueMap().with_(WithOptions.tokens)
         try:
             return await traversal.next()
         except GremlinServerError as e:
@@ -411,20 +412,21 @@ async def upsert_edge(
 ):
     from_label, from_id = source
     to_label, to_id = target
-    traversal = (
-        session.g.V()
-        .has(from_label, f"{from_label}_id", from_id)
-        .addE("relationship")
-        .to(__.V().has(to_label, f"{to_label}_id", to_id))
-        .property("last_modified", time.time())
-        .property("name", name)
-        .property("primacy", primacy)
-        .property("source_label", source_label)
-        .property("target_label", target_label)
-    )
     for attempt in range(10):
+        traversal = (
+            session.g.V()
+            .has(from_label, f"{from_label}_id", from_id)
+            .addE("relationship")
+            .to(__.V().has(to_label, f"{to_label}_id", to_id))
+            .property("last_modified", datetime.datetime.now())
+            .property("name", name)
+            .property("primacy", primacy)
+            .property("source_label", source_label)
+            .property("target_label", target_label)
+            .valueMap()
+        )
         try:
-            await traversal.fold().toList()
+            return await traversal.next()
         except GremlinServerError as e:
             if "The provided traverser does not map to a value" in str(e):
                 return
