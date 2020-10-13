@@ -1,8 +1,20 @@
+import datetime
+import json
+
 import aiohttp.web
 
 from maps import queries
 
 routes = aiohttp.web.RouteTableDef()
+
+
+def encode_json(data):
+    def default(value):
+        if isinstance(value, datetime.datetime):
+            return value.isoformat()
+        return str(value)
+
+    return json.dumps(data, indent=4, sort_keys=True, default=default)
 
 
 def validate_filters(request):
@@ -115,7 +127,7 @@ async def get_locality(request):
         },
     }
     # await cache.set(cache_key, data)
-    return aiohttp.web.json_response(data)
+    return aiohttp.web.json_response(data, dumps=encode_json)
 
 
 @routes.get("/random")
@@ -128,7 +140,7 @@ async def get_random(request):
         )
     ) is None:
         raise aiohttp.web.HTTPBadRequest()
-    return aiohttp.web.json_response({"result": result})
+    return aiohttp.web.json_response({"result": result}, dumps=encode_json)
 
 
 @routes.get("/search")
@@ -142,7 +154,9 @@ async def get_search(request):
     result = await queries.get_search(
         request.app["goblin"], query, limit=limit, vertex_label=vertex_label
     )
-    return aiohttp.web.json_response({"limit": limit, "query": query, "result": result})
+    return aiohttp.web.json_response(
+        {"limit": limit, "query": query, "result": result}, dumps=encode_json
+    )
 
 
 @routes.get("/vertex/{vertex_id}")
@@ -160,7 +174,7 @@ async def get_vertex(request):
         coroutine = queries.get_vertex_by_vertex_id(request.app["goblin"], vertex_id)
     if (result := await coroutine) is None:
         raise aiohttp.web.HTTPNotFound()
-    return aiohttp.web.json_response({"result": result})
+    return aiohttp.web.json_response({"result": result}, dumps=encode_json)
 
 
 @routes.get("/path/{source_label}/{source_id}/{target_label}/{target_id}")
@@ -183,4 +197,4 @@ async def get_path(request):
         )
     ) is None:
         raise aiohttp.web.HTTPNotFound()
-    return aiohttp.web.json_response({"result": result})
+    return aiohttp.web.json_response({"result": result}, dumps=encode_json)

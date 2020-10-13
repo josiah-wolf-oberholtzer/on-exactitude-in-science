@@ -69,7 +69,7 @@ async def test_search(api_client):
     json = await response.json()
     for entry in json["result"]:
         assert isinstance(entry["id"], int)
-        assert isinstance(entry["last_modified"], float)
+        assert isinstance(entry["last_modified"], str)
         assert isinstance(entry["random"], float)
         entry["id"] = ...
         entry["last_modified"] = ...
@@ -171,7 +171,7 @@ async def test_search_by_label(api_client):
     json = await response.json()
     for entry in json["result"]:
         assert isinstance(entry["id"], int)
-        assert isinstance(entry["last_modified"], float)
+        assert isinstance(entry["last_modified"], str)
         assert isinstance(entry["random"], float)
         entry["id"] = ...
         entry["last_modified"] = ...

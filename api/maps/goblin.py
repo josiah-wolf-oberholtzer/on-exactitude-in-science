@@ -111,7 +111,7 @@ def format_schema(goblin_app, graph_name="graph"):
                 f"{prop_key.data_type}).cardinality({prop_key.card}).make()"
             )
     property_keys.add(
-        "last_modified = mgmt.makePropertyKey('last_modified').dataType(Date.class).make()"
+        "last_modified = mgmt.makePropertyKey('last_modified').dataType(Date.class).cardinality(SINGLE).make()"
     )
     lines.extend(sorted(property_keys))
     lines.extend(

@@ -54,7 +54,9 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
             goblin_app, Path(__file__).parent, consumer_count=consumer_count, limit=50
         )
         await asyncio.sleep(1)
-        actual_vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
+        actual_vertex_counts = await (
+            session.traversal().V().groupCount().by(__.label())
+        ).next()
         actual_edge_counts = await (
             session.traversal().E().groupCount().by(__.values("name"))
         ).next()
