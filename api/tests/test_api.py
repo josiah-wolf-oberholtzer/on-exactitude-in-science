@@ -313,7 +313,7 @@ async def test_locality_by_label(api_client):
     json = await response.json()
     assert response.status == 200, json
     assert isinstance(json["result"]["center"].pop("id"), int)
-    assert isinstance(json["result"]["center"].pop("last_modified"), float)
+    assert isinstance(json["result"]["center"].pop("last_modified"), str)
     assert isinstance(json["result"]["center"].pop("random"), float)
     assert json["result"]["center"].pop("maximum_depth") >= 8
     assert json["result"]["center"] == {
