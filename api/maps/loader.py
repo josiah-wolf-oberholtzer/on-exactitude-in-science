@@ -111,7 +111,7 @@ async def drop_properties(session, xml_entity, entity_map):
     traversal = session.g.V().has(label, f"{label}_id", xml_entity.entity_id)
     for key, desired in sorted(to_drop.items()):
         traversal = traversal.sideEffect(
-            __.properties(key).values(P.without(*desired)).drop()
+            __.properties(key).hasValue(P.without(*desired)).drop()
         )
     for attempt in range(10):
         try:

@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+import random
 from pathlib import Path
 
 import pytest
@@ -66,43 +67,84 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
 
 @pytest.mark.asyncio
 async def test_load_artist_vertex(session):
-    xml_artist = xml.Artist(entity_id=666, name="Foo")
-    # verify non existence
-    assert (await session.g.V().has("artist", "artist_id", 666).count().next()) == 0
-    # verify existence
-    await loader.load_artist_vertex(session, xml_artist, timestamp=time.time())
-    values_a = await session.g.V().has("artist", "artist_id", 666).valueMap().next()
+    entity_id = random.randint(0, 1000)
+    xml_artist = xml.Artist(entity_id=entity_id, name="Foo")
+    assert (await session.g.V().has("artist", "artist_id", entity_id).count().next()) == 0
+
+    await loader.load_artist_vertex(session, xml_artist)
+    values_a = await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
     last_modified_a = values_a.pop("last_modified")[0]
     random_a = values_a.pop("random")[0]
-    assert values_a == {"artist_id": [666], "name": ["Foo"]}
-    # modify xml artist
+    assert values_a == {"artist_id": [entity_id], "name": ["Foo"]}
+
     xml_artist.name = "Foo 2"
-    await loader.load_artist_vertex(session, xml_artist, timestamp=time.time())
-    values_b = await session.g.V().has("artist", "artist_id", 666).valueMap().next()
+
+    await loader.load_artist_vertex(session, xml_artist)
+    values_b = await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
     last_modified_b = values_b.pop("last_modified")[0]
     random_b = values_b.pop("random")[0]
-    assert values_b == {"artist_id": [666], "name": ["Foo 2"]}
+    assert values_b == {"artist_id": [entity_id], "name": ["Foo 2"]}
     assert random_b != random_a
     assert last_modified_b > last_modified_a
 
 
 @pytest.mark.asyncio
 async def test_load_company_vertex(session):
-    xml_company = xml.Company(entity_id=23, name="Bar")
-    # verify non existence
-    await loader.load_company_vertex(session, xml_company, 0)
-    # verify existence
-    # modify xml company
-    await loader.load_company_vertex(session, xml_company, 0)
-    # verify modifications (including properties and timestamp)
+    entity_id = random.randint(0, 1000)
+    xml_company = xml.Company(entity_id=entity_id, name="Bar")
+    assert (await session.g.V().has("company", "company_id", entity_id).count().next()) == 0
+
+    await loader.load_company_vertex(session, xml_company)
+    values_a = await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    last_modified_a = values_a.pop("last_modified")[0]
+    random_a = values_a.pop("random")[0]
+    assert values_a == {'company_id': [entity_id], 'name': ['Bar']}
+    
+    xml_company.name = "Bar 2"
+
+    await loader.load_company_vertex(session, xml_company)
+    values_b = await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    last_modified_b = values_b.pop("last_modified")[0]
+    random_b = values_b.pop("random")[0]
+    assert values_b == {"company_id": [entity_id], "name": ["Bar 2"]}
+    assert random_b != random_a
+    assert last_modified_b > last_modified_a
 
 
 @pytest.mark.asyncio
-async def test_load_release_vertex(session):
-    xml_release = xml.Release(entity_id=2001, name="Baz")
-    # verify non existence
+async def test_load_release_vertex_properties(session):
+    entity_id = random.randint(0, 1000)
+    xml_release = xml.Release(
+        entity_id=entity_id,
+        country="US",
+        formats=['12"', "EP", "33\xe2\x85\x93"],
+        name="Baz",
+    )
+    assert (await session.g.V().has("release", "release_id", entity_id).count().next()) == 0
+
     await loader.load_release_vertex_and_edges(session, xml_release, 0)
-    # verify existence
-    # modify xml release
+    values_a = await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    last_modified_a = values_a.pop("last_modified")[0]
+    random_a = values_a.pop("random")[0]
+    assert values_a == {
+        "country": ["US"],
+        "formats": ['12"', "EP", "33\xe2\x85\x93"],
+        "name": ["Baz"], 
+        "release_id": [entity_id],
+    }
+
+    xml_release.name = "Baz 2"
+    xml_release.formats = ["EP", "33⅓", "Vinyl"]
+
     await loader.load_release_vertex_and_edges(session, xml_release, 0)
-    # verify modifications (including properties and timestamp)
+    values_b = await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    last_modified_b = values_b.pop("last_modified")[0]
+    random_b = values_b.pop("random")[0]
+    assert values_b == {
+        "country": ["US"],
+        "formats": ["EP", "Vinyl", "33⅓"],
+        "name": ["Baz 2"],
+        "release_id": [entity_id],
+    }
+    assert random_b != random_a
+    assert last_modified_b > last_modified_a
