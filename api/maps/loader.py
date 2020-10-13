@@ -108,12 +108,13 @@ async def drop_properties(session, xml_entity, entity_map):
     if not to_drop:
         return
     label = type(xml_entity).__name__.lower()
-    traversal = session.g.V().has(label, f"{label}_id", xml_entity.entity_id)
-    for key, desired in sorted(to_drop.items()):
-        traversal = traversal.sideEffect(
-            __.properties(key).hasValue(P.without(*desired)).drop()
-        )
     for attempt in range(10):
+        traversal = session.g.V().has(label, f"{label}_id", xml_entity.entity_id)
+        for key, desired in sorted(to_drop.items()):
+            traversal = traversal.sideEffect(
+                __.properties(key).hasValue(P.without(*desired)).drop()
+            )
+        traversal = traversal.id()
         try:
             return await traversal.next()
         except GremlinServerError as e:
@@ -468,14 +469,21 @@ async def upsert_edge(
         traversal = (
             session.g.V()
             .has(from_label, f"{from_label}_id", from_id)
+            .as_("source")
+            .V()
+            .has(to_label, f"{to_label}_id", to_id)
+            .as_("target")
+            # If source or target do not yield traversers, it will not make it here
             .addE("relationship")
-            .to(__.V().has(to_label, f"{to_label}_id", to_id))
+            .from_("source")
+            .to("target")
             .property("last_modified", datetime.datetime.now())
             .property("name", name)
             .property("primacy", primacy)
             .property("source_label", source_label)
             .property("target_label", target_label)
-            .valueMap()
+            .select("source", "target")
+            .by(__.id())
         )
         try:
             return await traversal.next()

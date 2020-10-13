@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import time
 import random
 from pathlib import Path
 
@@ -69,10 +68,14 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
 async def test_load_artist_vertex(session):
     entity_id = random.randint(0, 1000)
     xml_artist = xml.Artist(entity_id=entity_id, name="Foo")
-    assert (await session.g.V().has("artist", "artist_id", entity_id).count().next()) == 0
+    assert (
+        await session.g.V().has("artist", "artist_id", entity_id).count().next()
+    ) == 0
 
     await loader.load_artist_vertex(session, xml_artist)
-    values_a = await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
+    values_a = (
+        await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
+    )
     last_modified_a = values_a.pop("last_modified")[0]
     random_a = values_a.pop("random")[0]
     assert values_a == {"artist_id": [entity_id], "name": ["Foo"]}
@@ -80,7 +83,9 @@ async def test_load_artist_vertex(session):
     xml_artist.name = "Foo 2"
 
     await loader.load_artist_vertex(session, xml_artist)
-    values_b = await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
+    values_b = (
+        await session.g.V().has("artist", "artist_id", entity_id).valueMap().next()
+    )
     last_modified_b = values_b.pop("last_modified")[0]
     random_b = values_b.pop("random")[0]
     assert values_b == {"artist_id": [entity_id], "name": ["Foo 2"]}
@@ -92,18 +97,24 @@ async def test_load_artist_vertex(session):
 async def test_load_company_vertex(session):
     entity_id = random.randint(0, 1000)
     xml_company = xml.Company(entity_id=entity_id, name="Bar")
-    assert (await session.g.V().has("company", "company_id", entity_id).count().next()) == 0
+    assert (
+        await session.g.V().has("company", "company_id", entity_id).count().next()
+    ) == 0
 
     await loader.load_company_vertex(session, xml_company)
-    values_a = await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    values_a = (
+        await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    )
     last_modified_a = values_a.pop("last_modified")[0]
     random_a = values_a.pop("random")[0]
-    assert values_a == {'company_id': [entity_id], 'name': ['Bar']}
-    
+    assert values_a == {"company_id": [entity_id], "name": ["Bar"]}
+
     xml_company.name = "Bar 2"
 
     await loader.load_company_vertex(session, xml_company)
-    values_b = await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    values_b = (
+        await session.g.V().has("company", "company_id", entity_id).valueMap().next()
+    )
     last_modified_b = values_b.pop("last_modified")[0]
     random_b = values_b.pop("random")[0]
     assert values_b == {"company_id": [entity_id], "name": ["Bar 2"]}
@@ -120,16 +131,20 @@ async def test_load_release_vertex_properties(session):
         formats=['12"', "EP", "33\xe2\x85\x93"],
         name="Baz",
     )
-    assert (await session.g.V().has("release", "release_id", entity_id).count().next()) == 0
+    assert (
+        await session.g.V().has("release", "release_id", entity_id).count().next()
+    ) == 0
 
     await loader.load_release_vertex_and_edges(session, xml_release, 0)
-    values_a = await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    values_a = (
+        await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    )
     last_modified_a = values_a.pop("last_modified")[0]
     random_a = values_a.pop("random")[0]
     assert values_a == {
         "country": ["US"],
         "formats": ['12"', "EP", "33\xe2\x85\x93"],
-        "name": ["Baz"], 
+        "name": ["Baz"],
         "release_id": [entity_id],
     }
 
@@ -137,7 +152,9 @@ async def test_load_release_vertex_properties(session):
     xml_release.formats = ["EP", "33⅓", "Vinyl"]
 
     await loader.load_release_vertex_and_edges(session, xml_release, 0)
-    values_b = await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    values_b = (
+        await session.g.V().has("release", "release_id", entity_id).valueMap().next()
+    )
     last_modified_b = values_b.pop("last_modified")[0]
     random_b = values_b.pop("random")[0]
     assert values_b == {
