@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from aiogremlin.process.graph_traversal import __
 
-from maps import loader
+from maps import loader, xml
 
 
 @pytest.fixture
@@ -14,25 +14,17 @@ async def session(goblin_app):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("consumer_count", [1, 2, 4, 8])
+@pytest.mark.parametrize("consumer_count", [1, 8])
 async def test_loader_run(goblin_app, session, consumer_count, caplog):
-    caplog.set_level(logging.INFO)
-    await loader.load(
-        goblin_app, Path(__file__).parent, consumer_count=consumer_count, limit=50
-    )
-    await asyncio.sleep(1)
-    vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
-    edge_counts = await (
-        session.traversal().E().groupCount().by(__.values("name"))
-    ).next()
-    assert vertex_counts == {
+    caplog.set_level(logging.DEBUG, logger="maps")
+    expected_vertex_counts = {
         "artist": 50,
         "company": 50,
         "master": 50,
         "release": 50,
         "track": 246,
     }
-    assert edge_counts == {
+    expected_edge_counts = {
         "Alias Of": 5,
         "Arranged By": 15,
         "Co-producer": 1,
@@ -56,3 +48,47 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
         "Subsidiary Of": 1,
         "Written-By": 13,
     }
+    for _ in range(1):
+        await loader.load(
+            goblin_app, Path(__file__).parent, consumer_count=consumer_count, limit=50
+        )
+        await asyncio.sleep(1)
+        actual_vertex_counts = await (session.traversal().V().groupCount().by(__.label())).next()
+        actual_edge_counts = await (
+            session.traversal().E().groupCount().by(__.values("name"))
+        ).next()
+    assert actual_vertex_counts == expected_vertex_counts
+    assert actual_edge_counts == expected_edge_counts
+
+
+@pytest.mark.asyncio
+async def test_load_artist_vertex(session):
+    xml_artist = xml.Artist(entity_id=666, name="Foo")
+    # verify non existence
+    await loader.load_artist_vertex(session, xml_artist, 0)
+    # verify existence
+    # modify xml artist
+    await loader.load_artist_vertex(session, xml_artist, 0)
+    # verify modifications (including properties and timestamp)
+
+
+@pytest.mark.asyncio
+async def test_load_company_vertex(session):
+    xml_company = xml.Company(entity_id=23, name="Bar")
+    # verify non existence
+    await loader.load_company_vertex(session, xml_company, 0)
+    # verify existence
+    # modify xml company
+    await loader.load_company_vertex(session, xml_company, 0)
+    # verify modifications (including properties and timestamp)
+
+
+@pytest.mark.asyncio
+async def test_load_release_vertex(session):
+    xml_release = xml.Release(entity_id=2001, name="Baz")
+    # verify non existence
+    await loader.load_release_vertex_and_edges(session, xml_release, 0)
+    # verify existence
+    # modify xml release
+    await loader.load_release_vertex_and_edges(session, xml_release, 0)
+    # verify modifications (including properties and timestamp)
