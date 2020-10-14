@@ -32,7 +32,6 @@ async def test_format_schema(goblin_app):
         primacy = mgmt.makePropertyKey('primacy').dataType(Integer.class).cardinality(SINGLE).make()
         random = mgmt.makePropertyKey('random').dataType(Float.class).cardinality(SINGLE).make()
         release_id = mgmt.makePropertyKey('release_id').dataType(Integer.class).cardinality(SINGLE).make()
-        release_name = mgmt.makePropertyKey('release_name').dataType(String.class).cardinality(SINGLE).make()
         source_label = mgmt.makePropertyKey('source_label').dataType(Integer.class).cardinality(SINGLE).make()
         styles = mgmt.makePropertyKey('styles').dataType(String.class).cardinality(SET).make()
         target_label = mgmt.makePropertyKey('target_label').dataType(Integer.class).cardinality(SINGLE).make()

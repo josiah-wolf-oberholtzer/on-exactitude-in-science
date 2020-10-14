@@ -145,6 +145,7 @@ async def test_load_release_vertex_properties(session):
         "country": ["US"],
         "formats": ['12"', "EP", "33\xe2\x85\x93"],
         "name": ["Baz"],
+        "primacy": [1],
         "release_id": [entity_id],
     }
 
@@ -161,6 +162,7 @@ async def test_load_release_vertex_properties(session):
         "country": ["US"],
         "formats": ["EP", "Vinyl", "33⅓"],
         "name": ["Baz 2"],
+        "primacy": [1],
         "release_id": [entity_id],
     }
     assert random_b != random_a
