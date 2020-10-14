@@ -5,7 +5,7 @@ import logging
 import random
 import traceback
 from pathlib import Path
-from typing import Any, Generator, List
+from typing import Any, Generator, List, Optional, Tuple
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
@@ -458,7 +458,7 @@ async def upsert_vertex(session, xml_entity, **kwargs):
 
 async def upsert_edge(
     session, *, name, source, target, primacy=0, source_label=0, target_label=0
-):
+) -> Optional[Tuple[int, int]]:
     from_label, from_id = source
     to_label, to_id = target
     for attempt in range(10):
@@ -488,9 +488,10 @@ async def upsert_edge(
             .by(__.id())
         )
         try:
-            return await traversal.next()
+            result = await traversal.next()
+            if result:
+                return result["source"], result["target"]
         except GremlinServerError as e:
-            if "The provided traverser does not map to a value" in str(e):
-                return
             logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
+    return None
