@@ -287,16 +287,16 @@ async def load_release_vertex_and_edges(
     logger.debug(
         f"[{consumer_id}] V Release {entity_index} [eid: {xml_release.entity_id}] Loading..."
     )
-    entity_map = await upsert_vertex(session, xml_release)
-    await drop_properties(session, xml_release, entity_map)
-    for xml_track in xml_release.tracks:
-        entity_map = await upsert_vertex(session, xml_track)
-        await drop_properties(session, xml_track, entity_map)
     primacy = 2
     if xml_release.is_main_release:
         primacy = 1
     elif xml_release.master_id is None:
         primacy = 1
+    entity_map = await upsert_vertex(session, xml_release, primacy=primacy)
+    await drop_properties(session, xml_release, entity_map)
+    for xml_track in xml_release.tracks:
+        entity_map = await upsert_vertex(session, xml_track, primacy=primacy)
+        await drop_properties(session, xml_track, entity_map)
     for xml_artist in xml_release.artists:
         await upsert_edge(
             session,
@@ -415,7 +415,7 @@ def producer(
         yield None
 
 
-async def upsert_vertex(session, xml_entity):
+async def upsert_vertex(session, xml_entity, **kwargs):
     # TODO: Return entity map, so we can purge stale properties
     kind = type(xml_entity).__name__
     goblin_entity = getattr(entities, kind)()
@@ -428,6 +428,7 @@ async def upsert_vertex(session, xml_entity):
             for key, value in dataclasses.asdict(xml_entity).items()
             if hasattr(goblin_entity, key) and value is not None
         },
+        **kwargs,
     )
 
 
