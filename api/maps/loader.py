@@ -206,8 +206,8 @@ async def load_artist_edges(
         target = cache.get(target_tuple, target_tuple)
         result = await upsert_edge(
             session,
-            source=source_tuple,
-            target=target_tuple,
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.ARTIST,
             target_label=entities.VertexLabelEnum.ARTIST,
             name="Alias Of",
@@ -223,8 +223,8 @@ async def load_artist_edges(
         target = cache.get(target_tuple, target_tuple)
         result = await upsert_edge(
             session,
-            source=source_tuple,
-            target=target_tuple,
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.ARTIST,
             target_label=entities.VertexLabelEnum.ARTIST,
             name="Member Of",
@@ -259,15 +259,24 @@ async def load_company_edges(
     logger.debug(
         f"[{consumer_id}] E Company {entity_index} [eid: {xml_company.entity_id}] Loading..."
     )
+    cache = {}
     for xml_subsidiary in xml_company.subsidiaries:
-        await upsert_edge(
+        source_tuple = "company", xml_subsidiary.entity_id
+        target_tuple = "company", xml_company.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Company.__label__, xml_subsidiary.entity_id),
-            target=(entities.Company.__label__, xml_company.entity_id),
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.COMPANY,
             target_label=entities.VertexLabelEnum.COMPANY,
             name="Subsidiary Of",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     await drop_edges(
         session,
         "company",
@@ -476,8 +485,6 @@ async def upsert_vertex(session, xml_entity, **kwargs):
 async def upsert_edge(
     session, *, name, source, target, primacy=0, source_label=0, target_label=0
 ) -> Optional[Tuple[int, int]]:
-    from_label, from_id = source
-    to_label, to_id = target
     for attempt in range(10):
         traversal = session.g
         if isinstance(source, int):

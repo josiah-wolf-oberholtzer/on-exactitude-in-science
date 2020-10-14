@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import click
+from uqbar.io import Profiler
 
 from maps import goblin, loader
 
@@ -58,6 +59,7 @@ def data_load(ctx, path, limit, workers):
         aliases = {"graph": "g", "testgraph": "tg"}
         manager = goblin.GoblinManager(aliases={"g": aliases[ctx.obj["graph"]]})
         async with manager as goblin_app:
-            await loader.load(goblin_app, path, consumer_count=workers, limit=limit)
+            with Profiler():
+                await loader.load(goblin_app, path, consumer_count=workers, limit=limit)
 
     asyncio.run(run())
