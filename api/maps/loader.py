@@ -195,27 +195,44 @@ async def load_artist_edges(
     logger.debug(
         f"[{consumer_id}] E Artist {entity_index} [eid: {xml_artist.entity_id}] Loading..."
     )
+    cache = {}
     for xml_alias in xml_artist.aliases:
         # alias but only from low to high id
         if xml_artist.entity_id > xml_alias.entity_id:
             continue
-        await upsert_edge(
+        source_tuple = "artist", xml_artist.entity_id
+        target_tuple = "artist", xml_alias.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Artist.__label__, xml_artist.entity_id),
-            target=(entities.Artist.__label__, xml_alias.entity_id),
+            source=source_tuple,
+            target=target_tuple,
             source_label=entities.VertexLabelEnum.ARTIST,
             target_label=entities.VertexLabelEnum.ARTIST,
             name="Alias Of",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     for xml_member in xml_artist.members:
-        await upsert_edge(
+        source_tuple = "artist", xml_member.entity_id
+        target_tuple = "artist", xml_artist.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Artist.__label__, xml_member.entity_id),
-            target=(entities.Artist.__label__, xml_artist.entity_id),
+            source=source_tuple,
+            target=target_tuple,
             source_label=entities.VertexLabelEnum.ARTIST,
             target_label=entities.VertexLabelEnum.ARTIST,
             name="Member Of",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     await drop_edges(
         session,
         "artist",
