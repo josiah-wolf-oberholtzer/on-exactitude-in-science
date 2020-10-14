@@ -419,29 +419,24 @@ async def upsert_vertex(session, xml_entity, **kwargs):
     # TODO: Return entity map, so we can purge stale properties
     kind = type(xml_entity).__name__
     goblin_entity = getattr(entities, kind)()
-    return await upsert_one_vertex(
-        session,
-        label=kind.lower(),
-        entity_id=xml_entity.entity_id,
+    label = kind.lower()
+    kwargs = {
         **{
             key: value
             for key, value in dataclasses.asdict(xml_entity).items()
             if hasattr(goblin_entity, key) and value is not None
         },
         **kwargs,
-    )
-
-
-async def upsert_one_vertex(session, label, entity_id, **kwargs):
+    }
     entity_key = f"{label}_id"
     for attempt in range(10):
         traversal = (
             session.g.V()
-            .has(label, entity_key, entity_id)
+            .has(label, entity_key, xml_entity.entity_id)
             .fold()
             .coalesce(
                 __.unfold(),
-                __.addV(label).property(f"{label}_id", entity_id),
+                __.addV(label).property(f"{label}_id", xml_entity.entity_id),
             )
             .property("last_modified", datetime.datetime.now())
             .property("random", random.random())
@@ -467,13 +462,19 @@ async def upsert_edge(
     from_label, from_id = source
     to_label, to_id = target
     for attempt in range(10):
+        traversal = session.g
+        if isinstance(source, int):
+            traversal = traversal.V(source)
+        else:
+            traversal = traversal.V().has(source[0], f"{source[0]}_id", source[1])
+        traversal = traversal.as_("source")
+        if isinstance(target, int):
+            traversal = traversal.V(target)
+        else:
+            traversal = traversal.V().has(target[0], f"{target[0]}_id", target[1])
+        traversal = traversal.as_("target")
         traversal = (
-            session.g.V()
-            .has(from_label, f"{from_label}_id", from_id)
-            .as_("source")
-            .V()
-            .has(to_label, f"{to_label}_id", to_id)
-            .as_("target")
+            traversal
             # If source or target do not yield traversers, it will not make it here
             .addE("relationship")
             .from_("source")
