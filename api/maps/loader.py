@@ -9,7 +9,7 @@ from typing import Any, Generator, List, Optional, Tuple
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Cardinality, P, WithOptions
+from gremlin_python.process.traversal import Cardinality, P, T, WithOptions
 
 from maps import entities, goblin, xml
 
@@ -313,6 +313,7 @@ async def load_release_vertex_and_edges(
     logger.debug(
         f"[{consumer_id}] V Release {entity_index} [eid: {xml_release.entity_id}] Loading..."
     )
+    cache = {}
     primacy = 2
     if xml_release.is_main_release:
         primacy = 1
@@ -320,92 +321,158 @@ async def load_release_vertex_and_edges(
         primacy = 1
     entity_map = await upsert_vertex(session, xml_release, primacy=primacy)
     await drop_properties(session, xml_release, entity_map)
+    cache["release", xml_release.entity_id] = entity_map[T.id]
     for xml_track in xml_release.tracks:
         entity_map = await upsert_vertex(session, xml_track, primacy=primacy)
         await drop_properties(session, xml_track, entity_map)
+        cache["track", xml_track.entity_id] = entity_map[T.id]
     for xml_artist in xml_release.artists:
-        await upsert_edge(
+        source_tuple = "artist", xml_artist.entity_id
+        target_tuple = "release", xml_release.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Artist.__label__, xml_artist.entity_id),
-            target=(entities.Release.__label__, xml_release.entity_id),
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.ARTIST,
             target_label=entities.VertexLabelEnum.RELEASE,
             primacy=primacy,
             name="Released",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     for xml_extra_artist in xml_release.extra_artists:
+        source_tuple = "artist", xml_extra_artist.entity_id
+        target_tuple = "release", xml_release.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
         for role in xml_extra_artist.roles:
-            await upsert_edge(
+            result = await upsert_edge(
                 session,
-                source=(entities.Artist.__label__, xml_extra_artist.entity_id),
-                target=(entities.Release.__label__, xml_release.entity_id),
+                source=source,
+                target=target,
                 source_label=entities.VertexLabelEnum.ARTIST,
                 target_label=entities.VertexLabelEnum.RELEASE,
                 primacy=primacy,
                 name=role.name,
             )
+            if result:
+                source, target = result
+                cache[source_tuple] = source
+                cache[target_tuple] = target
     for xml_company in xml_release.companies:
+        source_tuple = "company", xml_company.entity_id
+        target_tuple = "release", xml_release.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
         for role in xml_company.roles:
-            await upsert_edge(
+            result = await upsert_edge(
                 session,
-                source=(entities.Company.__label__, xml_company.entity_id),
-                target=(entities.Release.__label__, xml_release.entity_id),
+                source=source,
+                target=target,
                 source_label=entities.VertexLabelEnum.COMPANY,
                 target_label=entities.VertexLabelEnum.RELEASE,
                 primacy=primacy,
                 name=role.name,
             )
+            if result:
+                source, target = result
+                cache[source_tuple] = source
+                cache[target_tuple] = target
     for xml_label in xml_release.labels:
-        await upsert_edge(
+        source_tuple = "release", xml_release.entity_id
+        target_tuple = "company", xml_label.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Release.__label__, xml_release.entity_id),
-            target=(entities.Company.__label__, xml_label.entity_id),
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.RELEASE,
             target_label=entities.VertexLabelEnum.COMPANY,
             primacy=primacy,
             name="Released On",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     if xml_release.master_id:
-        await upsert_edge(
+        source_tuple = "release", xml_release.entity_id
+        target_tuple = "master", xml_release.master_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Release.__label__, xml_release.entity_id),
-            target=(entities.Master.__label__, xml_release.master_id),
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.RELEASE,
             target_label=entities.VertexLabelEnum.MASTER,
             primacy=primacy,
             name="Subrelease Of",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
     for xml_track in xml_release.tracks:
-        await upsert_edge(
+        source_tuple = "release", xml_release.entity_id
+        target_tuple = "track", xml_track.entity_id
+        source = cache.get(source_tuple, source_tuple)
+        target = cache.get(target_tuple, target_tuple)
+        result = await upsert_edge(
             session,
-            source=(entities.Release.__label__, xml_release.entity_id),
-            target=(entities.Track.__label__, xml_track.entity_id),
+            source=source,
+            target=target,
             source_label=entities.VertexLabelEnum.RELEASE,
             target_label=entities.VertexLabelEnum.TRACK,
             primacy=primacy,
             name="Includes",
         )
+        if result:
+            source, target = result
+            cache[source_tuple] = source
+            cache[target_tuple] = target
         for xml_artist in xml_track.artists:
-            await upsert_edge(
+            source_tuple = "artist", xml_artist.entity_id
+            target_tuple = "track", xml_track.entity_id
+            source = cache.get(source_tuple, source_tuple)
+            target = cache.get(target_tuple, target_tuple)
+            result = await upsert_edge(
                 session,
-                source=(entities.Artist.__label__, xml_artist.entity_id),
-                target=(entities.Track.__label__, xml_track.entity_id),
+                source=source,
+                target=target,
                 source_label=entities.VertexLabelEnum.ARTIST,
                 target_label=entities.VertexLabelEnum.TRACK,
                 primacy=primacy,
                 name="Released",
             )
+            if result:
+                source, target = result
+                cache[source_tuple] = source
+                cache[target_tuple] = target
         for xml_extra_artist in xml_track.extra_artists:
+            source_tuple = "artist", xml_extra_artist.entity_id
+            target_tuple = "track", xml_track.entity_id
+            source = cache.get(source_tuple, source_tuple)
+            target = cache.get(target_tuple, target_tuple)
             for role in xml_extra_artist.roles:
-                await upsert_edge(
+                result = await upsert_edge(
                     session,
-                    source=(entities.Artist.__label__, xml_extra_artist.entity_id),
-                    target=(entities.Track.__label__, xml_track.entity_id),
+                    source=source,
+                    target=target,
                     source_label=entities.VertexLabelEnum.ARTIST,
                     target_label=entities.VertexLabelEnum.TRACK,
                     primacy=primacy,
                     name=role.name,
                 )
+                if result:
+                    source, target = result
+                    cache[source_tuple] = source
+                    cache[target_tuple] = target
         await drop_edges(
             session, "track", xml_track.entity_id, timestamp=timestamp, both=True
         )
@@ -513,8 +580,9 @@ async def upsert_edge(
         )
         try:
             result = await traversal.next()
-            if result:
-                return result["source"], result["target"]
+            if not result:
+                return None
+            return result["source"], result["target"]
         except GremlinServerError as e:
             logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
