@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from contextlib import ExitStack
 
 import click
 from uqbar.io import Profiler
@@ -53,13 +54,16 @@ def schema_load(ctx):
 )
 @click.option("-l", "--limit", default=None, type=int)
 @click.option("-w", "--workers", default=8)
+@click.option("--profile/--no-profile", default=False)
 @click.pass_context
-def data_load(ctx, path, limit, workers):
+def data_load(ctx, path, limit, workers, profile):
     async def run():
         aliases = {"graph": "g", "testgraph": "tg"}
         manager = goblin.GoblinManager(aliases={"g": aliases[ctx.obj["graph"]]})
-        async with manager as goblin_app:
-            #with Profiler():
-            await loader.load(goblin_app, path, consumer_count=workers, limit=limit)
+        with ExitStack() as stack:
+            if profile:
+                stack.enter_context(Profiler())
+            async with manager as goblin_app:
+                await loader.load(goblin_app, path, consumer_count=workers, limit=limit)
 
     asyncio.run(run())
