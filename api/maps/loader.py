@@ -132,11 +132,7 @@ async def drop_properties(session, xml_entity, entity_map):
 async def drop_vertices(goblin_app, timestamp):
     session = await goblin_app.session()
     for attempt in range(10):
-        traversal = (
-            session.g.V()
-            .has("last_modified", P.lt(timestamp))
-            .count()
-        )
+        traversal = session.g.V().has("last_modified", P.lt(timestamp)).count()
         try:
             total = await traversal.next()
         except GremlinServerError as e:
@@ -164,11 +160,7 @@ async def drop_vertices(goblin_app, timestamp):
                     logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
                     await backoff(attempt)
             for attempt in range(10):
-                traversal = (
-                    session.g.V()
-                    .has("last_modified", P.lt(timestamp))
-                    .count()
-                )
+                traversal = session.g.V().has("last_modified", P.lt(timestamp)).count()
                 try:
                     new_total = await traversal.next()
                 except GremlinServerError as e:
