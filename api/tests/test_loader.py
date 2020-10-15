@@ -18,6 +18,7 @@ async def session(goblin_app):
 @pytest.mark.parametrize("consumer_count", [1, 8])
 async def test_loader_run(goblin_app, session, consumer_count, caplog):
     caplog.set_level(logging.INFO, logger="maps")
+    limit = 50
     expected_vertex_counts = {
         "artist": 50,
         "company": 50,
@@ -51,7 +52,10 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
     }
     for _ in range(2):
         await loader.load(
-            goblin_app, Path(__file__).parent, consumer_count=consumer_count, limit=50
+            goblin_app,
+            Path(__file__).parent,
+            consumer_count=consumer_count,
+            limit=limit,
         )
         await asyncio.sleep(1)
         actual_vertex_counts = await (

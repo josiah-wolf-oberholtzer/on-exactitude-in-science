@@ -10,6 +10,7 @@ from typing import Any, Generator, List, Optional, Tuple
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P, T, WithOptions
+from tqdm import tqdm
 
 from maps import entities, goblin, xml
 
@@ -20,7 +21,9 @@ async def backoff(attempts, timeout=1.0, backoff_factor=1.5):
     await asyncio.sleep(timeout * pow(backoff_factor, attempts))
 
 
-async def consume_edges(goblin_app, iterator, consumer_id=1, timestamp=0.0):
+async def consume_edges(
+    goblin_app, iterator, consumer_id=1, timestamp=0.0, progress_bar=None
+):
     procedures = {
         xml.Artist: load_artist_edges,
         xml.Company: load_company_edges,
@@ -38,13 +41,16 @@ async def consume_edges(goblin_app, iterator, consumer_id=1, timestamp=0.0):
             consumer_id=consumer_id,
             entity_index=entity_index,
         )
-        if not entity_index % 100:
-            logger.info(
-                f"[{consumer_id}] E {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
-            )
+        progress_bar.update(1)
+        # if not entity_index % 100:
+        #     logger.info(
+        #         f"[{consumer_id}] E {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
+        #     )
 
 
-async def consume_vertices(goblin_app, iterator, consumer_id=1, timestamp=0.0):
+async def consume_vertices(
+    goblin_app, iterator, consumer_id=1, timestamp=0.0, progress_bar=None
+):
     procedures = {
         xml.Artist: load_artist_vertex,
         xml.Company: load_company_vertex,
@@ -65,10 +71,11 @@ async def consume_vertices(goblin_app, iterator, consumer_id=1, timestamp=0.0):
             consumer_id=consumer_id,
             entity_index=entity_index,
         )
-        if not entity_index % 100:
-            logger.info(
-                f"[{consumer_id}] V {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
-            )
+        progress_bar.update(1)
+        # if not entity_index % 100:
+        #     logger.info(
+        #         f"[{consumer_id}] V {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
+        #     )
 
 
 async def drop():
@@ -149,15 +156,46 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
     """
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
+    limits = {}
+    if limit:
+        limits.update(artists=limit, companies=limit, masters=limit, releases=limit)
+    else:
+        logger.info("Calculating dataset lengths ...")
+        limits.update(
+            artists=sum(
+                1 for x in xml.iterate_xml(xml.get_xml_path(path, "artist"), "artist")
+            ),
+            companies=sum(
+                1 for x in xml.iterate_xml(xml.get_xml_path(path, "label"), "label")
+            ),
+            masters=sum(
+                1 for x in xml.iterate_xml(xml.get_xml_path(path, "master"), "master")
+            ),
+            releases=sum(
+                1 for x in xml.iterate_xml(xml.get_xml_path(path, "release"), "release")
+            ),
+        )
     # Load artist, company, and master vertices.
     iterator = producer(
         Path(path), consumer_count=consumer_count, limit=limit, releases=False
     )
-    tasks = [
-        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_date)
-        for i in range(consumer_count)
-    ]
-    await asyncio.gather(*tasks)
+    with tqdm(
+        desc="Artist/Company/Master Vertices",
+        mininterval=0.25,
+        smoothing=0.01,
+        total=limits["artists"] + limits["companies"] + limits["masters"],
+    ) as progress_bar:
+        tasks = [
+            consume_vertices(
+                goblin_app,
+                iterator,
+                consumer_id=i,
+                timestamp=start_date,
+                progress_bar=progress_bar,
+            )
+            for i in range(consumer_count)
+        ]
+        await asyncio.gather(*tasks)
     # Load artist and company edges (alias-of, member-of, subsidiary-of).
     iterator = producer(
         Path(path),
@@ -166,11 +204,23 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         masters=False,
         releases=False,
     )
-    tasks = [
-        consume_edges(goblin_app, iterator, consumer_id=i, timestamp=start_date)
-        for i in range(consumer_count)
-    ]
-    await asyncio.gather(*tasks)
+    with tqdm(
+        desc="Artist/Company Edges",
+        mininterval=0.25,
+        smoothing=0.01,
+        total=limits["artists"] + limits["companies"],
+    ) as progress_bar:
+        tasks = [
+            consume_edges(
+                goblin_app,
+                iterator,
+                consumer_id=i,
+                timestamp=start_date,
+                progress_bar=progress_bar,
+            )
+            for i in range(consumer_count)
+        ]
+        await asyncio.gather(*tasks)
     # Load release (and track) vertices, and populate edges simultaneously.
     iterator = producer(
         Path(path),
@@ -180,11 +230,23 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         companies=False,
         masters=False,
     )
-    tasks = [
-        consume_vertices(goblin_app, iterator, consumer_id=i, timestamp=start_date)
-        for i in range(consumer_count)
-    ]
-    await asyncio.gather(*tasks)
+    with tqdm(
+        desc="Releases",
+        mininterval=0.25,
+        smoothing=0.01,
+        total=limits["releases"],
+    ) as progress_bar:
+        tasks = [
+            consume_vertices(
+                goblin_app,
+                iterator,
+                consumer_id=i,
+                timestamp=start_date,
+                progress_bar=progress_bar,
+            )
+            for i in range(consumer_count)
+        ]
+        await asyncio.gather(*tasks)
     logger.info("Loaded data in {}".format(datetime.datetime.now() - start_date))
     # TODO: Purge vertices untouched during loading.
 
