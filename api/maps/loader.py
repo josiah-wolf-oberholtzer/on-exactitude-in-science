@@ -129,6 +129,55 @@ async def drop_properties(session, xml_entity, entity_map):
             await backoff(attempt)
 
 
+async def drop_vertices(goblin_app, timestamp):
+    session = await goblin_app.session()
+    for attempt in range(10):
+        traversal = (
+            session.g.V()
+            .has("last_modified", P.lt(timestamp))
+            .count()
+        )
+        try:
+            total = await traversal.next()
+        except GremlinServerError as e:
+            logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
+            await backoff(attempt)
+    batch = 1000
+    with tqdm(
+        desc="Purging Old Vertices",
+        mininterval=0.25,
+        smoothing=0.01,
+        total=total,
+    ) as progress_bar:
+        while total > 0:
+            for attempt in range(10):
+                traversal = (
+                    session.g.V()
+                    .has("last_modified", P.lt(timestamp))
+                    .limit(batch)
+                    .sideEffect(__.drop())
+                    .count()
+                )
+                try:
+                    await traversal.next()
+                except GremlinServerError as e:
+                    logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
+                    await backoff(attempt)
+            for attempt in range(10):
+                traversal = (
+                    session.g.V()
+                    .has("last_modified", P.lt(timestamp))
+                    .count()
+                )
+                try:
+                    new_total = await traversal.next()
+                except GremlinServerError as e:
+                    logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
+                    await backoff(attempt)
+            progress_bar.update(total - new_total)
+            total = new_total
+
+
 async def load(goblin_app, path, consumer_count=1, limit=None):
     """
     Update graph from Discogs .xml.gz files.
@@ -247,8 +296,9 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
             for i in range(consumer_count)
         ]
         await asyncio.gather(*tasks)
+    # Drop old vertices
+    await drop_vertices(goblin_app, timestamp=start_date)
     logger.info("Loaded data in {}".format(datetime.datetime.now() - start_date))
-    # TODO: Purge vertices untouched during loading.
 
 
 async def load_artist_edges(
