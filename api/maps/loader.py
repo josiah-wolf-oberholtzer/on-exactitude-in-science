@@ -42,10 +42,6 @@ async def consume_edges(
             entity_index=entity_index,
         )
         progress_bar.update(1)
-        # if not entity_index % 100:
-        #     logger.info(
-        #         f"[{consumer_id}] E {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
-        #     )
 
 
 async def consume_vertices(
@@ -72,10 +68,6 @@ async def consume_vertices(
             entity_index=entity_index,
         )
         progress_bar.update(1)
-        # if not entity_index % 100:
-        #     logger.info(
-        #         f"[{consumer_id}] V {type(xml_entity).__name__} {entity_index} [eid: {xml_entity.entity_id}]"
-        #     )
 
 
 async def drop():
@@ -138,14 +130,13 @@ async def drop_vertices(goblin_app, timestamp):
         except GremlinServerError as e:
             logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
             await backoff(attempt)
-    batch = 1000
-    with tqdm(
-        desc="Purging Old Vertices",
-        mininterval=0.25,
-        smoothing=0.01,
-        total=total,
-    ) as progress_bar:
-        while total > 0:
+    logger.info(f"Found {total} stale vertices to drop.")
+    if not total:
+        return
+    with tqdm(desc="Purging Old Vertices", total=None) as progress_bar:
+        batch = 100
+        dropped = 1
+        while dropped:
             for attempt in range(10):
                 traversal = (
                     session.g.V()
@@ -155,19 +146,11 @@ async def drop_vertices(goblin_app, timestamp):
                     .count()
                 )
                 try:
-                    await traversal.next()
+                    dropped = await traversal.next()
                 except GremlinServerError as e:
                     logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
                     await backoff(attempt)
-            for attempt in range(10):
-                traversal = session.g.V().has("last_modified", P.lt(timestamp)).count()
-                try:
-                    new_total = await traversal.next()
-                except GremlinServerError as e:
-                    logger.error(f"Backing off: {e!s}\n{traceback.format_exc()}")
-                    await backoff(attempt)
-            progress_bar.update(total - new_total)
-            total = new_total
+            progress_bar.update(1)
 
 
 async def load(goblin_app, path, consumer_count=1, limit=None):
@@ -177,23 +160,6 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
     Upsert vertices and edges
 
     Delete stale vertices and edges.
-
-    New process:
-    - load artist vertices
-    - load company vertices
-    - load master vertices
-    - artist edges:
-      - delete old artist outgoing edges
-      - load artist outgoing edges
-    - company edges:
-      - load company outgoing edges
-      - delete old company outgoing edges
-    - load release vertices
-        - delete old release edges
-        - load new release edges
-        - load track vertices
-            - delete old track edges
-            - load new track edges
     """
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
