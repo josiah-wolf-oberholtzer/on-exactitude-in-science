@@ -255,6 +255,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         ]
         await asyncio.gather(*tasks)
     # Drop old vertices
+    await asyncio.sleep(10)  # Wait for elasticsearch to catch up.
     await drop_vertices(goblin_app, timestamp=start_date)
     logger.info("Loaded data in {}".format(datetime.datetime.now() - start_date))
 

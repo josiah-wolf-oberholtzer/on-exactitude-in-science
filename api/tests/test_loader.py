@@ -50,20 +50,21 @@ async def test_loader_run(goblin_app, session, consumer_count, caplog):
         "Subsidiary Of": 1,
         "Written-By": 13,
     }
-    for _ in range(2):
+    for attempt in range(2):
         await loader.load(
             goblin_app,
             Path(__file__).parent,
             consumer_count=consumer_count,
             limit=limit,
         )
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         actual_vertex_counts = await (
             session.traversal().V().groupCount().by(__.label())
         ).next()
         actual_edge_counts = await (
             session.traversal().E().groupCount().by(__.values("name"))
         ).next()
+        print(f"Attempt {attempt}")
         assert actual_vertex_counts == expected_vertex_counts
         assert actual_edge_counts == expected_edge_counts
 
