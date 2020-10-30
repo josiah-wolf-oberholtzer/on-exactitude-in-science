@@ -1,0 +1,257 @@
+from collections import deque
+
+from aiogremlin.process.graph_traversal import __
+from gremlin_python.process.traversal import P
+
+from maps.graphutils import cleanup_edge, cleanup_vertex
+
+
+def get_edge_projection():
+    return (
+        __.cap("filteredEdges")
+        .unfold()
+        .project(
+            "id",
+            "kind",
+            "label",
+            "source",
+            "target",
+            "values",
+        )
+        .by(__.id())
+        .by(__.constant("edge"))
+        .by(__.label())
+        .by(__.outV().id())
+        .by(__.inV().id())
+        .by(__.valueMap())
+    )
+
+
+def get_vertex_projection():
+    return (
+        __.cap("vertices")
+        .unfold()
+        .dedup()
+        .project(
+            "id",
+            "kind",
+            "label",
+            "values",
+            "total_edge_count",
+            "child_count",
+        )
+        .by(__.id())
+        .by(__.constant("vertex"))
+        .by(__.label())
+        .by(__.valueMap())
+        .by(__.bothE().count())
+        .by(
+            __.inE("relationship")
+            .has("name", P.within("Member Of", "Subsidiary Of", "Subrelease Of"))
+            .count()
+        )
+    )
+
+
+def get_primacy(labels, main_only):
+    primacy = (0, 1, 2)
+    if main_only:
+        primacy = (0, 1)
+    if labels:
+        if "Track" not in labels and "Release" not in labels:
+            primacy = (0,)
+        elif (
+            "Artist" not in labels
+            and "Company" not in labels
+            and "Master" not in labels
+        ):
+            primacy = (1, 2)
+            if main_only:
+                primacy = (1,)
+    return primacy
+
+
+def get_loop_traversal(
+    countries=None,
+    formats=None,
+    genres=None,
+    styles=None,
+    labels=None,
+    main_only=True,
+    offset=0,
+    roles=None,
+    years=None,
+):
+    primacy = get_primacy(labels, main_only)
+    traversal = __.bothE("relationship").dedup().has("primacy", P.within(*primacy))
+    if roles:
+        traversal = traversal.has("name", P.within(*roles))
+    other_traversal = __.otherV()
+    if labels:
+        other_traversal = other_traversal.hasLabel(*(label.lower() for label in labels))
+    if 1 in primacy or 2 in primacy:
+        traversals = []
+        # country, format, genre, style, year
+        if countries:
+            traversals.append(__.has("country", P.within(*countries)))
+        if formats:
+            traversals.append(__.has("formats", P.within(*formats)))
+        if genres:
+            traversals.append(__.has("genres", P.within(*genres)))
+        if styles:
+            traversals.append(__.has("styles", P.within(*styles)))
+        if years:
+            traversals.append(__.has("year", P.within(*years)))
+        if traversals:
+            traversal = traversal.where(
+                other_traversal.choose(
+                    __.label().is_(P.within("release", "track")),
+                    __.and_(*traversals),
+                    __.identity(),
+                )
+            )
+        elif labels:
+            traversal = traversal.where(other_traversal)
+    elif labels:
+        traversal = traversal.where(other_traversal)
+    traversal = traversal.choose(
+        __.loops().is_(0),
+        __.order().range(offset, offset + 50),
+        __.limit(10),
+    )
+    return __.local(traversal).dedup().aggregate("edges").otherV().dedup().timeLimit(500)
+
+
+async def get_locality_query(
+    session,
+    vertex_id,
+    vertex_label=None,
+    limit=200,
+    offset=0,
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    main_only=True,
+    roles=None,
+    styles=None,
+    years=None,
+):
+    traversal = session.g.V(vertex_id)
+    if vertex_label:
+        traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
+    traversal = traversal
+    traversal = (
+        traversal.aggregate("vertices")
+        .repeat(
+            get_loop_traversal(
+                labels=labels,
+                offset=offset,
+                main_only=main_only,
+                roles=roles,
+                countries=countries,
+                formats=formats,
+                genres=genres,
+                styles=styles,
+                years=years,
+            ),
+        )
+        .until(
+            __.or_(
+                __.cap("edges").unfold().count().is_(P.gt(limit)),
+                __.loops().is_(10),
+            )
+        )
+        .cap("edges")
+        .unfold()
+        .limit(limit)
+        .aggregate("filteredEdges")
+        .bothV()
+        .aggregate("vertices")
+        .barrier(0)
+        .inject(1)
+        .union(get_edge_projection(), get_vertex_projection())
+    )
+    return await traversal.toList()
+
+
+async def get_locality(
+    goblin_app,
+    vertex_id,
+    vertex_label=None,
+    limit=200,
+    offset=0,
+    countries=None,
+    formats=None,
+    genres=None,
+    labels=None,
+    main_only=True,
+    roles=None,
+    styles=None,
+    years=None,
+):
+    session = await goblin_app.session()
+    result = await get_locality_query(
+        session,
+        vertex_id,
+        vertex_label=vertex_label,
+        limit=limit,
+        offset=offset,
+        countries=countries,
+        formats=formats,
+        genres=genres,
+        labels=labels,
+        main_only=main_only,
+        roles=roles,
+        styles=styles,
+        years=years,
+    )
+    if not result:
+        return None
+    return cleanup_locality(goblin_app, vertex_id, vertex_label, result)
+
+
+def cleanup_locality(goblin_app, vertex_id, vertex_label, result):
+    edges = []
+    vertices = {}
+    for x in result:
+        print(x)
+        if x.pop("kind") == "edge":
+            edges.append(cleanup_edge(x))
+        else:
+            vertex = cleanup_vertex(x, goblin_app)
+            vertices[vertex["id"]] = vertex
+    for vertex in vertices.values():
+        if (
+            vertex_label
+            and vertex_label == vertex["label"]
+            and vertex["eid"] == vertex_id
+        ):
+            vertex["depth"] = 0
+        elif vertex_label is None and vertex_id == vertex["id"]:
+            vertex["depth"] = 0
+    edge_deque = deque(edges)
+    maximum_depth = 1
+    while edge_deque:
+        edge = edge_deque.popleft()
+        source = vertices[edge["source"]]
+        target = vertices[edge["target"]]
+        if "depth" in source and "depth" in target:
+            continue
+        elif "depth" in source:
+            target["depth"] = source["depth"] + 1
+            if target["depth"] > maximum_depth:
+                maximum_depth = target["depth"]
+        elif "depth" in target:
+            source["depth"] = target["depth"] + 1
+            if source["depth"] > maximum_depth:
+                maximum_depth = source["depth"]
+        else:
+            edge_deque.append(edge)
+    for vertex in vertices.values():
+        vertex["maximum_depth"] = maximum_depth
+    return {
+        "center": [vertex for vertex in vertices.values() if vertex["depth"] == 0][0],
+        "edges": edges,
+        "vertices": [vertex for _, vertex in sorted(vertices.items())],
+    }

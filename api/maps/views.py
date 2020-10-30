@@ -3,7 +3,7 @@ import json
 
 import aiohttp.web
 
-from maps import queries
+from maps import locality, queries
 
 routes = aiohttp.web.RouteTableDef()
 
@@ -102,7 +102,7 @@ async def get_locality(request):
     # cache_key = str(request.rel_url).encode()
     # if (cached := await cache.get(cache_key)) is not None:
     #    return aiohttp.web.json_response(cached)
-    locality = await queries.get_locality(
+    result = await locality.get_locality(
         request.app["goblin"],
         vertex_id,
         countries=request.query.getall("countries[]", []),
@@ -116,16 +116,9 @@ async def get_locality(request):
         vertex_label=vertex_label,
         years=request.query.getall("years[]", []),
     )
-    if locality is None:
+    if result is None:
         raise aiohttp.web.HTTPNotFound()
-    root_vertex, vertices, edges = locality
-    data = {
-        "result": {
-            "center": root_vertex,
-            "edges": edges,
-            "vertices": vertices,
-        },
-    }
+    data = {"result": result}
     # await cache.set(cache_key, data)
     return aiohttp.web.json_response(data, dumps=encode_json)
 

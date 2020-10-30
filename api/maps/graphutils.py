@@ -39,7 +39,7 @@ def cleanup_vertex(result, goblin_app):
     cleanup_values(result["label"], result["values"], goblin_app)
     result["eid"] = result["values"].pop(result["label"] + "_id")
     result.update(result.pop("values"))
-    if extra := result.pop("extra"):
+    if extra := result.pop("extra", None):
         cleanup_values("release", extra, goblin_app)
         for key, value in extra.items():
             if key.endswith("_id"):
@@ -47,8 +47,6 @@ def cleanup_vertex(result, goblin_app):
             elif key == "name":
                 key = f"release_{key}"
             result[key] = value
-    if "is_main_release" in result:
-        result["main"] = result.pop("is_main_release")
     if in_roles := sorted(result.pop("in_roles", {})):
         result["in_roles"] = in_roles
     if out_roles := sorted(result.pop("out_roles", {})):

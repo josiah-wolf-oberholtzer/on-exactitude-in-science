@@ -94,24 +94,24 @@ async def drop_edges(session, label, entity_id, timestamp=None, both=False, name
             await backoff(attempt)
 
 
-async def drop_properties(session, xml_entity, entity_map):
-    to_drop = {}
-    for key, desired in dataclasses.asdict(xml_entity).items():
+async def drop_properties(session, xml_entity, entity_map, **kwargs):
+    desired = {}
+    for key, desired_values in {**dataclasses.asdict(xml_entity), **kwargs}.items():
         if key not in entity_map:
             continue
         elif not isinstance(desired, (list, set)):
             continue
         elif sorted(desired) == sorted(entity_map[key]):
             continue
-        to_drop[key] = desired
-    if not to_drop:
+        desired[key] = desired_values
+    if not desired:
         return
     label = type(xml_entity).__name__.lower()
     for attempt in range(10):
         traversal = session.g.V().has(label, f"{label}_id", xml_entity.entity_id)
-        for key, desired in sorted(to_drop.items()):
+        for key, desired_values in sorted(desired.items()):
             traversal = traversal.sideEffect(
-                __.properties(key).hasValue(P.without(*desired)).drop()
+                __.properties(key).hasValue(P.without(*desired_values)).drop()
             )
         traversal = traversal.id()
         try:
@@ -394,8 +394,24 @@ async def load_release_vertex_and_edges(
     await drop_properties(session, xml_release, entity_map)
     cache["release", xml_release.entity_id] = entity_map[T.id]
     for xml_track in xml_release.tracks:
-        entity_map = await upsert_vertex(session, xml_track, primacy=primacy)
-        await drop_properties(session, xml_track, entity_map)
+        entity_map = await upsert_vertex(
+            session,
+            xml_track,
+            country=xml_release.country,
+            formats=xml_release.formats,
+            genres=xml_release.genres,
+            primacy=primacy,
+            styles=xml_release.styles,
+            year=xml_release.year,
+        )
+        await drop_properties(
+            session,
+            xml_track,
+            entity_map,
+            formats=xml_release.formats,
+            genres=xml_release.genres,
+            styles=xml_release.styles,
+        )
         cache["track", xml_track.entity_id] = entity_map[T.id]
     for xml_artist in xml_release.artists:
         source_tuple = "artist", xml_artist.entity_id
@@ -644,8 +660,6 @@ async def upsert_edge(
             .property("last_modified", datetime.datetime.now())
             .property("name", name)
             .property("primacy", primacy)
-            .property("source_label", source_label)
-            .property("target_label", target_label)
             .select("source", "target")
             .by(__.id())
         )

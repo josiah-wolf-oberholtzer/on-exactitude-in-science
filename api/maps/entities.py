@@ -68,10 +68,6 @@ class VertexLabelEnum(enum.IntEnum):
 
 class Relationship(goblin.Edge):
     __label__ = "relationship"
-    country = goblin.Property(goblin.String)
     last_modified = goblin.Property(goblin.Integer)
     name = goblin.Property(goblin.String)
     primacy = goblin.Property(goblin.Integer)
-    source_label = goblin.Property(goblin.Integer)
-    target_label = goblin.Property(goblin.Integer)
-    year = goblin.Property(goblin.Integer)
