@@ -96,12 +96,13 @@ async def drop_edges(session, label, entity_id, timestamp=None, both=False, name
 
 async def drop_properties(session, xml_entity, entity_map, **kwargs):
     desired = {}
-    for key, desired_values in {**dataclasses.asdict(xml_entity), **kwargs}.items():
+    search = {**dataclasses.asdict(xml_entity), **kwargs}
+    for key, desired_values in search.items():
         if key not in entity_map:
             continue
-        elif not isinstance(desired, (list, set)):
+        if not isinstance(desired_values, (list, set)):
             continue
-        elif sorted(desired) == sorted(entity_map[key]):
+        if sorted(desired_values) == sorted(entity_map[key]):
             continue
         desired[key] = desired_values
     if not desired:
@@ -609,7 +610,7 @@ async def upsert_vertex(session, xml_entity, **kwargs):
         **{
             key: value for key, value in kwargs.items()
             if value is not None
-        }
+        },
     }
     entity_key = f"{label}_id"
     for attempt in range(10):

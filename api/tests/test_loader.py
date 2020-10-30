@@ -156,14 +156,40 @@ async def test_load_release_vertex_properties(session):
     values_a = (
         await session.g.V().has("release", "release_id", entity_id).valueMap().next()
     )
+    values_aa = (
+        await session.g.V().has("track", "track_id", f"{entity_id}-A").valueMap().next()
+    )
+    values_ab = (
+        await session.g.V().has("track", "track_id", f"{entity_id}-B").valueMap().next()
+    )
     last_modified_a = values_a.pop("last_modified")[0]
     random_a = values_a.pop("random")[0]
+    values_aa.pop("last_modified")
+    values_ab.pop("last_modified")
+    values_aa.pop("random")
+    values_ab.pop("random")
     assert values_a == {
         "country": ["US"],
         "formats": ['12"', "EP", "33\xe2\x85\x93"],
         "name": ["Baz"],
         "primacy": [1],
         "release_id": [entity_id],
+    }
+    assert values_aa == {
+        "country": ["US"],
+        "formats": ['12"', "EP", "33\xe2\x85\x93"],
+        'name': ['Track A'],
+        'position': ['A'],
+        "primacy": [1],
+        'track_id': [f'{entity_id}-A'],
+    }
+    assert values_ab == {
+        "country": ["US"],
+        "formats": ['12"', "EP", "33\xe2\x85\x93"],
+        'name': ['Track B'],
+        'position': ['B'],
+        "primacy": [1],
+        'track_id': [f'{entity_id}-B'],
     }
 
     xml_release.name = "Baz 2"
@@ -173,8 +199,18 @@ async def test_load_release_vertex_properties(session):
     values_b = (
         await session.g.V().has("release", "release_id", entity_id).valueMap().next()
     )
+    values_ba = (
+        await session.g.V().has("track", "track_id", f"{entity_id}-A").valueMap().next()
+    )
+    values_bb = (
+        await session.g.V().has("track", "track_id", f"{entity_id}-B").valueMap().next()
+    )
     last_modified_b = values_b.pop("last_modified")[0]
     random_b = values_b.pop("random")[0]
+    values_ba.pop("last_modified")
+    values_bb.pop("last_modified")
+    values_ba.pop("random")
+    values_bb.pop("random")
     assert values_b == {
         "country": ["US"],
         "formats": ["EP", "Vinyl", "33⅓"],
@@ -184,3 +220,19 @@ async def test_load_release_vertex_properties(session):
     }
     assert random_b != random_a
     assert last_modified_b > last_modified_a
+    assert values_ba == {
+        "country": ["US"],
+        "formats": ["EP", "Vinyl", "33⅓"],
+        'name': ['Track A'],
+        'position': ['A'],
+        "primacy": [1],
+        'track_id': [f'{entity_id}-A'],
+    }
+    assert values_bb == {
+        "country": ["US"],
+        "formats": ["EP", "Vinyl", "33⅓"],
+        'name': ['Track B'],
+        'position': ['B'],
+        "primacy": [1],
+        'track_id': [f'{entity_id}-B'],
+    }
