@@ -135,6 +135,18 @@ async def test_load_release_vertex_properties(session):
         country="US",
         formats=['12"', "EP", "33\xe2\x85\x93"],
         name="Baz",
+        tracks=[
+            xml.Track(
+                entity_id=f"{entity_id}-A",
+                name="Track A",
+                position="A",
+            ),
+            xml.Track(
+                entity_id=f"{entity_id}-B",
+                name="Track B",
+                position="B",
+            ),
+        ],
     )
     assert (
         await session.g.V().has("release", "release_id", entity_id).count().next()

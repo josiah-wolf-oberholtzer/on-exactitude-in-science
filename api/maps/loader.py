@@ -606,7 +606,10 @@ async def upsert_vertex(session, xml_entity, **kwargs):
             for key, value in dataclasses.asdict(xml_entity).items()
             if hasattr(goblin_entity, key) and value is not None
         },
-        **kwargs,
+        **{
+            key: value for key, value in kwargs.items()
+            if value is not None
+        }
     }
     entity_key = f"{label}_id"
     for attempt in range(10):

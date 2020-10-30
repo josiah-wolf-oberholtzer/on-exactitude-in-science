@@ -119,7 +119,9 @@ def get_loop_traversal(
         __.order().range(offset, offset + 50),
         __.limit(10),
     )
-    return __.local(traversal).dedup().aggregate("edges").otherV().dedup().timeLimit(500)
+    return (
+        __.local(traversal).dedup().aggregate("edges").otherV().dedup().timeLimit(500)
+    )
 
 
 async def get_locality_query(
