@@ -1,12 +1,24 @@
 from collections import deque
 
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import Column, P
+from gremlin_python.process.traversal import P
 
 from maps.graphutils import cleanup_edge, cleanup_vertex
 
 
-def get_edge_projection():
+def get_locality_center_projection():
+    return (
+        __.cap("center")
+        .unfold()
+        .project("in_roles", "kind", "out_roles", "pageable_edge_count")
+        .by(__.inE("relationship").groupCount().by("name"))
+        .by(__.constant("center"))
+        .by(__.outE("relationship").groupCount().by("name"))
+        .by(__.cap("pageableEdges").unfold().count()),
+    )
+
+
+def get_locality_edge_projection():
     return (
         __.cap("filteredEdges")
         .unfold()
@@ -27,7 +39,7 @@ def get_edge_projection():
     )
 
 
-def get_vertex_projection():
+def get_locality_vertex_projection():
     return (
         __.cap("vertices")
         .unfold()
@@ -71,7 +83,7 @@ def get_primacy(labels, main_only):
     return primacy
 
 
-def get_loop_traversal(
+def get_locality_loop_traversal(
     countries=None,
     formats=None,
     genres=None,
@@ -124,7 +136,7 @@ def get_loop_traversal(
     )
 
 
-async def get_locality_query(
+async def get_locality_traversal(
     session,
     vertex_id,
     vertex_label=None,
@@ -146,7 +158,7 @@ async def get_locality_query(
     traversal = (
         traversal.aggregate("vertices")
         .repeat(
-            get_loop_traversal(
+            get_locality_loop_traversal(
                 labels=labels,
                 offset=offset,
                 main_only=main_only,
@@ -173,23 +185,9 @@ async def get_locality_query(
         .barrier(0)
         .inject(1)
         .union(
-            get_edge_projection(),
-            get_vertex_projection(),
-            __.cap("center")
-            .unfold()
-            .project("in_roles", "kind", "out_roles", "pageable_edge_count")
-            .by(
-                __.inE("relationship")
-                .groupCount()
-                .by("name")
-            )
-            .by(__.constant("center"))
-            .by(
-                __.outE("relationship")
-                .groupCount()
-                .by("name")
-            )
-            .by(__.cap("pageableEdges").unfold().count()),
+            get_locality_edge_projection(),
+            get_locality_vertex_projection(),
+            get_locality_center_projection(),
         )
     )
     return await traversal.toList()
@@ -211,7 +209,7 @@ async def get_locality(
     years=None,
 ):
     session = await goblin_app.session()
-    result = await get_locality_query(
+    result = await get_locality_traversal(
         session,
         vertex_id,
         vertex_label=vertex_label,

@@ -3,16 +3,6 @@ import json
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P
 
-roles_to_labels = {
-    "Alias Of": "alias_of",
-    "Includes": "includes",
-    "Member Of": "member_of",
-    "Released": "released",
-    "Released On": "released_on",
-    "Subsidiary Of": "subsidiary_of",
-    "Subrelease Of": "subrelease_of",
-}
-
 
 def cleanup_edge(result):
     result["id"] = result["id"]["@value"]["relationId"]
