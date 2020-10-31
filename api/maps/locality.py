@@ -1,7 +1,7 @@
 from collections import deque
 
 from aiogremlin.process.graph_traversal import __
-from gremlin_python.process.traversal import P
+from gremlin_python.process.traversal import Column, P
 
 from maps.graphutils import cleanup_edge, cleanup_vertex
 
@@ -116,7 +116,7 @@ def get_loop_traversal(
         traversal = traversal.where(other_traversal)
     traversal = traversal.choose(
         __.loops().is_(0),
-        __.order().range(offset, offset + 50),
+        __.aggregate("pageableEdges").order().range(offset, offset + 50),
         __.limit(10),
     )
     return (
@@ -142,7 +142,7 @@ async def get_locality_query(
     traversal = session.g.V(vertex_id)
     if vertex_label:
         traversal = session.g.V().has(vertex_label, f"{vertex_label}_id", vertex_id)
-    traversal = traversal
+    traversal = traversal.aggregate("center")
     traversal = (
         traversal.aggregate("vertices")
         .repeat(
@@ -172,7 +172,25 @@ async def get_locality_query(
         .aggregate("vertices")
         .barrier(0)
         .inject(1)
-        .union(get_edge_projection(), get_vertex_projection())
+        .union(
+            get_edge_projection(),
+            get_vertex_projection(),
+            __.cap("center")
+            .unfold()
+            .project("in_roles", "kind", "out_roles", "pageable_edge_count")
+            .by(
+                __.inE("relationship")
+                .groupCount()
+                .by("name")
+            )
+            .by(__.constant("center"))
+            .by(
+                __.outE("relationship")
+                .groupCount()
+                .by("name")
+            )
+            .by(__.cap("pageableEdges").unfold().count()),
+        )
     )
     return await traversal.toList()
 
@@ -216,13 +234,20 @@ async def get_locality(
 def cleanup_locality(goblin_app, vertex_id, vertex_label, result):
     edges = []
     vertices = {}
+    center = {}
     for x in result:
-        print(x)
-        if x.pop("kind") == "edge":
+        kind = x.pop("kind")
+        if kind == "edge":
             edges.append(cleanup_edge(x))
-        else:
+        elif kind == "vertex":
             vertex = cleanup_vertex(x, goblin_app)
             vertices[vertex["id"]] = vertex
+        elif kind == "center":
+            center = {
+                "in_roles": sorted(x["in_roles"]),
+                "out_roles": sorted(x["out_roles"]),
+                "pageable_edge_count": x["pageable_edge_count"],
+            }
     for vertex in vertices.values():
         if (
             vertex_label
@@ -230,8 +255,15 @@ def cleanup_locality(goblin_app, vertex_id, vertex_label, result):
             and vertex["eid"] == vertex_id
         ):
             vertex["depth"] = 0
+            vertex.update(center)
         elif vertex_label is None and vertex_id == vertex["id"]:
             vertex["depth"] = 0
+            vertex.update(center)
+    for edge in edges:
+        source = vertices[edge["source"]]
+        target = vertices[edge["target"]]
+        source["edge_count"] = source.get("edge_count", 0) + 1
+        target["edge_count"] = target.get("edge_count", 0) + 1
     edge_deque = deque(edges)
     maximum_depth = 1
     while edge_deque:

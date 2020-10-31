@@ -32,9 +32,7 @@ async def test_format_schema(goblin_app):
         primacy = mgmt.makePropertyKey('primacy').dataType(Integer.class).cardinality(SINGLE).make()
         random = mgmt.makePropertyKey('random').dataType(Float.class).cardinality(SINGLE).make()
         release_id = mgmt.makePropertyKey('release_id').dataType(Integer.class).cardinality(SINGLE).make()
-        source_label = mgmt.makePropertyKey('source_label').dataType(Integer.class).cardinality(SINGLE).make()
         styles = mgmt.makePropertyKey('styles').dataType(String.class).cardinality(SET).make()
-        target_label = mgmt.makePropertyKey('target_label').dataType(Integer.class).cardinality(SINGLE).make()
         track_id = mgmt.makePropertyKey('track_id').dataType(String.class).cardinality(SINGLE).make()
         videos = mgmt.makePropertyKey('videos').dataType(String.class).cardinality(SINGLE).make()
         year = mgmt.makePropertyKey('year').dataType(Integer.class).cardinality(SINGLE).make()
@@ -65,7 +63,7 @@ async def test_format_schema(goblin_app):
 
         // Vertex-Centric Indices
         mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_name', Direction.BOTH, Order.asc, name)
-        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, source_label, target_label, name)
+        mgmt.buildEdgeIndex(relationship, 'foo_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, name)
 
         mgmt.commit()
         """

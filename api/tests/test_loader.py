@@ -178,18 +178,18 @@ async def test_load_release_vertex_properties(session):
     assert values_aa == {
         "country": ["US"],
         "formats": ['12"', "EP", "33\xe2\x85\x93"],
-        'name': ['Track A'],
-        'position': ['A'],
+        "name": ["Track A"],
+        "position": ["A"],
         "primacy": [1],
-        'track_id': [f'{entity_id}-A'],
+        "track_id": [f"{entity_id}-A"],
     }
     assert values_ab == {
         "country": ["US"],
         "formats": ['12"', "EP", "33\xe2\x85\x93"],
-        'name': ['Track B'],
-        'position': ['B'],
+        "name": ["Track B"],
+        "position": ["B"],
         "primacy": [1],
-        'track_id': [f'{entity_id}-B'],
+        "track_id": [f"{entity_id}-B"],
     }
 
     xml_release.name = "Baz 2"
@@ -223,16 +223,16 @@ async def test_load_release_vertex_properties(session):
     assert values_ba == {
         "country": ["US"],
         "formats": ["EP", "Vinyl", "33⅓"],
-        'name': ['Track A'],
-        'position': ['A'],
+        "name": ["Track A"],
+        "position": ["A"],
         "primacy": [1],
-        'track_id': [f'{entity_id}-A'],
+        "track_id": [f"{entity_id}-A"],
     }
     assert values_bb == {
         "country": ["US"],
         "formats": ["EP", "Vinyl", "33⅓"],
-        'name': ['Track B'],
-        'position': ['B'],
+        "name": ["Track B"],
+        "position": ["B"],
         "primacy": [1],
-        'track_id': [f'{entity_id}-B'],
+        "track_id": [f"{entity_id}-B"],
     }
