@@ -69,7 +69,7 @@ async def test_search(api_client):
     json = await response.json()
     for entry in json["result"]:
         assert isinstance(entry["id"], int)
-        assert isinstance(entry["last_modified"], float)
+        assert isinstance(entry["last_modified"], str)
         assert isinstance(entry["random"], float)
         entry["id"] = ...
         entry["last_modified"] = ...
@@ -100,9 +100,9 @@ async def test_search(api_client):
                 "in_roles": ["Includes", "Released", "Remix"],
                 "label": "track",
                 "last_modified": ...,
-                "main": False,
                 "name": "When The Funk Hits The Fan (Mood II Swing When The Dub Hits The Fan)",
                 "position": "3",
+                "primacy": 2,
                 "random": ...,
                 "release_name": "Profound Sounds Vol. 1",
                 "styles": ["Tech House", "Techno"],
@@ -134,9 +134,9 @@ async def test_search(api_client):
                 "in_roles": ["Includes"],
                 "label": "track",
                 "last_modified": ...,
-                "main": True,
                 "name": "Mood Swing",
                 "position": "6",
+                "primacy": 1,
                 "random": ...,
                 "release_name": "World Receiver",
                 "styles": ["Ambient"],
@@ -173,7 +173,7 @@ async def test_search_by_label(api_client):
     json = await response.json()
     for entry in json["result"]:
         assert isinstance(entry["id"], int)
-        assert isinstance(entry["last_modified"], float)
+        assert isinstance(entry["last_modified"], str)
         assert isinstance(entry["random"], float)
         entry["id"] = ...
         entry["last_modified"] = ...
@@ -216,11 +216,11 @@ async def test_vertex_by_goblin_id(api_client):
             "genres": ["Electronic"],
             "id": id,
             "in_roles": ["Released"],
-            "main": True,
             "label": "release",
             "last_modified": last_modified,
             "name": "Stockholm",
             "out_roles": ["Includes", "Released On"],
+            "primacy": 1,
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
@@ -271,11 +271,11 @@ async def test_vertex_by_label(api_client):
             "genres": ["Electronic"],
             "id": id,
             "in_roles": ["Released"],
-            "main": True,
             "label": "release",
             "last_modified": last_modified,
             "name": "Stockholm",
             "out_roles": ["Includes", "Released On"],
+            "primacy": 1,
             "random": random,
             "styles": ["Deep House"],
             "total_edge_count": 8,
@@ -317,7 +317,7 @@ async def test_locality_by_label(api_client):
     json = await response.json()
     assert response.status == 200, json
     assert isinstance(json["result"]["center"].pop("id"), int)
-    assert isinstance(json["result"]["center"].pop("last_modified"), float)
+    assert isinstance(json["result"]["center"].pop("last_modified"), str)
     assert isinstance(json["result"]["center"].pop("random"), float)
     assert json["result"]["center"].pop("maximum_depth") >= 8
     assert json["result"]["center"] == {
@@ -330,10 +330,10 @@ async def test_locality_by_label(api_client):
         "genres": ["Electronic"],
         "in_roles": ["Released"],
         "label": "release",
-        "main": True,
         "name": "Stockholm",
         "out_roles": ["Includes", "Released On"],
         "pageable_edge_count": 8,
+        "primacy": 1,
         "styles": ["Deep House"],
         "total_edge_count": 8,
         "videos": [
@@ -364,7 +364,7 @@ async def test_locality_by_label(api_client):
         ],
         "year": 1999,
     }
-    assert len(json["result"]["edges"]) == 250
+    assert 100 <= len(json["result"]["edges"]) <= 250
     assert 100 <= len(json["result"]["vertices"]) <= 250
 
 

@@ -1,5 +1,5 @@
 DATASET_YEAR ?= 2020
-DATASET_MONTH ?= 06
+DATASET_MONTH ?= 10
 DATASET_DAY ?= 01
 DATASET_TIMESTAMP := ${DATASET_YEAR}${DATASET_MONTH}${DATASET_DAY}
 LIMIT ?= 10000
@@ -15,13 +15,16 @@ fetch-dataset:
 reset-janusgraph:
 	docker-compose stop
 	docker-compose rm -f
-	docker-compose up -d scylla elasticsearch janusgraph
+	docker-compose up --remove-orphans -d scylla elasticsearch janusgraph
 
 wait-for-janusgraph:
 	docker-compose run --rm janusgraph-healthcheck
 
 load-data: wait-for-janusgraph
 	time docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers ${WORKERS}
+
+load-data-profiled: wait-for-janusgraph
+	time docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers ${WORKERS} --profile
 
 load-schema: wait-for-janusgraph
 	docker-compose run --rm api python3 -m maps schema load

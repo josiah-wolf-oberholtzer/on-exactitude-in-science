@@ -104,10 +104,15 @@ def format_schema(goblin_app, graph_name="graph"):
             # Get data type
             mapped_data_type = DATA_TYPE_MAPPING[type(prop.data_type)]
             prop_key = PropertyKey(db_name, mapped_data_type, mapped_card)
+            if prop_key.name == "last_modified":
+                continue
             property_keys.add(
                 f"{prop_key.name} = mgmt.makePropertyKey('{prop_key.name}').dataType("
                 f"{prop_key.data_type}).cardinality({prop_key.card}).make()"
             )
+    property_keys.add(
+        "last_modified = mgmt.makePropertyKey('last_modified').dataType(Date.class).cardinality(SINGLE).make()"
+    )
     lines.extend(sorted(property_keys))
     lines.extend(
         [
@@ -126,18 +131,28 @@ def format_schema(goblin_app, graph_name="graph"):
         lines.append(
             f"{label} = mgmt.makeEdgeLabel('{label}').multiplicity(MULTI).make()"
         )
-    lines.extend(["", "// Indices"])
+    lines.extend(["", "// Vertex Indices"])
     for label, _ in sorted(goblin_app.vertices.items()):
         lines.append(
             f"mgmt.buildIndex('{graph_name}_by_{label}_id', Vertex.class).addKey({label}_id).indexOnly({label}).unique().buildCompositeIndex()"
-            # f"mgmt.buildIndex('{graph_name}_by_{label}_id', Vertex.class).addKey({label}_id).unique().buildCompositeIndex()"
         )
     lines.extend(
         [
-            f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(name).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_last_modified', Vertex.class).addKey(last_modified).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_artist_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(artist).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_company_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(company).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_release_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(release).buildMixedIndex('search')",
+            f"mgmt.buildIndex('{graph_name}_by_track_name', Vertex.class).addKey(name, Mapping.TEXTSTRING.asParameter()).indexOnly(track).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_page_rank', Vertex.class).addKey(page_rank).buildMixedIndex('search')",
             f"mgmt.buildIndex('{graph_name}_by_random', Vertex.class).addKey(random).buildMixedIndex('search')",
+        ]
+    )
+    lines.extend(["", "// Vertex-Centric Indices"])
+    lines.extend(
+        [
+            f"mgmt.buildEdgeIndex(relationship, '{graph_name}_by_relationship_name', Direction.BOTH, Order.asc, name)",
+            f"mgmt.buildEdgeIndex(relationship, '{graph_name}_by_relationship_primacy_name', Direction.BOTH, Order.asc, primacy, name)",
         ]
     )
     lines.extend(["", "mgmt.commit()"])

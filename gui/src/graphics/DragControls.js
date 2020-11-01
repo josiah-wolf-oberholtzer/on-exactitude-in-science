@@ -21,7 +21,6 @@ class DragControls {
     this.raycaster = new Raycaster();
     this.raycaster.params.Line.threshold = 0.25;
     this.selected = null;
-    this.transformGroup = false;
     this.worldPosition = new Vector3();
     this.activate();
   }
@@ -86,7 +85,14 @@ class DragControls {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
-      this.dragged = (this.transformGroup === true) ? this.objects[0] : this.intersections[0].object;
+      this.dragged = this.intersections[0].object;
+      /* eslint-disable-next-line no-restricted-syntax */
+      for (const intersection of this.intersections) {
+        if (intersection.object.parent.envelope.isVertex) {
+          this.dragged = intersection.object;
+          break;
+        }
+      }
       this.raycaster.ray.intersectPlane(this.plane, this.intersection);
       this.canvas.style.cursor = 'move';
       if (this.dragged !== this.selected) {
@@ -120,7 +126,14 @@ class DragControls {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
-      const { object } = this.intersections[0];
+      let { object } = this.intersections[0];
+      /* eslint-disable-next-line no-restricted-syntax */
+      for (const intersection of this.intersections) {
+        if (intersection.object.parent.envelope.isVertex) {
+          object = intersection.object;
+          break;
+        }
+      }
       this.plane.setFromNormalAndCoplanarPoint(
         this.camera.getWorldDirection(this.plane.normal),
         this.worldPosition.setFromMatrixPosition(object.matrixWorld),
@@ -172,7 +185,14 @@ class DragControls {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
-      this.dragged = (this.transformGroup === true) ? this.objects[0] : this.intersections[0].object;
+      this.dragged = this.intersections[0].object;
+      /* eslint-disable-next-line no-restricted-syntax */
+      for (const intersection of this.intersections) {
+        if (intersection.object.parent.envelope.isVertex) {
+          this.dragged = intersection.object;
+          break;
+        }
+      }
       this.plane.setFromNormalAndCoplanarPoint(
         this.camera.getWorldDirection(this.plane.normal),
         this.worldPosition.setFromMatrixPosition(this.dragged.matrixWorld),
@@ -207,14 +227,6 @@ class DragControls {
         this.dragged = null;
       }
     }
-  }
-
-  transformGroup(_) {
-    if (arguments.length > 0) {
-      this.transformGroup = _;
-      return this;
-    }
-    return this.transformGroup;
   }
 }
 

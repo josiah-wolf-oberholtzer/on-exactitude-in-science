@@ -36,7 +36,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: scylladb/scylla:4.1.3
+        image: scylladb/scylla:4.1.7
         args: ["--seeds", "scylla-0.scylla"]
         ports:
         - containerPort: 7000

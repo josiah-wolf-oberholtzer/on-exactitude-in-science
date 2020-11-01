@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.11.6
 WORKDIR /app
 RUN apk update \
     && apk add --no-cache --virtual .build-dependencies build-base libffi-dev musl-dev python3-dev \

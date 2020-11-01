@@ -1,4 +1,4 @@
-FROM alpine:3.11 as builder
+FROM alpine:3.11.6 as builder
 
 RUN apk update && apk add nodejs yarn
 COPY package.json .
