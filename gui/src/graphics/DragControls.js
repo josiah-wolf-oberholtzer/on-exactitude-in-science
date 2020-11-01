@@ -86,6 +86,7 @@ class DragControls {
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
       this.dragged = this.intersections[0].object;
+      /* eslint-disable-next-line no-restricted-syntax */
       for (const intersection of this.intersections) {
         if (intersection.object.parent.envelope.isVertex) {
           this.dragged = intersection.object;
@@ -126,6 +127,7 @@ class DragControls {
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
       let { object } = this.intersections[0];
+      /* eslint-disable-next-line no-restricted-syntax */
       for (const intersection of this.intersections) {
         if (intersection.object.parent.envelope.isVertex) {
           object = intersection.object;
@@ -184,6 +186,7 @@ class DragControls {
     this.raycaster.intersectObjects(this.objects, true, this.intersections);
     if (this.intersections.length > 0) {
       this.dragged = this.intersections[0].object;
+      /* eslint-disable-next-line no-restricted-syntax */
       for (const intersection of this.intersections) {
         if (intersection.object.parent.envelope.isVertex) {
           this.dragged = intersection.object;
@@ -225,7 +228,6 @@ class DragControls {
       }
     }
   }
-
 }
 
 export default DragControls;

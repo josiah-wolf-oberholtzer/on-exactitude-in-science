@@ -239,10 +239,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         masters=False,
     )
     with tqdm(
-        desc="Releases",
-        mininterval=0.25,
-        smoothing=0.01,
-        total=limits["releases"],
+        desc="Releases", mininterval=0.25, smoothing=0.01, total=limits["releases"],
     ) as progress_bar:
         tasks = [
             consume_vertices(

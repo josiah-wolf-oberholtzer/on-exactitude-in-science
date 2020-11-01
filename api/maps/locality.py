@@ -22,14 +22,7 @@ def get_locality_edge_projection():
     return (
         __.cap("filteredEdges")
         .unfold()
-        .project(
-            "id",
-            "kind",
-            "label",
-            "source",
-            "target",
-            "values",
-        )
+        .project("id", "kind", "label", "source", "target", "values")
         .by(__.id())
         .by(__.constant("edge"))
         .by(__.label())
@@ -44,14 +37,7 @@ def get_locality_vertex_projection():
         __.cap("vertices")
         .unfold()
         .dedup()
-        .project(
-            "id",
-            "kind",
-            "label",
-            "values",
-            "total_edge_count",
-            "child_count",
-        )
+        .project("id", "kind", "label", "values", "total_edge_count", "child_count")
         .by(__.id())
         .by(__.constant("vertex"))
         .by(__.label())
@@ -172,8 +158,7 @@ async def get_locality_traversal(
         )
         .until(
             __.or_(
-                __.cap("edges").unfold().count().is_(P.gt(limit)),
-                __.loops().is_(10),
+                __.cap("edges").unfold().count().is_(P.gt(limit)), __.loops().is_(10),
             )
         )
         .cap("edges")
