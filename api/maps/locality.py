@@ -65,9 +65,9 @@ def get_locality_vertex_projection():
     )
 
 
-def get_primacy(labels, main_only):
+def get_primacy(labels, main_releases_only):
     primacy = (0, 1, 2)
-    if main_only:
+    if main_releases_only:
         primacy = (0, 1)
     if labels:
         if "Track" not in labels and "Release" not in labels:
@@ -78,7 +78,7 @@ def get_primacy(labels, main_only):
             and "Master" not in labels
         ):
             primacy = (1, 2)
-            if main_only:
+            if main_releases_only:
                 primacy = (1,)
     return primacy
 
@@ -89,12 +89,12 @@ def get_locality_loop_traversal(
     genres=None,
     styles=None,
     labels=None,
-    main_only=True,
+    main_releases_only=True,
     offset=0,
     roles=None,
     years=None,
 ):
-    primacy = get_primacy(labels, main_only)
+    primacy = get_primacy(labels, main_releases_only)
     traversal = __.bothE("relationship").dedup().has("primacy", P.within(*primacy))
     if roles:
         traversal = traversal.has("name", P.within(*roles))
@@ -146,7 +146,7 @@ async def get_locality_traversal(
     formats=None,
     genres=None,
     labels=None,
-    main_only=True,
+    main_releases_only=True,
     roles=None,
     styles=None,
     years=None,
@@ -161,7 +161,7 @@ async def get_locality_traversal(
             get_locality_loop_traversal(
                 labels=labels,
                 offset=offset,
-                main_only=main_only,
+                main_releases_only=main_releases_only,
                 roles=roles,
                 countries=countries,
                 formats=formats,
@@ -203,7 +203,7 @@ async def get_locality(
     formats=None,
     genres=None,
     labels=None,
-    main_only=True,
+    main_releases_only=True,
     roles=None,
     styles=None,
     years=None,
@@ -219,7 +219,7 @@ async def get_locality(
         formats=formats,
         genres=genres,
         labels=labels,
-        main_only=main_only,
+        main_releases_only=main_releases_only,
         roles=roles,
         styles=styles,
         years=years,

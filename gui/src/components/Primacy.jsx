@@ -28,7 +28,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const SidebarSectionMainReleases = (props) => {
+const Primacy = (props) => {
   const location = useLocation();
   return (
     <ListItem button onClick={() => { props.pushChecked(location, !props.checked) }}>
@@ -38,4 +38,4 @@ const SidebarSectionMainReleases = (props) => {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SidebarSectionMainReleases);
+export default connect(mapStateToProps, mapDispatchToProps)(Primacy);

@@ -7,6 +7,7 @@ import Genres from './Genres';
 import GraphSize from './GraphSize';
 import Labels from './Labels';
 import Pagination from './Pagination';
+import Primacy from './Primacy';
 import Roles from './Roles';
 import Styles from './Styles';
 import Years from './Years';
@@ -47,14 +48,15 @@ const Sidebar = (props) => {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
+          <Countries />
+          <Formats />
+          <Genres />
           <Labels />
           <Roles />
-          <Years />
-          <Formats />
           <Styles />
-          <Genres />
-          <Countries />
+          <Years />
           <GraphSize />
+          <Primacy />
           <Divider />
           <Pagination />
         </List>
