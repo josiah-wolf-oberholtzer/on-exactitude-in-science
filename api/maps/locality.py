@@ -14,7 +14,7 @@ def get_locality_center_projection():
         .by(__.inE("relationship").groupCount().by("name"))
         .by(__.constant("center"))
         .by(__.outE("relationship").groupCount().by("name"))
-        .by(__.cap("pageableEdges").unfold().count()),
+        .by(__.cap("pageableEdges").unfold().count())
     )
 
 

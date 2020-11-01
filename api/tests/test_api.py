@@ -364,7 +364,7 @@ async def test_locality_by_label(api_client):
         ],
         "year": 1999,
     }
-    assert len(json["result"]["edges"]) == 250
+    assert 100 <= len(json["result"]["edges"]) <= 250
     assert 100 <= len(json["result"]["vertices"]) <= 250
 
 
