@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set IMAGE_TAG
-      run: echo "::set-env name=IMAGE_TAG::sha-$(git rev-parse --short ${{ github.sha }})"
+      run: echo "IMAGE_TAG=sha-$(git rev-parse --short ${{ github.sha }}) >> $GITHUB_ENV"
     - name: Set up kubectl
       uses: matootie/dokube@v1.3.2
       with:
