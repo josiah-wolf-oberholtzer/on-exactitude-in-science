@@ -213,7 +213,7 @@ async def load(
         desc="Artist/Company/Master Vertices",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=0.25,
+        mininterval=1.0,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"] + limits["masters"],
     ) as progress_bar:
@@ -240,7 +240,7 @@ async def load(
         desc="Artist/Company Edges",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=0.25,
+        mininterval=1.0,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"],
     ) as progress_bar:
@@ -268,7 +268,7 @@ async def load(
         desc="Releases",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=0.25,
+        mininterval=1.0,
         smoothing=0.01,
         total=limits["releases"],
     ) as progress_bar:
