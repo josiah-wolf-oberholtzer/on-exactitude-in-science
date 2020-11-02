@@ -171,19 +171,15 @@ async def load(
         limits.update(artists=limit, companies=limit, masters=limit, releases=limit)
     else:
         logger.info("Calculating dataset lengths ...")
+        artist_count = xml.count_xml_path(path, "artist")
+        company_count = xml.count_xml_path(path, "label")
+        master_count = xml.count_xml_path(path, "master")
+        release_count = xml.count_xml_path(path, "release")
         limits.update(
-            artists=sum(
-                1 for x in xml.iterate_xml(xml.get_xml_path(path, "artist"), "artist")
-            ),
-            companies=sum(
-                1 for x in xml.iterate_xml(xml.get_xml_path(path, "label"), "label")
-            ),
-            masters=sum(
-                1 for x in xml.iterate_xml(xml.get_xml_path(path, "master"), "master")
-            ),
-            releases=sum(
-                1 for x in xml.iterate_xml(xml.get_xml_path(path, "release"), "release")
-            ),
+            artists=artist_count,
+            companies=company_count,
+            masters=master_count,
+            releases=release_count,
         )
     # Load artist, company, and master vertices.
     iterator = producer(

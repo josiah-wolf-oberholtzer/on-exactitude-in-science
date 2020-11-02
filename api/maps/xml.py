@@ -9,6 +9,8 @@ from typing import IO, Any, Generator, List, Optional, Set, cast
 from xml.dom import minidom
 from xml.etree import cElementTree as ElementTree
 
+from tqdm import tqdm
+
 date_regex = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 date_no_dashes_regex = re.compile(r"^(\d{4})(\d{2})(\d{2})$")
 year_regex = re.compile(r"^\d\d\d\d$")
@@ -103,6 +105,15 @@ def iterate_xml(xml_path: Path, tag: str):
                 if depth == 0:
                     yield element
                     root.clear()
+
+
+def count_xml_path(directory_path: Path, tag: str):
+    count = 0
+    with tqdm(desc=f"Counting {tag} elements", total=None) as progress_bar:
+        for _ in iterate_xml(get_xml_path(directory_path, tag), tag):
+            count += 1
+            progress_bar.update(1)
+    return count
 
 
 def prettify(element):
