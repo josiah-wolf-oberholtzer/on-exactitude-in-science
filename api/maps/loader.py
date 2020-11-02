@@ -11,9 +11,9 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import Cardinality, P, T, WithOptions
-from tqdm import tqdm
 
 from maps import entities, goblin, xml
+from maps.k8s import TQDMK8S
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ async def drop_vertices(goblin_app, timestamp):
     logger.info(f"Found {total} stale vertices to drop.")
     if not total:
         return
-    with tqdm(
+    with TQDMK8S(
         desc="Purging Old Vertices", dynamic_ncols=True, file=sys.stdout, total=None,
     ) as progress_bar:
         batch = 100
@@ -188,7 +188,7 @@ async def load(
     iterator = producer(
         path, consumer_count=consumer_count, limit=limit, releases=False
     )
-    with tqdm(
+    with TQDMK8S(
         desc="Artist/Company/Master Vertices",
         dynamic_ncols=True,
         file=sys.stdout,
@@ -215,7 +215,7 @@ async def load(
         masters=False,
         releases=False,
     )
-    with tqdm(
+    with TQDMK8S(
         desc="Artist/Company Edges",
         dynamic_ncols=True,
         file=sys.stdout,
@@ -243,7 +243,7 @@ async def load(
         companies=False,
         masters=False,
     )
-    with tqdm(
+    with TQDMK8S(
         desc="Releases",
         dynamic_ncols=True,
         file=sys.stdout,

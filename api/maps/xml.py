@@ -10,7 +10,7 @@ from typing import IO, Any, Generator, List, Optional, Set, cast
 from xml.dom import minidom
 from xml.etree import cElementTree as ElementTree
 
-from tqdm import tqdm
+from maps.k8s import TQDMK8S
 
 date_regex = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 date_no_dashes_regex = re.compile(r"^(\d{4})(\d{2})(\d{2})$")
@@ -110,9 +110,8 @@ def iterate_xml(xml_path: Path, tag: str):
 
 def count_xml_path(directory_path: Path, tag: str):
     count = 0
-    with tqdm(
+    with TQDMK8S(
         desc=f"Counting {tag} elements",
-        dynamic_ncols=True,
         file=sys.stdout,
         total=None,
     ) as progress_bar:

@@ -23,6 +23,9 @@ wait-for-janusgraph:
 load-data: wait-for-janusgraph
 	time docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers ${WORKERS}
 
+load-data-unlimited: wait-for-janusgraph
+	time docker-compose run --rm api python3 -m maps data load --workers ${WORKERS}
+
 load-data-profiled: wait-for-janusgraph
 	time docker-compose run --rm api python3 -m maps data load --limit ${LIMIT} --workers ${WORKERS} --profile
 
