@@ -16,14 +16,21 @@ spec:
           value: "10"
         - name: DATASET_DAY
           value: "01"
+        - name: SKIP_DOWNLOADING
+          value: "true"
         command:
         - /run.sh
         volumeMounts:
+        - mountPath: /data
+          name: data
         - mountPath: /run.sh
           name: data-loader-script
           subPath: run.sh
       restartPolicy: Never
       volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data-loader-data-pvc
       - name: data-loader-script
         configMap:
           defaultMode: 0777
