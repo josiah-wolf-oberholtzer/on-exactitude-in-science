@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: loader
+  name: data-loader-script
 data:
-  load.sh: |
+  run.sh: |
     #!/bin/sh
     set -x
     DATASET_PATH="/data"

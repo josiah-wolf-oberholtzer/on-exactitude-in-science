@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: loader
+  name: data-loader
 spec:
   template:
     spec:
       containers:
-      - name: loader
+      - name: data-loader
         image: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
         env:
         - name: DATASET_YEAR
@@ -16,15 +16,15 @@ spec:
         - name: DATASET_DAY
           value: "01"
         command:
-        - /load.sh
+        - /run.sh
         volumeMounts:
-        - mountPath: /load.sh
-          name: loader-data
-          subPath: load.sh
+        - mountPath: /run.sh
+          name: data-loader-script
+          subPath: run.sh
       restartPolicy: Never
       volumes:
-      - name: loader-data
+      - name: data-loader-script
         configMap:
           defaultMode: 0777
-          name: loader
+          name: data-loader-script
   backoffLimit: 0
