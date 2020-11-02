@@ -36,6 +36,8 @@ spec:
           value: cql-es
         - name: gremlinserver.channelizer
           value: org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer
+        - name: gremlinserver.gremlinPool
+          value: "16"
         - name: janusgraph.index.search.hostname
           value: elasticsearch
         - name: janusgraph.query.force-index
