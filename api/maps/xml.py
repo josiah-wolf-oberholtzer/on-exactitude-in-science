@@ -2,6 +2,7 @@ import datetime
 import gzip
 import json
 import re
+import sys
 import traceback
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -109,7 +110,12 @@ def iterate_xml(xml_path: Path, tag: str):
 
 def count_xml_path(directory_path: Path, tag: str):
     count = 0
-    with tqdm(desc=f"Counting {tag} elements", total=None) as progress_bar:
+    with tqdm(
+        desc=f"Counting {tag} elements",
+        dynamic_ncols=True,
+        file=sys.stdout,
+        total=None,
+    ) as progress_bar:
         for _ in iterate_xml(get_xml_path(directory_path, tag), tag):
             count += 1
             progress_bar.update(1)

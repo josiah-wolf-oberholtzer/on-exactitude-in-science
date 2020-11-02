@@ -16,7 +16,7 @@ data:
         https://discogs-data.s3-us-west-2.amazonaws.com/data/${DATASET_YEAR}/discogs_${DATASET_TIMESTAMP}_${label}.xml.gz;
     done;
     if [ -z "${LIMIT}" ]; then
-      python3 -m maps data load --path ${DATASET_PATH} --workers 8
+      python3 -m maps data load --path ${DATASET_PATH} --workers 16
     else 
-      python3 -m maps data load --limit ${LIMIT} --path ${DATASET_PATH} --workers 8
+      python3 -m maps data load --limit ${LIMIT} --path ${DATASET_PATH} --workers 16
     fi

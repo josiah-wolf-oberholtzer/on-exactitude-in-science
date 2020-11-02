@@ -8,6 +8,7 @@ spec:
       containers:
       - name: data-loader
         image: josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+        imagePullPolicy: Always
         env:
         - name: DATASET_YEAR
           value: "2020"

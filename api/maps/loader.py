@@ -3,6 +3,7 @@ import dataclasses
 import datetime
 import logging
 import random
+import sys
 import traceback
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
@@ -134,7 +135,9 @@ async def drop_vertices(goblin_app, timestamp):
     logger.info(f"Found {total} stale vertices to drop.")
     if not total:
         return
-    with tqdm(desc="Purging Old Vertices", total=None) as progress_bar:
+    with tqdm(
+        desc="Purging Old Vertices", dynamic_ncols=True, file=sys.stdout, total=None,
+    ) as progress_bar:
         batch = 100
         dropped = 1
         while dropped:
@@ -187,6 +190,8 @@ async def load(
     )
     with tqdm(
         desc="Artist/Company/Master Vertices",
+        dynamic_ncols=True,
+        file=sys.stdout,
         mininterval=0.25,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"] + limits["masters"],
@@ -212,6 +217,8 @@ async def load(
     )
     with tqdm(
         desc="Artist/Company Edges",
+        dynamic_ncols=True,
+        file=sys.stdout,
         mininterval=0.25,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"],
@@ -237,7 +244,12 @@ async def load(
         masters=False,
     )
     with tqdm(
-        desc="Releases", mininterval=0.25, smoothing=0.01, total=limits["releases"],
+        desc="Releases",
+        dynamic_ncols=True,
+        file=sys.stdout,
+        mininterval=0.25,
+        smoothing=0.01,
+        total=limits["releases"],
     ) as progress_bar:
         tasks = [
             consume_vertices(
