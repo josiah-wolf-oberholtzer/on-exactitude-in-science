@@ -1,8 +1,8 @@
 FROM alpine:3.11.6
 WORKDIR /app
 RUN apk update \
-    && apk add --no-cache --virtual .build-dependencies build-base libffi-dev musl-dev python3-dev \
-    && apk add --no-cache --virtual .runtime-dependencies curl git jq make python3
+    && apk add --no-cache --virtual .build-dependencies build-base libffi-dev libxslt-dev musl-dev python3-dev \
+    && apk add --no-cache --virtual .runtime-dependencies curl git jq libxslt make python3
 COPY requirements*.txt /app/
 RUN python3 -m ensurepip \
     && pip3 install -U pip \
