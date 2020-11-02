@@ -5,7 +5,7 @@ import logging
 import random
 import traceback
 from pathlib import Path
-from typing import Any, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
@@ -154,7 +154,9 @@ async def drop_vertices(goblin_app, timestamp):
             progress_bar.update(1)
 
 
-async def load(goblin_app, path, consumer_count=1, limit=None):
+async def load(
+    goblin_app, path: Path, consumer_count: int = 1, limit: Optional[int] = None
+):
     """
     Update graph from Discogs .xml.gz files.
 
@@ -164,7 +166,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
     """
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
-    limits = {}
+    limits: Dict[str, int] = {}
     if limit:
         limits.update(artists=limit, companies=limit, masters=limit, releases=limit)
     else:
@@ -185,7 +187,7 @@ async def load(goblin_app, path, consumer_count=1, limit=None):
         )
     # Load artist, company, and master vertices.
     iterator = producer(
-        Path(path), consumer_count=consumer_count, limit=limit, releases=False
+        path, consumer_count=consumer_count, limit=limit, releases=False
     )
     with tqdm(
         desc="Artist/Company/Master Vertices",
