@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import IO, Any, Generator, List, Optional, Set, cast
 from xml.dom import minidom
+
 from lxml.etree import ElementTree, iterparse
 
 from maps.k8s import TQDMK8S
@@ -90,9 +91,7 @@ def get_xml_path(directory_path: Path, tag: str):
 
 def iterate_xml(xml_path: Path, tag: str):
     with gzip.GzipFile(xml_path, "r") as gzip_file:
-        context = iterparse(
-            cast(IO[Any], gzip_file), events=["start", "end"]
-        )
+        context = iterparse(cast(IO[Any], gzip_file), events=["start", "end"])
         context = iter(context)
         _, root = next(context)
         depth = 0
@@ -111,10 +110,7 @@ def iterate_xml(xml_path: Path, tag: str):
 def count_xml_path(directory_path: Path, tag: str):
     count = 0
     with TQDMK8S(
-        desc=f"Counting {tag} elements",
-        file=sys.stdout,
-        mininterval=0.25,
-        total=None,
+        desc=f"Counting {tag} elements", file=sys.stdout, mininterval=0.25, total=None,
     ) as progress_bar:
         for _ in iterate_xml(get_xml_path(directory_path, tag), tag):
             count += 1
