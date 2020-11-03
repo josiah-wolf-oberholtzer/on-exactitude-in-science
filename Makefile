@@ -45,3 +45,6 @@ gremlin-docker:
 
 gremlin-kubectl:
 	kubectl exec -tic janusgraph $$(kubectl get pods --selector=app=janusgraph -o jsonpath="{.items[0].metadata.name}") -- ./bin/gremlin.sh
+
+graphana:
+	kubectl port-forward `kubectl get -n prometheus-operator pods -l app.kubernetes.io/name=grafana -o jsonpath='{.items[0].metadata.name}'` -n prometheus-operator 8080:3000
