@@ -1,12 +1,13 @@
 import asyncio
 import dataclasses
 import datetime
+import json
 import logging
 import random
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Generator, List, Optional, Tuple
 
 from aiogremlin.exception import GremlinServerError
 from aiogremlin.process.graph_traversal import __
@@ -157,6 +158,39 @@ async def drop_vertices(goblin_app, timestamp):
             progress_bar.update(1)
 
 
+async def find_limit(directory_path, tag):
+    xml_path = xml.get_xml_path(directory_path, tag)
+    cache_path = xml_path.with_suffix("").with_suffix(".json")
+    if cache_path.exists():
+        return json.loads(cache_path.read_text())["count"]
+    count = 0
+    with TQDMK8S(
+        desc=f"Counting {tag} elements", file=sys.stdout, mininterval=0.25, total=None,
+    ) as progress_bar:
+        for _ in xml.iterate_xml(xml_path, tag):
+            count += 1
+            progress_bar.update(1)
+    cache_path.write_text(json.dumps({"count": count}))
+    return count
+
+
+def find_limits(path, limit: Optional[int] = None):
+    if limit:
+        return {
+            "artists": limit,
+            "companies": limit,
+            "masters": limit,
+            "releases": limit,
+        }
+    logger.info("Calculating dataset lengths ...")
+    return {
+        "artists": find_limit(path, "artist"),
+        "companies": find_limit(path, "label"),
+        "masters": find_limit(path, "master"),
+        "releases": find_limit(path, "release"),
+    }
+
+
 async def load(
     goblin_app, path: Path, consumer_count: int = 1, limit: Optional[int] = None
 ):
@@ -169,21 +203,8 @@ async def load(
     """
     logger.info("Loading data ...")
     start_date = datetime.datetime.now()
-    limits: Dict[str, int] = {}
-    if limit:
-        limits.update(artists=limit, companies=limit, masters=limit, releases=limit)
-    else:
-        logger.info("Calculating dataset lengths ...")
-        artist_count = xml.count_xml_path(path, "artist")
-        company_count = xml.count_xml_path(path, "label")
-        master_count = xml.count_xml_path(path, "master")
-        release_count = xml.count_xml_path(path, "release")
-        limits.update(
-            artists=artist_count,
-            companies=company_count,
-            masters=master_count,
-            releases=release_count,
-        )
+    # Calculate limits for TQDM
+    limits = find_limits(path, limit=limit)
     # Load artist, company, and master vertices.
     iterator = producer(
         path, consumer_count=consumer_count, limit=limit, releases=False
