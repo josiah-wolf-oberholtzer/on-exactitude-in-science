@@ -54,10 +54,6 @@ spec:
             path: /_cluster/health?local=true
             port: 9200
           initialDelaySeconds: 15
-        resources:
-          requests:
-            cpu: 4000m
-            memory: 4Gi
         volumeMounts:
         - name: elasticsearch-data
           mountPath: /usr/share/elasticsearch/data

@@ -55,7 +55,3 @@ spec:
           periodSeconds: 30
         ports:
         - containerPort: 8182
-        resources:
-          requests:
-            cpu: 4000m
-            memory: 4Gi
