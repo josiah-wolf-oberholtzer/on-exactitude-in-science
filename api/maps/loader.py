@@ -158,7 +158,7 @@ async def drop_vertices(goblin_app, timestamp):
             progress_bar.update(1)
 
 
-async def find_limit(directory_path, tag):
+def find_limit(directory_path, tag):
     xml_path = xml.get_xml_path(directory_path, tag)
     cache_path = xml_path.with_suffix("").with_suffix(".json")
     if cache_path.exists():
