@@ -46,5 +46,23 @@ gremlin-docker:
 gremlin-kubectl:
 	kubectl exec -tic janusgraph $$(kubectl get pods --selector=app=janusgraph -o jsonpath="{.items[0].metadata.name}") -- ./bin/gremlin.sh
 
+data-loader-logs:
+	kubectl logs --follow --tail 10 jobs/data-loader
+
+elasticsearch-df:
+	kubectl exec -c elasticsearch elasticsearch-0 -- df
+	kubectl exec -c elasticsearch elasticsearch-1 -- df
+	kubectl exec -c elasticsearch elasticsearch-2 -- df
+
 graphana:
 	kubectl port-forward `kubectl get -n prometheus-operator pods -l app.kubernetes.io/name=grafana -o jsonpath='{.items[0].metadata.name}'` -n prometheus-operator 8080:3000
+
+scylla-df:
+	kubectl exec -c scylla scylla-0 -- df
+	kubectl exec -c scylla scylla-1 -- df
+	kubectl exec -c scylla scylla-2 -- df
+
+scylla-nodetool-status:
+	kubectl exec -c scylla scylla-0 -- nodetool status
+	kubectl exec -c scylla scylla-1 -- nodetool status
+	kubectl exec -c scylla scylla-2 -- nodetool status
