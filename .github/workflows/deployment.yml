@@ -62,6 +62,8 @@ jobs:
     - name: Set image tags
       working-directory: ./kubernetes
       run: |
+        echo ${GITHUB_SHA}
+        echo ${IMAGE_TAG}
         kustomize edit set image ${API_IMAGE}=${API_IMAGE}:${IMAGE_TAG}
         kustomize edit set image ${GUI_IMAGE}=${GUI_IMAGE}:${IMAGE_TAG}
     - name: Debug
