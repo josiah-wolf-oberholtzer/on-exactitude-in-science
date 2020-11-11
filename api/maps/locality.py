@@ -86,7 +86,12 @@ def get_locality_loop_traversal(
     years=None,
 ):
     primacy = get_primacy(labels, main_releases_only)
-    traversal = __.bothE("relationship").dedup().has("primacy", P.within(*primacy))
+    traversal = (
+        __.timeLimit(1000)
+        .bothE("relationship")
+        .dedup()
+        .has("primacy", P.within(*primacy))
+    )
     if roles:
         traversal = traversal.has("name", P.within(*roles))
     other_traversal = __.otherV()
@@ -130,9 +135,7 @@ def get_locality_loop_traversal(
         __.aggregate("pageableEdges").order().range(offset, offset + 50),
         __.limit(10),
     )
-    return (
-        __.local(traversal).dedup().aggregate("edges").otherV().dedup().timeLimit(500)
-    )
+    return __.local(traversal).dedup().aggregate("edges").otherV().dedup()
 
 
 async def get_locality_traversal(
