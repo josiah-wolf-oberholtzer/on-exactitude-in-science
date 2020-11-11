@@ -49,8 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set IMAGE_TAG
-      run: echo "IMAGE_TAG=sha-$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
     - name: Set up kubectl
       uses: matootie/dokube@v1.3.3
       with:
@@ -59,11 +57,11 @@ jobs:
     - uses: imranismail/setup-kustomize@v1.5.2
       with:
         kustomize-version: "3.8.1"
+    - name: Set IMAGE_TAG
+      run: echo "IMAGE_TAG=sha-$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
     - name: Set image tags
       working-directory: ./kubernetes
       run: |
-        echo ${GITHUB_SHA}
-        echo ${IMAGE_TAG}
         kustomize edit set image ${API_IMAGE}=${API_IMAGE}:${IMAGE_TAG}
         kustomize edit set image ${GUI_IMAGE}=${GUI_IMAGE}:${IMAGE_TAG}
     - name: Debug
