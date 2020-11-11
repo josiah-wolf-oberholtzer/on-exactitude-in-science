@@ -40,7 +40,7 @@ class Edge {
     return { startColor, endColor };
   }
 
-  enter(graphManager, newData, newLineManager) {
+  enter(graphManager, newData) {
     this.graphManager = graphManager;
     this.graphManager.addToLineManager(this);
     this.graphManager.addToControls(this.line);

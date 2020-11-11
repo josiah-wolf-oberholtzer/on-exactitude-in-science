@@ -11,7 +11,7 @@ const youtubeSlice = createSlice({
     selectYouTubeIndex(state, action) {
       state.index = action.payload;
     },
-    closeYouTubeModal(state, action) {
+    closeYouTubeModal(state) {
       state.open = false;
     },
     openYouTubeModal(state, action) {
@@ -19,7 +19,7 @@ const youtubeSlice = createSlice({
       state.videos = action.payload || [];
     },
   },
-})
+});
 
 const { selectYouTubeIndex, openYouTubeModal, closeYouTubeModal } = youtubeSlice.actions;
 
