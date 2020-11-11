@@ -15,6 +15,7 @@ const youtubeSlice = createSlice({
       state.open = false;
     },
     openYouTubeModal(state, action) {
+      state.index = 0;
       state.open = true;
       state.videos = action.payload || [];
     },
