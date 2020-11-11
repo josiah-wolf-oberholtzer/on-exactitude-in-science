@@ -107,6 +107,7 @@ async def get_locality(request):
         vertex_id,
         countries=request.query.getall("countries[]", []),
         formats=request.query.getall("formats[]", []),
+        formats_op=request.query.get("formatsOp", "or"),
         genres=request.query.getall("genres[]", []),
         labels=request.query.getall("labels[]", []),
         limit=limit,
@@ -114,6 +115,7 @@ async def get_locality(request):
         offset=offset,
         roles=request.query.getall("roles[]", []),
         styles=request.query.getall("styles[]", []),
+        styles_op=request.query.get("stylesOp", "or"),
         vertex_label=vertex_label,
         years=request.query.getall("years[]", []),
     )
