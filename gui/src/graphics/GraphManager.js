@@ -196,7 +196,7 @@ class GraphManager {
   }
 
   removeFromLineManager(edge) {
-    this.lineManager.remove(this);
+    this.lineManager.remove(edge);
   }
 
   removeFromOutlines(mesh) {
