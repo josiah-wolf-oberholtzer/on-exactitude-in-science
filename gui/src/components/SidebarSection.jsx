@@ -5,14 +5,13 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MoreIcon from '@material-ui/icons/More';
 import StarRateIcon from '@material-ui/icons/StarRate';
-import { connect } from 'react-redux';
 import { Badge, Button, Chip, Collapse, Divider, IconButton, ListItem, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
+import { connect } from 'react-redux';
 import { highlight, unhighlight } from '../slices/highlightedSlice';
+import { push } from 'connected-react-router';
+import { queryObjectToString, queryStringToObject } from '../utils';
 import { toggleSidebarSection } from '../slices/layoutSlice';
 import { useLocation } from "react-router-dom";
-import { push } from 'connected-react-router';
-import * as QueryString from 'query-string';
-import { queryObjectToString, queryStringToObject } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
   chips: {
@@ -157,14 +156,6 @@ const SidebarSection = (props) => {
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto">
-        { props.children &&
-          <React.Fragment>
-            <Divider />
-            <div className={classes.chips}>
-            { props.children }
-            </div>
-          </React.Fragment>
-        }
         { filteredChips.length > 0 &&
           <React.Fragment>
             <Divider />
@@ -194,6 +185,15 @@ const SidebarSection = (props) => {
             </div>
           </React.Fragment>
         }
+        { props.children &&
+          <React.Fragment>
+            <Divider />
+            <div className={classes.chips}>
+            { props.children }
+            </div>
+          </React.Fragment>
+        }
+        <Divider />
       </Collapse>
     </React.Fragment>
   )

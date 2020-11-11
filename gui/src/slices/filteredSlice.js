@@ -11,10 +11,12 @@ const filteredSlice = createSlice({
     showSecondaryReleases: false,
     countries: [],
     formats: [],
+    formatsOp: 'or',
     genres: [],
     labels: [],
     roles: [],
     styles: [],
+    stylesOp: 'or',
     years: [],
   },
   reducers: {
@@ -23,6 +25,8 @@ const filteredSlice = createSlice({
         const names = new Set(action.payload[category] || []);
         state[category] = Array.from(names).sort();
       });
+      state.formatsOp = action.payload.formatsOp || 'or';
+      state.stylesOp = action.payload.stylesOp || 'or';
       state.page = parseInt(action.payload.page, 10) || 1;
       if (state.page < 1) {
         state.page = 1;

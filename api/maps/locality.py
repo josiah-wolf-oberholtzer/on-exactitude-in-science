@@ -1,9 +1,12 @@
+import logging
 from collections import deque
 
 from aiogremlin.process.graph_traversal import __
 from gremlin_python.process.traversal import P
 
 from maps.graphutils import cleanup_edge, cleanup_vertex
+
+logger = logging.getLogger(__name__)
 
 
 def get_locality_center_projection():
@@ -72,12 +75,14 @@ def get_primacy(labels, main_releases_only):
 def get_locality_loop_traversal(
     countries=None,
     formats=None,
+    formats_op="or",
     genres=None,
-    styles=None,
     labels=None,
     main_releases_only=True,
     offset=0,
     roles=None,
+    styles=None,
+    styles_op="or",
     years=None,
 ):
     primacy = get_primacy(labels, main_releases_only)
@@ -93,11 +98,19 @@ def get_locality_loop_traversal(
         if countries:
             traversals.append(__.has("country", P.within(*countries)))
         if formats:
-            traversals.append(__.has("formats", P.within(*formats)))
+            if formats_op == "or":
+                traversals.append(__.has("formats", P.within(*formats)))
+            else:
+                for format_ in formats:
+                    traversals.append(__.has("formats", format_))
         if genres:
             traversals.append(__.has("genres", P.within(*genres)))
         if styles:
-            traversals.append(__.has("styles", P.within(*styles)))
+            if styles_op == "or":
+                traversals.append(__.has("styles", P.within(*styles)))
+            else:
+                for style in styles:
+                    traversals.append(__.has("styles", style))
         if years:
             traversals.append(__.has("year", P.within(*years)))
         if traversals:
@@ -130,11 +143,13 @@ async def get_locality_traversal(
     offset=0,
     countries=None,
     formats=None,
+    formats_op="or",
     genres=None,
     labels=None,
     main_releases_only=True,
     roles=None,
     styles=None,
+    styles_op="or",
     years=None,
 ):
     traversal = session.g.V(vertex_id)
@@ -145,14 +160,16 @@ async def get_locality_traversal(
         traversal.aggregate("vertices")
         .repeat(
             get_locality_loop_traversal(
-                labels=labels,
-                offset=offset,
-                main_releases_only=main_releases_only,
-                roles=roles,
                 countries=countries,
                 formats=formats,
+                formats_op=formats_op,
                 genres=genres,
+                labels=labels,
+                main_releases_only=main_releases_only,
+                offset=offset,
+                roles=roles,
                 styles=styles,
+                styles_op=styles_op,
                 years=years,
             ),
         )
@@ -182,15 +199,17 @@ async def get_locality(
     goblin_app,
     vertex_id,
     vertex_label=None,
-    limit=200,
-    offset=0,
     countries=None,
     formats=None,
+    formats_op="or",
     genres=None,
     labels=None,
+    limit=200,
     main_releases_only=True,
+    offset=0,
     roles=None,
     styles=None,
+    styles_op="or",
     years=None,
 ):
     session = await goblin_app.session()
@@ -198,15 +217,17 @@ async def get_locality(
         session,
         vertex_id,
         vertex_label=vertex_label,
-        limit=limit,
-        offset=offset,
         countries=countries,
         formats=formats,
+        formats_op=formats_op,
         genres=genres,
         labels=labels,
+        limit=limit,
         main_releases_only=main_releases_only,
+        offset=offset,
         roles=roles,
         styles=styles,
+        styles_op=styles_op,
         years=years,
     )
     if not result:

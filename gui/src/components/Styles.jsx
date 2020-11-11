@@ -1,4 +1,5 @@
 import React from 'react';
+import Operator from './Operator';
 import SidebarSection from './SidebarSection';
 import { STYLES } from '../constants';
 import { connect } from 'react-redux';
@@ -10,6 +11,7 @@ const mapStateToProps = state => {
     highlightedNames: state.highlighted.styles,
     names: getVerticesByStyle(state),
     filteredNames: state.filtered.styles,
+    stylesOp: state.filtered.stylesOp,
   }
 }
 
@@ -22,7 +24,9 @@ const Styles = (props) => {
       open={props.open}
       filteredNames={props.filteredNames}
       title="Styles"
-    />
+    >
+      <Operator name="stylesOp" value={props.stylesOp} />
+    </SidebarSection>
   )
 }
 
