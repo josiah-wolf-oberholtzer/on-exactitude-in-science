@@ -91,7 +91,7 @@ class GraphManager {
 
   onEdgeEnter(data) {
     const threeEdge = new Edge();
-    threeEdge.enter(data, this.group, this.controls, this.lineManager);
+    threeEdge.enter(this, data, this.lineManager);
     this.envelopes.set(data.id, threeEdge);
   }
 
@@ -158,7 +158,7 @@ class GraphManager {
 
   onVertexEnter(data) {
     const threeVertex = new Vertex();
-    threeVertex.enter(this, data, this.group, this.controls, this.textLoader);
+    threeVertex.enter(this, data, this.textLoader);
     this.envelopes.set(data.id, threeVertex);
   }
 
@@ -175,6 +175,10 @@ class GraphManager {
     this.controls.add(mesh);
   }
 
+  addToLineManager(edge) {
+    this.lineManager.add(edge);
+  }
+
   addMesh(mesh) {
     this.group.add(mesh);
   }
@@ -183,8 +187,16 @@ class GraphManager {
     this.sceneManager.addToOutlines(mesh);
   }
 
+  refreshEdgeColor(edge) {
+    this.lineManager.updateColor(edge);
+  }
+
   removeFromControls(mesh) {
     this.controls.remove(mesh);
+  }
+
+  removeFromLineManager(edge) {
+    this.lineManager.remove(this);
   }
 
   removeFromOutlines(mesh) {

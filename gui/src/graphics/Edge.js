@@ -2,10 +2,9 @@ import * as THREE from 'three';
 
 class Edge {
   constructor() {
+    this.graphManager = null;
     this.isEdge = true;
-    this.controls = null;
     this.data = {};
-    this.parent = null;
     this.curve = new THREE.QuadraticBezierCurve3(
       new THREE.Vector3(),
       new THREE.Vector3(),
@@ -15,7 +14,6 @@ class Edge {
     this.group = new THREE.Group();
     this.group.envelope = this;
     this.group.add(this.line);
-    this.lineManager = null;
     this.points = [];
     this.hovered = false;
     this.selected = false;
@@ -42,12 +40,10 @@ class Edge {
     return { startColor, endColor };
   }
 
-  enter(newData, newParent, newControls, newLineManager) {
-    this.controls = newControls;
-    this.parent = newParent;
-    this.lineManager = newLineManager;
-    this.lineManager.add(this);
-    this.controls.add(this.line);
+  enter(graphManager, newData, newLineManager) {
+    this.graphManager = graphManager;
+    this.graphManager.addToLineManager(this);
+    this.graphManager.addToControls(this.line);
     this.update(newData);
   }
 
@@ -56,11 +52,9 @@ class Edge {
   }
 
   exit() {
-    this.controls.remove(this.line);
-    this.lineManager.remove(this);
-    this.lineManager = null;
-    this.parent = null;
-    this.controls = null;
+    this.graphManager.removeFromControls(this.line);
+    this.graphManager.removeFromLineManager(this);
+    this.graphManager = null;
     this.data = {};
   }
 
@@ -90,44 +84,44 @@ class Edge {
 
   mouseout() {
     this.hovered = false;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 
   mouseover() {
     this.hovered = true;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 
   select() {
     this.selected = true;
     this.hovered = false;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 
   deselect() {
     this.selected = false;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 
   highlight() {
     this.highlighted = true;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 
   unhighlight() {
     this.highlighted = false;
-    if (this.lineManager !== null) {
-      this.lineManager.updateColor(this);
+    if (this.graphManager !== null) {
+      this.graphManager.refreshEdgeColor(this);
     }
   }
 }

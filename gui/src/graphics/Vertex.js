@@ -107,7 +107,7 @@ class Vertex {
     };
   }
 
-  enter(graphManager, newData, newParent, newControls, textLoader) {
+  enter(graphManager, newData, textLoader) {
     this.graphManager = graphManager;
     this.graphManager.addMesh(this.group);
     this.graphManager.addToControls(this.coreMesh);
