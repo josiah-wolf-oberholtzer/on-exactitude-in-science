@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { refocusCamera } from '../slices/cameraSlice';
 import { buildDiscogsURL } from '../utils';
+import { openYouTubeModal } from '../slices/youtubeSlice';
 
 const useStyles = makeStyles((theme) => ({
   speedDial: {
@@ -31,6 +32,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     refocusCamera: () => dispatch(refocusCamera()),
+    openYouTubeModal: (videos) => dispatch(openYouTubeModal(videos)),
   }
 }
 
@@ -49,24 +51,27 @@ const EntityDial = (props) => {
   const [open, setOpen] = React.useState(false);
   const handleClose = () => { setOpen(false); };
   const handleOpen = () => { setOpen(true); };
-  const videos = props.selected ? (props.selected.vertex ? props.selected.vertex.videos : null) : null;
+  const videos = (props.selected ? (props.selected.vertex ? props.selected.vertex.videos : []) : []) || [];
 
   return (
     <SpeedDial
       ariaLabel="Speed Dial"
       className={classes.speedDial}
-      icon={videos ? <SpeedDialIcon icon={<YouTubeIcon />} /> : <SpeedDialIcon />}
+      icon={videos.length > 0 ? <SpeedDialIcon icon={<YouTubeIcon />} /> : <SpeedDialIcon />}
       direction="up"
       onClose={handleClose}
       onOpen={handleOpen}
       open={open}
     >
-      { videos &&
+      { (videos.length > 0) &&
         <SpeedDialAction
           className={classes.speedDialAction}
-          key="focus"
+          key="youtube"
           icon={<YouTubeIcon />}
-          onClick={() => { }}
+          onClick={() => { 
+            props.openYouTubeModal(videos || []);
+            handleClose();
+          }}
           style={{ whiteSpace: "nowrap" }}
           tooltipOpen
           tooltipPlacement="left"
