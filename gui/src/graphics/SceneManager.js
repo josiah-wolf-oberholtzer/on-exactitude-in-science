@@ -1,18 +1,36 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { dispatch } from 'd3-dispatch';
 
 class SceneManager {
   constructor(container) {
-    // allocation
-    this.container = container;
-    this.renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, stencil: false });
-    this.canvas = this.renderer.domElement;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
-    this.controls = new OrbitControls(this.camera, this.canvas);
-    this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
+    this.renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, stencil: false });
+    this.composer = new EffectComposer(this.renderer);
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
+
+    this.container = container;
     this.dispatcher = dispatch('beforeRender');
+    this.canvas = this.renderer.domElement;
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.ambientLight = new THREE.AmbientLight(0x606060); // soft white light
+    this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000);
+
+    this.outlinedObjects = [];
+    this.outlinePass.selectedObjects = this.outlinedObjects;
+    this.outlinePass.edgeStrength = 4.0;
+    this.outlinePass.edgeGlow = 1.0;
+    this.outlinePass.edgeThickness = 2.0;
+    this.outlinePass.visibleEdgeColor.set('#ff00ff');
+    this.outlinePass.hiddenEdgeColor.set('#880088');
+
+    this.composer.addPass(this.renderPass);
+    this.composer.addPass(this.outlinePass);
 
     // settings
     this.camera.position.z = 100;
@@ -30,6 +48,7 @@ class SceneManager {
 
     // structure
     this.container.appendChild(this.canvas);
+    this.scene.add(this.ambientLight);
     this.scene.add(this.hemisphereLight);
     this.update();
     window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -42,6 +61,18 @@ class SceneManager {
     this.frameId = requestAnimationFrame(this.animate.bind(this));
   }
 
+  outline(mesh, shouldOutline) {
+    if (!mesh) {
+      return;
+    }
+    const index = this.outlinedObjects.indexOf(mesh);
+    if (shouldOutline && (index === -1)) {
+      this.outlinedObjects.push(mesh);
+    } else if (!shouldOutline && (index !== -1)) {
+      this.outlinedObjects.splice(index, 1);
+    }
+  }
+
   on(name, _) {
     if (arguments.length > 1) {
       return this.dispatcher.on(name, _);
@@ -52,7 +83,8 @@ class SceneManager {
   onWindowResize() { this.update(); }
 
   render() {
-    this.renderer.render(this.scene, this.camera);
+    //this.renderer.render(this.scene, this.camera);
+    this.composer.render();
   }
 
   resetCamera() {
@@ -74,6 +106,7 @@ class SceneManager {
     this.controls.update();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.composer.setSize(window.innerWidth * 2, window.innerHeight * 2);
   }
 }
 
