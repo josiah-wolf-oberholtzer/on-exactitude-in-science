@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { dispatch } from 'd3-dispatch';
 
 class SceneManager {
@@ -12,7 +12,9 @@ class SceneManager {
     this.renderer = new THREE.WebGLRenderer({ alpha: false, antialias: true, stencil: false });
     this.composer = new EffectComposer(this.renderer);
     this.renderPass = new RenderPass(this.scene, this.camera);
-    this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
+    this.outlinePass = new OutlinePass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera,
+    );
 
     this.container = container;
     this.dispatcher = dispatch('beforeRender');
@@ -61,14 +63,18 @@ class SceneManager {
     this.frameId = requestAnimationFrame(this.animate.bind(this));
   }
 
-  outline(mesh, shouldOutline) {
-    if (!mesh) {
-      return;
-    }
+  addToOutlines(mesh) {
+    if (!mesh) { return; }
     const index = this.outlinedObjects.indexOf(mesh);
-    if (shouldOutline && (index === -1)) {
+    if (index === -1) {
       this.outlinedObjects.push(mesh);
-    } else if (!shouldOutline && (index !== -1)) {
+    }
+  }
+
+  removeFromOutlines(mesh) {
+    if (!mesh) { return; }
+    const index = this.outlinedObjects.indexOf(mesh);
+    if (index !== -1) {
       this.outlinedObjects.splice(index, 1);
     }
   }
@@ -83,7 +89,7 @@ class SceneManager {
   onWindowResize() { this.update(); }
 
   render() {
-    //this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
     this.composer.render();
   }
 

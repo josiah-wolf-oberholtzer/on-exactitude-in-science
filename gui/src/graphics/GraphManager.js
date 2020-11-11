@@ -158,7 +158,7 @@ class GraphManager {
 
   onVertexEnter(data) {
     const threeVertex = new Vertex();
-    threeVertex.enter(data, this.group, this.controls, this.textLoader);
+    threeVertex.enter(this, data, this.group, this.controls, this.textLoader);
     this.envelopes.set(data.id, threeVertex);
   }
 
@@ -169,6 +169,30 @@ class GraphManager {
   onVertexExit(data) {
     this.envelopes.get(data.id).exit();
     this.envelopes.delete(data.id);
+  }
+
+  addToControls(mesh) {
+    this.controls.add(mesh);
+  }
+
+  addMesh(mesh) {
+    this.group.add(mesh);
+  }
+
+  addToOutlines(mesh) {
+    this.sceneManager.addToOutlines(mesh);
+  }
+
+  removeFromControls(mesh) {
+    this.controls.remove(mesh);
+  }
+
+  removeFromOutlines(mesh) {
+    this.sceneManager.removeFromOutlines(mesh);
+  }
+
+  removeMesh(mesh) {
+    this.group.remove(mesh);
   }
 }
 

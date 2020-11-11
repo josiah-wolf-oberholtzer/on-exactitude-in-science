@@ -3,10 +3,9 @@ import * as d3 from 'd3-scale-chromatic';
 
 class Vertex {
   constructor() {
+    this.graphManager = null;
     this.isVertex = true;
-    this.controls = null;
     this.data = {};
-    this.parent = null;
     this.textA = null;
     this.textB = null;
     this.radii = {
@@ -62,6 +61,16 @@ class Vertex {
     }
   }
 
+  calculateOutline() {
+    if (this.hovered || this.highlighted) {
+      this.graphManager.addToOutlines(this.coreMesh);
+      this.graphManager.addToOutlines(this.childRingMesh);
+    } else {
+      this.graphManager.removeFromOutlines(this.coreMesh);
+      this.graphManager.removeFromOutlines(this.childRingMesh);
+    }
+  }
+
   static calculateCoreGeometry(label) {
     switch (label) {
       case 'artist':
@@ -98,11 +107,10 @@ class Vertex {
     };
   }
 
-  enter(newData, newParent, newControls, textLoader) {
-    this.controls = newControls;
-    this.parent = newParent;
-    this.parent.add(this.group);
-    this.controls.add(this.coreMesh);
+  enter(graphManager, newData, newParent, newControls, textLoader) {
+    this.graphManager = graphManager;
+    this.graphManager.addMesh(this.group);
+    this.graphManager.addToControls(this.coreMesh);
     this.textA = textLoader.loadMesh(newData.name);
     this.textB = this.textA.clone(false);
     this.textA.rotation.set(0, Math.PI * 0.5, 0);
@@ -154,13 +162,12 @@ class Vertex {
   }
 
   exit() {
-    this.parent.remove(this.group);
-    this.controls.remove(this.coreMesh);
+    this.graphManager.removeFromControls(this.coreMesh);
+    this.graphManager.removeMesh(this.group);
     this.group.remove(this.textA);
     this.group.remove(this.textB);
-    this.parent = null;
     this.data = {};
-    this.controls = null;
+    this.graphManager = null;
   }
 
   select() {
@@ -175,18 +182,17 @@ class Vertex {
   }
 
   highlight() {
-    console.log('vertex/highlight', this);
     this.highlighted = true;
   }
 
   unhighlight() {
-    console.log('vertex/unhighlight', this);
     this.highlighted = false;
   }
 
   frameTick() {
     this.edgeRingMesh.rotation.y += 0.05 + ((this.data.random || 1) * 0.1);
     this.calculateColor();
+    this.calculateOutline();
   }
 
   graphTick(newData) {
