@@ -16,6 +16,7 @@ import graphReducer from '../slices/graphSlice';
 import highlightedReducer from '../slices/highlightedSlice';
 import layoutReducer from '../slices/layoutSlice';
 import filteredReducer from '../slices/filteredSlice';
+import youtubeReducer from '../slices/youtubeSlice';
 
 const history = createBrowserHistory();
 
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
   highlighted: highlightedReducer,
   layout: layoutReducer,
   filtered: filteredReducer,
+  youtube: youtubeReducer,
   router: connectRouter(history),
 });
 

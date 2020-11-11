@@ -44,7 +44,7 @@ export const getEdgesByRole = createSelector(
       'Subrelease Of': [],
     };
     centerRoles.forEach((role) => { mapping[role] = []; });
-    categorizeObjects(mapping, edges, (edge) => [edge.role]);
+    categorizeObjects(mapping, edges, (edge) => [edge.name]);
     return mapping;
   },
 );

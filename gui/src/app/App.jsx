@@ -10,6 +10,7 @@ import Header from '../components/Header';
 import Loading from '../components/Loading';
 import Routing from '../components/Routing';
 import Sidebar from '../components/Sidebar';
+import YouTubeModal from '../components/YouTubeModal';
 import ErrorMessage from '../components/ErrorMessage';
 import { SnackbarProvider } from 'notistack';
 
@@ -44,6 +45,7 @@ const App = () => {
             <Header />
             <Sidebar />
             <Loading />
+            <YouTubeModal />
             <ErrorMessage />
           </div>
         </SnackbarProvider>
