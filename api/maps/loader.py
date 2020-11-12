@@ -165,7 +165,7 @@ def find_limit(directory_path, tag):
         return json.loads(cache_path.read_text())["count"]
     count = 0
     with TQDMK8S(
-        desc=f"Counting {tag} elements", file=sys.stdout, mininterval=0.25, total=None,
+        desc=f"Counting {tag} elements", file=sys.stdout, mininterval=5.0, total=None,
     ) as progress_bar:
         for _ in xml.iterate_xml(xml_path, tag):
             count += 1
@@ -192,7 +192,10 @@ def find_limits(path, limit: Optional[int] = None):
 
 
 async def load(
-    goblin_app, path: Path, consumer_count: int = 1, limit: Optional[int] = None
+    goblin_app,
+    path: Path,
+    consumer_count: int = 1,
+    limit: Optional[int] = None,
 ):
     """
     Update graph from Discogs .xml.gz files.
@@ -213,7 +216,7 @@ async def load(
         desc="Artist/Company/Master Vertices",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=1.0,
+        mininterval=5.0,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"] + limits["masters"],
     ) as progress_bar:
@@ -240,7 +243,7 @@ async def load(
         desc="Artist/Company Edges",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=1.0,
+        mininterval=5.0,
         smoothing=0.01,
         total=limits["artists"] + limits["companies"],
     ) as progress_bar:
@@ -268,7 +271,7 @@ async def load(
         desc="Releases",
         dynamic_ncols=True,
         file=sys.stdout,
-        mininterval=1.0,
+        mininterval=10.0,
         smoothing=0.01,
         total=limits["releases"],
     ) as progress_bar:
