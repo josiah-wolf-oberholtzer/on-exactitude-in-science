@@ -192,10 +192,7 @@ def find_limits(path, limit: Optional[int] = None):
 
 
 async def load(
-    goblin_app,
-    path: Path,
-    consumer_count: int = 1,
-    limit: Optional[int] = None,
+    goblin_app, path: Path, consumer_count: int = 1, limit: Optional[int] = None,
 ):
     """
     Update graph from Discogs .xml.gz files.
