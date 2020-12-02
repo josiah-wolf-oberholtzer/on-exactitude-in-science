@@ -55,7 +55,7 @@ const EdgeCaption = (props) => {
         ? <Typography variant="overline" display="block">{roleCaptions[edge.label]}</Typography>
         : <Typography variant="overline" display="block">&nbsp;</Typography>
       }
-      <Typography variant="h5" display="block">{edge.role}</Typography>
+      <Typography variant="h5" display="block">{edge.name}</Typography>
     </Grid>
   )
 }
@@ -67,7 +67,7 @@ const EdgeIcon = (props) => {
       <Box px={1}>
         <Typography variant="overline" display="block">&nbsp;</Typography>
         { 
-          edge.label === "alias_of"
+          edge.name === "Alias Of"
           ? <SwapHorizIcon />
           : <ArrowForwardIosIcon />
         }
