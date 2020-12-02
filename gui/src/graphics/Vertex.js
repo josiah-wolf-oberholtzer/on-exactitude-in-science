@@ -62,7 +62,7 @@ class Vertex {
   }
 
   calculateOutline() {
-    if (this.hovered || this.highlighted) {
+    if (this.highlighted || this.hovered || this.selected) {
       this.graphManager.addToOutlines(this.coreMesh);
       this.graphManager.addToOutlines(this.childRingMesh);
     } else {
