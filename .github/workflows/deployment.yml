@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up kubectl
-      uses: matootie/dokube@v1.3.3
+      uses: matootie/dokube@v1.3.4
       with:
         personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
         clusterName: on-exactitude-in-science
