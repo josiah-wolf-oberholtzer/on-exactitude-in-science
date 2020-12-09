@@ -42,6 +42,8 @@ spec:
           value: elasticsearch
         - name: janusgraph.query.force-index
           value: "true"
+        - name: janusgraph.storage.batch-loading
+          value: "true"
         - name: janusgraph.schema.default
           value: none
         - name: janusgraph.storage.hostname
