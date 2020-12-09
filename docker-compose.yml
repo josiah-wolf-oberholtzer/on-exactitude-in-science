@@ -24,24 +24,11 @@ services:
     volumes:
     - ./api:/app
     - ./data:/data
-  gui:
-    build:
-      context: gui
-    ports:
-    - 8080:80
-    volumes:
-    - ./gui/dist:/var/www/html
   cassandra:
     image: cassandra:3.11.6
     ports:
     - 9042:9042
     - 9160:9160
-  redis:
-    image: redis:6.0.9-alpine
-    ports:
-    - 6379:6379
-  scylla:
-    image: scylladb/scylla:4.1.7
   elasticsearch:
     environment:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -54,6 +41,13 @@ services:
     image: elasticsearch:7.9.2
     ports:
     - 9200:9200
+  gui:
+    build:
+      context: gui
+    ports:
+    - 8080:80
+    volumes:
+    - ./gui/dist:/var/www/html
   janusgraph:
     depends_on:
     - scylla
@@ -72,3 +66,9 @@ services:
     image: memcached:latest
     ports:
     - 11211:11211
+  redis:
+    image: redis:6.0.9-alpine
+    ports:
+    - 6379:6379
+  scylla:
+    image: scylladb/scylla:4.1.7
