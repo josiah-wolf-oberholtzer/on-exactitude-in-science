@@ -18,7 +18,7 @@ services:
       GUNICORN_ENABLE_STDIO_INHERITANCE: "true"
     depends_on:
     - janusgraph-healthcheck
-    - memcached
+    - redis
     ports:
     - 9090:9090
     volumes:
@@ -62,13 +62,20 @@ services:
     depends_on:
     - janusgraph
     image: curlimages/curl:latest
-  memcached:
-    image: memcached:latest
-    ports:
-    - 11211:11211
   redis:
     image: redis:6.0.9-alpine
     ports:
     - 6379:6379
   scylla:
     image: scylladb/scylla:4.1.7
+  worker:
+    build:
+      cache_from:
+      - josiahwolfoberholtzer/on-exactitude-in-science-api:latest
+      context: api
+    command: celery -A maps.tasks worker --loglevel=INFO
+    depends_on:
+    - janusgraph-healthcheck
+    - redis
+    volumes:
+    - ./api:/app
