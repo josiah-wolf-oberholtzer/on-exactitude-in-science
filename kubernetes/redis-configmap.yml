@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis
+data:
+  init.sh: |
+    #!/bin/sh
+    set -ex
+    hostname | grep -Eq 'redis-([0-9]+)$' || exit 1
+    ORDINAL=`hostname | sed 's/redis-//'`
+    if [[ $ORDINAL -eq 0 ]]; then
+      cp /mnt/config-map/master.conf /etc/redis.conf
+    else
+      cp /mnt/config-map/slave.conf /etc/redis.conf
+    fi
+    exec "$@"
+  master.conf: |
+    appendonly yes
+    bind 0.0.0.0
+    daemonize no
+    logfile ""
+    loglevel notice
+    pidfile /var/run/redis_6379.pid
+    port 6379
+    protected-mode yes
+    supervised no
+    tcp-backlog 511
+    tcp-keepalive 300
+    timeout 0
+  slave.conf: |
+    slaveof redis-0.redis 6379

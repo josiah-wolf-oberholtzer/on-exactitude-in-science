@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  serviceName: redis
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - redis
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: redis
+        image: redis:6.0.9-alpine3.12
+        command:
+        - /mnt/config-map/init.sh
+        - redis-server
+        - /etc/redis.conf
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        ports:
+        - name: redis
+          containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: config-map
+          mountPath: /mnt/config-map
+      volumes:
+      - name: config-map
+        configMap:
+          defaultMode: 0755
+          name: redis
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: 24Gi
+      storageClassName: do-block-storage-xfs

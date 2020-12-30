@@ -12,6 +12,9 @@ resources:
 - janusgraph-deployment.yml
 - janusgraph-service.yml
 - namespace.yml
+- redis-configmap.yml
+- redis-service.yml
+- redis-statefulset.yml
 - scylla-configmap.yml
 - scylla-service.yml
 - scylla-statefulset.yml
