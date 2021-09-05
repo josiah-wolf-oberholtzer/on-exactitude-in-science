@@ -1,0 +1,20 @@
+q,
+blockquote {
+    font-size: 0.75em;
+    line-height: 1.0em;
+}
+
+q::after,
+blockquote::after {
+    content: "";
+}
+
+.image {
+    max-height: 700px;
+    padding: 2em;
+}
+
+img.graphviz {
+    max-height: 500px;
+    padding: 2em;
+}

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mapping Recorded Music &mdash; Mapping Recorded Music History 2021.09.03 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/styles.css" type="text/css" />
+    <link rel="stylesheet" href="_static/slides.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+    
+    
+    
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/slides.css" type="text/css" />
+    <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2021.09.03',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/common.js"></script>
+    
+    <script type="text/javascript" src="_static/slides.js"></script>
+    <script type="text/javascript" src="_static/sync.js"></script>
+    <script type="text/javascript" src="_static/controller.js"></script>
+    <script type="text/javascript" src="_static/init.js"></script>
+    
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Mapping Recorded Music History 2021.09.03 documentation" href="#" /> 
+  </head>
+  <body>
+
+<section
+   id="slide_container"
+   class='slides layout-regular'>
+
+
+  
+<article class="slide level-1" id="mapping-recorded-music">
+
+<h1>Mapping Recorded Music</h1>
+
+
+
+
+
+</article>
+<article class="slide level-2" id="howdy">
+
+<h2>Howdy</h2>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="who-i-am">
+
+<h3>Who I am</h3>
+
+<ul class="simple">
+<li>Make my coin as a software engineer</li>
+<li>My background is in the arts and music industry</li>
+<li>Currently in Kingston, NY</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id1">
+
+<h3>Who I am</h3>
+
+<ul class="build simple">
+<li>Oberlin: BMus in composition</li>
+<li>Forced Exposure: music distribution</li>
+<li>Harvard: masters / PhD in composition</li>
+<li>Music21 &#64; MIT: toolkit for digital musicology</li>
+<li>Discogs: music database / marketplace</li>
+<li>CapitalOne: banking core modernization</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="a-cute-dog">
+
+<h3>A cute dog</h3>
+
+<div class="figure align-default">
+<img alt="_images/bradley.jpg" class="fill" src="_images/bradley.jpg" />
+</div>
+
+
+
+
+</article>
+<article class="slide level-2" id="musical-maps">
+
+<h2>Musical maps</h2>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="state-of-play">
+
+<h3>State of play</h3>
+
+<ul class="build simple">
+<li>A variety of musical maps exist today</li>
+<li>Some are interactive, some aren’t</li>
+<li>Most are concerned with concepts of “genre”, “style”, “period” and how these
+categories mutate into other categories, and generate new categories</li>
+<li><em>But</em>, they almost all represent music history as a graph</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id2">
+
+<h3>State of play</h3>
+
+<div class="figure align-default">
+<img alt="_images/map-of-metal.png" class="fill" src="_images/map-of-metal.png" />
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="id3">
+
+<h3>State of play</h3>
+
+<div class="figure align-default">
+<img alt="_images/map-of-acid.jpg" class="fill" src="_images/map-of-acid.jpg" />
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="id4">
+
+<h3>State of play</h3>
+
+<div class="figure align-default">
+<img alt="_images/map-of-ishkur.png" class="fill" src="_images/map-of-ishkur.png" />
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="lossy-abstractions">
+
+<h3>Lossy abstractions</h3>
+
+<ul class="simple">
+<li>Abstract categorizations are highly subjective</li>
+<li>They elide really interesting information</li>
+<li>Who collaborated with who?</li>
+<li>Who curated or published who, and when?</li>
+<li>How do multiple labels’ curation overlap to create the “moire” effect that we
+want to recognize as style?</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="materialist-view-of-history">
+
+<h3>Materialist view of history</h3>
+
+<ul class="simple">
+<li>Style, and genre don’t exist</li>
+<li>But humans and the artifacts of their production do</li>
+<li>Specific artists, companies, releases and songs</li>
+<li>Specific years, countries and formats</li>
+<li>What if we could map these concrete interactions?</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="we-have-the-data">
+
+<h3>We have the data</h3>
+
+<ul class="simple">
+<li><a class="reference external" href="https://discogs.com">https://discogs.com</a> Discographic Dataset</li>
+<li><a class="reference external" href="http://data.discogs.com/">http://data.discogs.com/</a></li>
+<li>Monthly XML dumps</li>
+<li>CC-0 licensed</li>
+<li>1.7 million companies</li>
+<li>7.7 million artists</li>
+<li>14.3 million releases</li>
+<li>1.9 million “masters”</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id5">
+
+<h3>We have the data</h3>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">artist</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">images</span><span class="o">&gt;...&lt;/</span><span class="n">images</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="mi">8</span><span class="o">&lt;/</span><span class="nb">id</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">Mood</span> <span class="n">II</span> <span class="n">Swing</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">realname</span><span class="o">&gt;</span><span class="n">John</span> <span class="n">Ciafone</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">Lem</span> <span class="n">Springsteen</span><span class="o">&lt;/</span><span class="n">realname</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">profile</span><span class="o">&gt;...&lt;/</span><span class="n">profile</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">namevariations</span><span class="o">&gt;&lt;</span><span class="n">name</span><span class="o">&gt;...&lt;/</span><span class="n">name</span><span class="o">&gt;&lt;/</span><span class="n">namevariations</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">aliases</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;26498&quot;</span><span class="o">&gt;</span><span class="n">Chronic</span> <span class="n">Sounds</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;34749&quot;</span><span class="o">&gt;</span><span class="n">Urbanized</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">...</span>
+  <span class="o">&lt;/</span><span class="n">aliases</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">members</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="mi">12186</span><span class="o">&lt;/</span><span class="nb">id</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;12186&quot;</span><span class="o">&gt;</span><span class="n">John</span> <span class="n">Ciafone</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="mi">27959</span><span class="o">&lt;/</span><span class="nb">id</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">name</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;27959&quot;</span><span class="o">&gt;</span><span class="n">Lem</span> <span class="n">Springsteen</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;/</span><span class="n">members</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">artist</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="id6">
+
+<h3>We have the data</h3>
+
+<div align="center" class="align-center"><div class="graphviz"><img src="_images/graphviz-a42339152af5d814bf164304faa15e74241e7fe3.png" alt="digraph G {
+     a1 [label=&quot;Mood II Swing&quot;]
+     a2 [label=&quot;Chronic Sounds&quot;]
+     a3 [label=&quot;Urbanized&quot;]
+     a4 [label=&quot;John Ciafone&quot;]
+     a5 [label=&quot;Lem Springsteen&quot;]
+     a1 -&gt; a2 [dir=both,label=&quot;alias&quot;]
+     a1 -&gt; a3 [dir=both,label=&quot;alias&quot;]
+     a4 -&gt; a1 [label=&quot;member&quot;]
+     a5 -&gt; a1 [label=&quot;member&quot;]
+ }" class="graphviz" /></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-2" id="prior-work">
+
+<h2>Prior work</h2>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="disco-graph-2015">
+
+<h3>Disco/graph (2015)</h3>
+
+<ul class="simple">
+<li>Flask, d3, PostgreSQL</li>
+<li>Graph database implemented by hand</li>
+<li>Visualizes connections between entities</li>
+<li>But loses information about “where” connections occurred</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id7">
+
+<h3>Disco/graph (2015)</h3>
+
+<br/>
+<div style="padding:62.5% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/138564453?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;h=8d2543f5db" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="discoGraph demo #2: From Morris Day to Björk"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+
+
+
+</article>
+<article class="slide level-2" id="https-on-exactitude-in-science">
+
+<h2><a class="reference external" href="https://on-exactitude-in.science">https://on-exactitude-in.science</a></h2>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="fast-forward-to-2020">
+
+<h3>Fast forward to 2020</h3>
+
+<ul class="simple">
+<li>Happy quarantine!</li>
+<li>Time to revisit the 2015 project</li>
+<li>Let’s use a modern stack</li>
+<li>Let’s use a proper graph database</li>
+<li>Let’s do it in 3D</li>
+<li>Let’s provide maximum granularity</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="on-exactitude-in-science">
+
+<h3>On Exactitude In Science</h3>
+
+<p>Jorge Luis Borges:</p>
+<blockquote>
+<div><p>… In that Empire, the Art of Cartography attained such Perfection that the
+map of a single Province occupied the entirety of a City, and the map of the
+Empire, the entirety of a Province.</p>
+<p>In time, those Unconscionable Maps no longer satisfied, and the
+Cartographers Guilds struck a Map of the Empire whose size was that of the
+Empire, and which coincided point for point with it.</p>
+<p>The following Generations, who were not so fond of the Study of Cartography
+as their Forebears had been, saw that that vast Map was Useless, and not
+without some Pitilessness was it, that they delivered it up to the
+Inclemencies of Sun and Winters.</p>
+<p>In the Deserts of the West, still today, there are Tattered Ruins of that
+Map, inhabited by Animals and Beggars; in all the Land there is no other
+Relic of the Disciplines of Geography.</p>
+</div></blockquote>
+
+
+
+
+</article>
+<article class="slide level-3" id="demo">
+
+<h3>Demo</h3>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="stack">
+
+<h3>Stack</h3>
+
+<ul class="simple">
+<li>Kubernetes</li>
+<li>JanusGraph, Scylla, Elasticsearch</li>
+<li>aiohttp, aiogremlin</li>
+<li>React, Redux, Material UI</li>
+<li>d3, three.js</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="aside-graph-databases">
+
+<h3>Aside: graph databases</h3>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="gremlin">
+
+<h3>Gremlin</h3>
+
+<p><a class="reference external" href="https://tinkerpop.apache.org/gremlin.html">https://tinkerpop.apache.org/gremlin.html</a></p>
+<blockquote>
+<div><p>Gremlin is the graph traversal language of Apache TinkerPop. Gremlin is a
+functional, data-flow language that enables users to succinctly express complex
+traversals on (or queries of) their application’s property graph.</p>
+<p>Every Gremlin traversal is composed of a sequence of (potentially nested)
+steps.  A step performs an atomic operation on the data stream.</p>
+<p>Every step is either a map-step (transforming the objects in the stream), a
+filter-step (removing objects from the stream), or a sideEffect-step
+(computing statistics about the stream).</p>
+<p>The Gremlin step library extends on these 3-fundamental operations to
+provide users a rich collection of steps that they can compose in order to
+ask any conceivable question they may have of their data for Gremlin is
+Turing Complete.</p>
+</div></blockquote>
+
+
+
+
+</article>
+<article class="slide level-3" id="id8">
+
+<h3>Gremlin</h3>
+
+<p>What are the names of Josiah’s friends’ friends.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">V</span><span class="p">()</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Josiah&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="s2">&quot;knows&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="s2">&quot;knows&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="etl">
+
+<h3>ETL</h3>
+
+<ul class="simple">
+<li>Vertices, then edges</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id9">
+
+<h3>ETL</h3>
+
+<ul class="simple">
+<li>Add artist, company, master vertices</li>
+<li>Add artist, company, edges</li>
+<li>Add releases &amp; tracks vertices and edges</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="id10">
+
+<h3>ETL</h3>
+
+<ul class="simple">
+<li>Multiple passes allow for lookups of previously created vertices</li>
+<li>Assumes that data can be loaded with each new monthly dump, rather than just
+once</li>
+<li>Maybe not a good assumption though</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="querying">
+
+<h3>Querying</h3>
+
+<ul class="simple">
+<li>neighborhood pseudocode</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="querying-iteration-0">
+
+<h3>Querying: Iteration 0</h3>
+
+<div align="center" class="align-center"><div class="graphviz"><img src="_images/graphviz-9a7d31caff61d24372a121740a0e55b6fd5f5b83.png" alt="digraph G {
+     a
+ }" class="graphviz" /></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="querying-iteration-1">
+
+<h3>Querying: Iteration 1</h3>
+
+<div align="center" class="align-center"><div class="graphviz"><img src="_images/graphviz-a0da897af4d880dc243f88369731c89217899dab.png" alt="digraph G {
+     graph [overlap=prism];
+     a -&gt; b
+     a -&gt; c
+     a -&gt; d
+     a -&gt; e
+ }" class="graphviz" /></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="querying-iteration-2">
+
+<h3>Querying: Iteration 2</h3>
+
+<div align="center" class="align-center"><div class="graphviz"><img src="_images/graphviz-1c48c3c03eb42b7959f7f5d49c66b26235fa512a.png" alt="digraph G {
+     graph [overlap=prism];
+     a -&gt; b
+     a -&gt; c
+     a -&gt; d
+     a -&gt; e
+     b -&gt; f
+     c -&gt; g
+     c -&gt; h
+     d -&gt; i
+     d -&gt; j
+     d -&gt; k
+     d -&gt; l
+ }" class="graphviz" /></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="querying-iteration-3">
+
+<h3>Querying: Iteration 3</h3>
+
+<div align="center" class="align-center"><div class="graphviz"><img src="_images/graphviz-f497e950de8fbc78b3857d6bc51746ded1464b7e.png" alt="digraph G {
+     graph [overlap=prism];
+     a -&gt; b
+     a -&gt; c
+     a -&gt; d
+     a -&gt; e
+     b -&gt; f
+     c -&gt; g
+     c -&gt; h
+     d -&gt; i
+     d -&gt; j
+     d -&gt; k
+     d -&gt; l
+     f -&gt; h
+     f -&gt; i
+     g -&gt; i
+     h -&gt; m
+     h -&gt; n
+     h -&gt; o
+     i -&gt; m
+     i -&gt; p
+     i -&gt; q
+     i -&gt; r
+     i -&gt; s
+     i -&gt; t
+     j -&gt; m
+     j -&gt; u
+     j -&gt; v
+     k -&gt; w
+     l -&gt; x
+     l -&gt; y
+     l -&gt; z
+ }" class="graphviz" /></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="visualizing">
+
+<h3>Visualizing</h3>
+
+<ul class="simple">
+<li>Api returns edges and vertices</li>
+<li>Conversion to force directed graph</li>
+<li>Each edge gets its own “control point” vertex</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-2" id="performance">
+
+<h2>Performance</h2>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="physics-engine">
+
+<h3>Physics engine</h3>
+
+<ul class="simple">
+<li>Force directed graphs model an n-body problem</li>
+<li>Barnes-Hutte approximation</li>
+<li>Octree vs garbage collection</li>
+<li>GPU-acceleration</li>
+<li>Brute force O(n^2)</li>
+</ul>
+
+
+
+
+</article>
+<article class="slide level-3" id="query-optimization">
+
+<h3>Query optimization</h3>
+
+
+
+
+
+</article>
+<article class="slide level-3" id="schema">
+
+<h3>Schema</h3>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Artist</span><span class="p">(</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="n">artist_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">random</span><span class="p">:</span> <span class="nb">float</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Company</span><span class="p">(</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="n">company_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">random</span><span class="p">:</span> <span class="nb">float</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Master</span><span class="p">(</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="n">master_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">random</span><span class="p">:</span> <span class="nb">float</span>
+</pre></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="id11">
+
+<h3>Schema</h3>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Release</span><span class="p">(</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="n">country</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">formats</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">genres</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">primacy</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">random</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">release_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">styles</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">videos</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">year</span><span class="p">:</span> <span class="nb">int</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Track</span><span class="p">(</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="n">track_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+
+
+
+
+</article>
+<article class="slide level-3" id="id12">
+
+<h3>Schema</h3>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Relationship</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">primacy</span><span class="p">:</span> <span class="nb">int</span>
+</pre></div>
+</div>
+
+
+
+
+</article>
+
+</section>
+
+<section id="slide_notes">
+
+</section>
+
+  </body>
+</html>
