@@ -608,18 +608,18 @@ we want to recognize as style?</li>
 
 
 </article>
-<article class="slide level-2" id="https-on-exactitude-in-science">
+<article class="slide level-2" id="fast-forward-to-2020">
 
-<h2><a class="reference external" href="https://on-exactitude-in.science">https://on-exactitude-in.science</a></h2>
+<h2>Fast forward to 2020</h2>
 
 
 
 
 
 </article>
-<article class="slide level-3" id="fast-forward-to-2020">
+<article class="slide level-3" id="https-on-exactitude-in-science">
 
-<h3>Fast forward to 2020</h3>
+<h3><a class="reference external" href="https://on-exactitude-in.science">https://on-exactitude-in.science</a></h3>
 
 <ul class="simple">
 <li>Happy quarantine!</li>
@@ -659,9 +659,18 @@ Relic of the Disciplines of Geography.</p>
 
 
 </article>
-<article class="slide level-3" id="demo">
+<article class="slide level-2" id="demo">
 
-<h3>Demo</h3>
+<h2>Demo</h2>
+
+
+
+
+
+</article>
+<article class="slide level-2" id="implementation">
+
+<h2>Implementation</h2>
 
 
 
@@ -688,6 +697,13 @@ Relic of the Disciplines of Geography.</p>
 
 <h3>Wait, what’s a graph database?</h3>
 
+<ul class="simple">
+<li>Efficient store for vertices and edges</li>
+<li>Often NoSQL</li>
+<li>Use domain specific query languages (Cypher, Gremlin)</li>
+<li>Neo4J, JanusGraph, DSE Graph</li>
+<li>IBM Graph, AWS Azure</li>
+</ul>
 
 
 
@@ -697,22 +713,14 @@ Relic of the Disciplines of Geography.</p>
 
 <h3>Gremlin</h3>
 
-<p><a class="reference external" href="https://tinkerpop.apache.org/gremlin.html">https://tinkerpop.apache.org/gremlin.html</a></p>
+<p>Gremlin describes “programs” for traversing graphs.</p>
 <q>
 Gremlin is the graph traversal language of Apache TinkerPop. Gremlin is a
 functional, data-flow language that enables users to succinctly express complex
 traversals on (or queries of) their application’s property graph.</q>
-<p>Gremlin describes “programs” for traversing graphs.</p>
-
-
-
-
-</article>
-<article class="slide level-3" id="id10">
-
-<h3>Gremlin</h3>
-
-<p>What are the names of Josiah’s friends’ friends.</p>
+<p><a class="reference external" href="https://tinkerpop.apache.org/gremlin.html">https://tinkerpop.apache.org/gremlin.html</a></p>
+<p>—</p>
+<p>What are the names of Josiah’s friends’ friends?</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">V</span><span class="p">()</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Josiah&quot;</span><span class="p">)</span>
     <span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="s2">&quot;knows&quot;</span><span class="p">)</span>
     <span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="s2">&quot;knows&quot;</span><span class="p">)</span>
@@ -731,10 +739,12 @@ traversals on (or queries of) their application’s property graph.</q>
 <ul class="simple">
 <li>Extract a “subgraph” from the wider graph</li>
 <li>Centered on a single vertex</li>
-<li>Expanding out</li>
-<li>Stopping after encountering “enough” vertices</li>
+<li>Loop, expanding out to unvisited vertices</li>
 <li>Where the vertices and edges encountered fulfill filter requirements</li>
-<li>Avoiding traversing beyond “supernodes”</li>
+<li>Paging the first iteration of the loop</li>
+<li>Limiting non-center edges to ~10 per vertex</li>
+<li>And avoid traversing “supernodes”</li>
+<li>Stop after encountering “enough” vertices</li>
 </ul>
 
 
@@ -838,6 +848,15 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
+<article class="slide level-2" id="what-could-go-wrong">
+
+<h2>What could go wrong?</h2>
+
+
+
+
+
+</article>
 <article class="slide level-2" id="gui-performance">
 
 <h2>GUI Performance</h2>
@@ -860,25 +879,24 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="barnes-hut">
+<article class="slide level-3" id="barnes-hut-approximation">
 
-<h3>Barnes-Hut</h3>
+<h3>Barnes-Hut approximation</h3>
 
 <ul class="simple">
-<li>Barnes-Hut approximation</li>
 <li>O(n log n) complexity</li>
 <li>Uses an octree datastructure for aggregating distant nodes</li>
 <li>Nice framerate (20-25fps)</li>
-<li>Large stop-the-world garbage collections</li>
+<li><em>But</em>, suffers from large stop-the-world garbage collections</li>
 </ul>
 
 
 
 
 </article>
-<article class="slide level-3" id="id11">
+<article class="slide level-3" id="id10">
 
-<h3>Barnes-Hut</h3>
+<h3>Barnes-Hut approximation</h3>
 
 <div class="figure align-default">
 <img alt="_images/timing-barnes-hut.png" class="fill" src="_images/timing-barnes-hut.png" />
@@ -888,9 +906,9 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="id12">
+<article class="slide level-3" id="id11">
 
-<h3>Barnes-Hut</h3>
+<h3>Barnes-Hut approximation</h3>
 
 <div class="figure align-default">
 <img alt="_images/timing-barnes-hut-gc.png" class="fill" src="_images/timing-barnes-hut-gc.png" />
@@ -900,9 +918,9 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="gpu-solution">
+<article class="slide level-3" id="what-about-gpus">
 
-<h3>GPU solution</h3>
+<h3>What about GPUs?</h3>
 
 <ul class="simple">
 <li>Hypothetically fast</li>
@@ -915,9 +933,9 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="naive-solution">
+<article class="slide level-3" id="a-naive-approach">
 
-<h3>Naive solution</h3>
+<h3>A naive approach</h3>
 
 <ul class="simple">
 <li>Stupid simple, brute force, nothing to allocate</li>
@@ -931,9 +949,9 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="id13">
+<article class="slide level-3" id="id12">
 
-<h3>Naive solution</h3>
+<h3>A naive approach</h3>
 
 <div class="figure align-default">
 <img alt="_images/timing-naive.png" class="fill" src="_images/timing-naive.png" />
@@ -943,9 +961,9 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="id14">
+<article class="slide level-3" id="id13">
 
-<h3>Naive solution</h3>
+<h3>A naive approach</h3>
 
 <div class="figure align-default">
 <img alt="_images/timing-naive-gc.png" class="fill" src="_images/timing-naive-gc.png" />
@@ -1027,7 +1045,7 @@ traversals on (or queries of) their application’s property graph.</q>
 
 
 </article>
-<article class="slide level-3" id="id15">
+<article class="slide level-3" id="id14">
 
 <h3>Data representation</h3>
 
@@ -1099,7 +1117,7 @@ not speed them up</li>
 
 
 </article>
-<article class="slide level-3" id="id16">
+<article class="slide level-3" id="id15">
 
 <h3>Schema</h3>
 
@@ -1125,7 +1143,7 @@ not speed them up</li>
 
 
 </article>
-<article class="slide level-3" id="id17">
+<article class="slide level-3" id="id16">
 
 <h3>Schema</h3>
 
@@ -1183,6 +1201,15 @@ storage backend</li>
 <li>Limit filtering? Just forbid it?</li>
 <li>Get a bigger budget? More or bigger Scylla instances?</li>
 </ul>
+
+
+
+
+</article>
+<article class="slide level-2" id="thanks-for-listening">
+
+<h2>Thanks for listening!</h2>
+
 
 
 

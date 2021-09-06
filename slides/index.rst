@@ -427,13 +427,11 @@ Disco/graph (2015)
     </div>
     <script src="https://player.vimeo.com/api/player.js"></script>
 
-
+Fast forward to 2020
+====================
 
 https://on-exactitude-in.science
-================================
-
-Fast forward to 2020
---------------------
+--------------------------------
 
 - Happy quarantine!
 - Time to revisit the 2015 project
@@ -465,7 +463,10 @@ Jorge Luis Borges:
     Relic of the Disciplines of Geography.
 
 Demo
-----
+====
+
+Implementation
+==============
 
 Stack
 -----
@@ -488,17 +489,17 @@ Wait, what's a graph database?
 Gremlin
 -------
 
-https://tinkerpop.apache.org/gremlin.html
+Gremlin describes "programs" for traversing graphs.
 
     Gremlin is the graph traversal language of Apache TinkerPop. Gremlin is a
     functional, data-flow language that enables users to succinctly express complex
     traversals on (or queries of) their application's property graph.
 
-Gremlin describes "programs" for traversing graphs.
-    
-.. nextslide::
+https://tinkerpop.apache.org/gremlin.html
 
-What are the names of Josiah's friends' friends.
+---
+    
+What are the names of Josiah's friends' friends?
 
 ::
 
@@ -531,10 +532,12 @@ Querying
 
 - Extract a "subgraph" from the wider graph
 - Centered on a single vertex
-- Expanding out
-- Stopping after encountering "enough" vertices
+- Loop, expanding out to unvisited vertices
 - Where the vertices and edges encountered fulfill filter requirements
-- Avoiding traversing beyond "supernodes"
+- Paging the first iteration of the loop
+- Limiting non-center edges to ~10 per vertex
+- And avoid traversing "supernodes"
+- Stop after encountering "enough" vertices
 
 Querying: Iteration 0
 ---------------------
@@ -633,6 +636,9 @@ Querying: Iteration 3
     - Conversion to force directed graph
     - Each edge gets its own "control point" vertex
 
+What could go wrong?
+====================
+
 GUI Performance
 ===============
 
@@ -641,13 +647,12 @@ Physics engine
 - Force directed graphs model an n-body problem
 - Different techniques for solving n-body
 
-Barnes-Hut
-----------
-- Barnes-Hut approximation
+Barnes-Hut approximation
+------------------------
 - O(n log n) complexity
 - Uses an octree datastructure for aggregating distant nodes
 - Nice framerate (20-25fps)
-- Large stop-the-world garbage collections
+- *But*, suffers from large stop-the-world garbage collections
 
 .. nextslide::
 
@@ -659,15 +664,15 @@ Barnes-Hut
 .. figure:: images/timing-barnes-hut-gc.png
    :class: fill
 
-GPU solution
-------------
+What about GPUs?
+----------------
 - Hypothetically fast
 - Unstable, can hard-crash Chrome
 - Cutting edge, probably not supported in all browsers
 - Too much time spent transferring data on/off of GPU
 
-Naive solution
---------------
+A naive approach
+-----------------
 - Stupid simple, brute force, nothing to allocate
 - O(n^2) complexity
 - Slightly slower framerate than Barnes-Hut (25-30fps) given the number of nodes displayed
@@ -830,3 +835,6 @@ Solutions?
 - Precompute bitmasks of vertex collections as edge properties?
 - Limit filtering? Just forbid it?
 - Get a bigger budget? More or bigger Scylla instances?
+
+Thanks for listening!
+=====================
