@@ -18,3 +18,8 @@ img.graphviz {
     max-height: 500px;
     padding: 2em;
 }
+
+.overflow {
+    max-height: 500px;
+    overflow: auto;
+}
