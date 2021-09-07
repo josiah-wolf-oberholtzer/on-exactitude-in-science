@@ -8,9 +8,9 @@ Howdy
 Who I am
 --------
 
-- Make my coin as a software engineer
-- My background is in the arts and music industry
-- Currently in Kingston, NY
+- Living in Kingston, NY
+- My background is in classical music / new media
+- Working as a software engineer
 
 .. nextslide::
 
@@ -21,14 +21,13 @@ Who I am
 - Discogs: music database / marketplace
 - CapitalOne: banking core modernization
 
-A cute dog
-----------
+.. nextslide:: ""
 
 .. figure:: images/bradley.jpg
    :class: fill
 
-Musical maps
-============
+Mapping music
+=============
 
 State of play
 -------------
@@ -51,12 +50,12 @@ State of play
 
 .. nextslide:: ""
 
-.. figure:: images/map-of-acid.jpg
+.. figure:: images/map-of-ishkur.png
    :class: fill
 
 .. nextslide:: ""
 
-.. figure:: images/map-of-ishkur.png
+.. figure:: images/map-of-acid.jpg
    :class: fill
 
 Lossy abstractions
@@ -675,7 +674,7 @@ A naive approach
 -----------------
 - Stupid simple, brute force, nothing to allocate
 - O(n^2) complexity
-- Slightly slower framerate than Barnes-Hut (25-30fps) given the number of nodes displayed
+- Slightly slower framerate than Barnes-Hut (30-45fps) given the number of nodes displayed
 - Obviously degrades considerably at larger node counts
 - Smaller GCs, stop-the-world is rare
 
